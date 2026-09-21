@@ -314,3 +314,33 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .teams-btns span{font-size:12px;padding:5px 12px;border:1px solid var(--bd);border-radius:6px;color:#5b5fc7;font-weight:600}
 .teams-note{margin:8px 0 0;font-size:11.8px;color:var(--mu)}
 @media (max-width:760px){.rq{grid-template-columns:1fr}}
+
+/* ---- Teams 알림 시연 ---- */
+.rq-sent{display:flex;gap:8px;align-items:flex-start;margin:14px 0 0;padding:11px 14px;border-radius:10px;background:var(--ac-50);font-size:13px}
+.rq-sent svg{width:16px;height:16px;color:var(--ac);flex-shrink:0;margin-top:2px}
+.tt{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:min(360px,calc(100vw - 32px));background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 18px 40px rgba(15,23,42,.22);z-index:200;overflow:hidden;transform:translateY(24px);opacity:0;transition:transform .3s ease,opacity .3s ease}
+.tt.in{transform:none;opacity:1}
+.tt-top{display:flex;align-items:center;gap:8px;padding:10px 12px;font-size:12.5px;border-bottom:1px solid var(--bd-2)}
+.tt-demo{font-size:10.5px;color:var(--mu);border:1px solid var(--bd);border-radius:99px;padding:0 6px}
+.tt-x{margin-left:auto;color:var(--mu);font-size:13px;width:24px;height:24px;border-radius:6px}
+.tt-x:hover{background:var(--card-2)}
+.tt-body{display:flex;gap:10px;padding:12px 14px;font-size:13px}
+.tt-body small{color:var(--mu);margin-left:6px;font-size:11.5px}
+.tt-body p{margin:6px 0 0;color:var(--tx-2);line-height:1.55}
+.tt-av{width:32px;height:32px;border-radius:50%;background:var(--acs);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0}
+.tt-act{display:flex;gap:8px;padding:0 14px 12px}
+.tt-act button{flex:1;height:32px;border-radius:6px;font-size:12.5px;font-weight:600;border:1px solid var(--bd)}
+.tt-open{background:#5b5fc7!important;color:#fff;border-color:#5b5fc7!important}
+.tt-bar{display:block;height:3px;background:#5b5fc7;transform-origin:left;animation:ttbar 9s linear forwards}
+@keyframes ttbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.tw-back{position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:210;padding:16px}
+.tw{width:min(560px,100%);background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.tw-top{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#5b5fc7;color:#fff;font-size:13.5px}
+.tw-top small{opacity:.8;font-size:11.5px}
+.tw-top .teams-logo{background:#fff;color:#5b5fc7}
+.tw-top .tt-x{color:#fff}.tw-top .tt-x:hover{background:rgba(255,255,255,.15)}
+.tw-chat{padding:18px 16px;background:var(--card-2);min-height:180px}
+.tw-msg{display:flex;gap:10px}
+.tw-meta{font-size:12px;color:var(--mu);margin-bottom:6px}.tw-meta b{color:var(--tx);margin-right:6px}
+.tw-in{margin:12px 14px 0;padding:10px 12px;border:1px solid var(--bd);border-radius:8px;font-size:12.5px;color:var(--mu-2)}
+.tw-note{margin:10px 14px 14px;font-size:11.8px;color:var(--mu)}

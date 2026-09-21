@@ -142,14 +142,48 @@ function renderMyReq(){
   const e={via:"direct",q,key:d.group||k,docKey:k,regNo:d.no,regName:short(d.name),owner:d.owner,assignee:own.main||own.sub||"",need:"",user:u.name,dept:u.dept};
   escStore.add(e);
   reqSel="";renderMyReq();
-  $("#rq-done").innerHTML=`<div class="teams">
-   <div class="teams-h"><span class="teams-logo">T</span><b>Microsoft Teams</b><small>${esc(e.assignee?nameOnly(e.assignee)+" 님에게 전송됨":d.owner+" 채널에 전송됨")} · 시연 미리보기</small></div>
-   <div class="teams-card"><b>[사내규정 문의] ${esc(d.no)} ${esc(short(d.name))}</b><p>문의자: ${esc(u.dept)} ${esc(u.name)}</p><p class="tq">${esc(q)}</p>
-    <div class="teams-btns"><span>답변하기</span><span>규정 원문 보기</span></div></div>
-   ${e.assignee?`<a class="cklink" href="${teamsLink(e)}" target="_blank" rel="noopener">실제 Teams에서 대화 열기 →</a>`:""}
-   <p class="teams-note">시연에서는 전송을 미리보기로 보여줍니다. 운영 시에는 서버가 담당자에게 Teams 메시지를 자동으로 보냅니다.</p></div>`;
+  $("#rq-done").innerHTML=`<p class="rq-sent">${IC.check}<span><b>${esc(e.assignee?nameOnly(e.assignee):d.owner)}</b> 님에게 Teams 알림을 보냈습니다. 답변이 오면 아래 내역에 표시됩니다.</span></p>`;
+  setTimeout(()=>teamsToast({...e,at:new Date().toISOString()}),700);
  };
  v.querySelectorAll("[data-reask]").forEach(b=>b.onclick=()=>{const e=mine.find(x=>x.id===b.dataset.reask);openGroup(D[e.key].group,e.q,D[e.docKey]?e.docKey:undefined);});
+}
+
+/* ---------- Teams 알림 시연 (토스트 + 채팅 창 팝업) ----------
+ * 담당자 PC에 Teams 알림이 도착하는 장면을 흉내 낸다. 실제 전송은 운영 시 서버(Graph API/Power Automate)가 한다. */
+function teamsToast(e){
+ document.querySelector(".tt")?.remove();
+ const who=e.assignee?nameOnly(e.assignee):e.owner;
+ const t=document.createElement("div");t.className="tt";t.setAttribute("role","status");
+ t.innerHTML=`<div class="tt-top"><span class="teams-logo">T</span><b>Microsoft Teams</b><span class="tt-demo">시연</span><button class="tt-x" aria-label="닫기">✕</button></div>
+  <div class="tt-body"><span class="tt-av">AI</span><div><b>사내규정 AI 에이전트</b><small>→ ${esc(who)} 님</small>
+   <p><b>[사내규정 문의] ${esc(e.regNo)} ${esc(e.regName)}</b><br>${esc(e.dept)} ${esc(e.user)}: ${esc(e.q.length>60?e.q.slice(0,60)+"…":e.q)}</p></div></div>
+  <div class="tt-act"><button class="tt-open">보기</button><button class="tt-close">닫기</button></div>
+  <i class="tt-bar"></i>`;
+ document.body.appendChild(t);
+ requestAnimationFrame(()=>t.classList.add("in"));
+ const close=()=>{t.classList.remove("in");setTimeout(()=>t.remove(),300);};
+ const timer=setTimeout(close,9000);
+ t.querySelector(".tt-x").onclick=t.querySelector(".tt-close").onclick=()=>{clearTimeout(timer);close();};
+ t.querySelector(".tt-open").onclick=()=>{clearTimeout(timer);close();teamsWindow(e);};
+}
+function teamsWindow(e){
+ const who=e.assignee||e.owner,time=new Date(e.at).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+ const m=document.createElement("div");m.className="tw-back";
+ m.innerHTML=`<div class="tw" role="dialog" aria-label="Teams 채팅 미리보기">
+  <div class="tw-top"><span class="teams-logo">T</span><b>${esc(who)}</b><small>Microsoft Teams · 담당자 화면 (시연)</small><button class="tt-x" aria-label="닫기">✕</button></div>
+  <div class="tw-chat">
+   <div class="tw-msg"><span class="tt-av">AI</span><div><div class="tw-meta"><b>사내규정 AI 에이전트</b> ${time}</div>
+    <div class="teams-card"><b>[사내규정 문의] ${esc(e.regNo)} ${esc(e.regName)}</b><p>문의자: ${esc(e.dept)} ${esc(e.user)} · 담당: ${esc(who)}</p><p class="tq">${esc(e.q)}</p>
+     <div class="teams-btns"><span>답변하기</span><span>규정 원문 보기</span></div></div></div></div>
+  </div>
+  <div class="tw-in"><span>새 메시지 입력</span></div>
+  <p class="tw-note">시연 화면입니다. 운영 시에는 서버가 담당자 Teams로 이 메시지를 자동 전송하고, "답변하기"로 남긴 답이 문의자의 규정 문의 내역에 표시됩니다.</p>
+ </div>`;
+ document.body.appendChild(m);
+ const close=()=>m.remove();
+ m.onclick=ev=>{if(ev.target===m)close();};
+ m.querySelector(".tt-x").onclick=close;
+ document.addEventListener("keydown",function k(ev){if(ev.key==="Escape"){close();document.removeEventListener("keydown",k);}});
 }
 
 /* ---------- 규정 인쇄 / 다운로드 ---------- */
