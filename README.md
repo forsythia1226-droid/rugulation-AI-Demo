@@ -18,3 +18,11 @@
 - 규정 목록과 업무분류는 사내규정 관리규정 제11조를 따릅니다.
 - **조문 본문은 시연을 위해 작성한 가상 조문이며 실제 사규가 아닙니다.**
 - 운영 전환 시 사내망에 설치하고 사내 승인 LLM을 연결하는 것을 전제로 합니다.
+
+## 실행 · 배포
+
+- 로컬 확인: `index.html`을 브라우저로 열거나 `python -m http.server 8000` 후 http://localhost:8000
+- 시연 계정: 일반 임직원 `user / demo1234`, 규정 관리자 `admin / admin1234` (시연용 로그인이며 보안 수단이 아닙니다)
+- 배포: `main`에 push하면 GitHub Actions(`.github/workflows/pages.yml`)가 인용 검증(`node scripts/verify-quotes.js`)을 통과한 경우에만 GitHub Pages로 배포합니다.
+  - 최초 1회: 저장소 Settings → Pages → Build and deployment → Source를 **GitHub Actions**로 지정
+- 데이터(로그인 세션, 관리자 편집, 업로드 파일)는 각 방문자의 브라우저에만 저장됩니다. 실제 사규·실제 파일을 올리지 마십시오.
