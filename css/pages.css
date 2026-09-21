@@ -243,3 +243,10 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .home .ctile{display:grid;grid-template-columns:auto 1fr auto;min-width:0}
 .home .ctn{min-width:0}
 @media (max-width:1560px){.home .ctile{grid-template-columns:1fr auto}}
+
+/* ---- FAQ: 규정번호·규정명 오른쪽 끝 정렬 ---- */
+.faqlist .faq,.home .faq{align-items:center}
+.faqlist .faq>span:last-child,.home .faq>span:last-child{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.faqlist .faq small,.home .faq small{margin:0;white-space:nowrap;flex-shrink:0;text-align:right}
+.faqlist .faq small{font-size:12px}
+@media (max-width:640px){.faqlist .faq>span:last-child{flex-direction:column;align-items:flex-start;gap:2px}}
