@@ -69,7 +69,7 @@ const NOTICES=[
 const NAV=[
  {g:"대시보드",items:[["home","홈",IC.home]]},
  {g:"규정 탐색",items:[["cats","카테고리별 규정",IC.folder],["faq","자주 찾는 질문",IC.help],["notice","최근 개정 공지",IC.bell]]},
- {g:"나의 업무",items:[["myreq","내 확인 요청",IC.inbox],["manage","관리자 페이지",IC.edit]]}];
+ {g:"나의 업무",items:[["myreq","규정 문의",IC.chat],["manage","관리자 페이지",IC.edit]]}];
 const allNotices=()=>[...noticeStore.list(),...NOTICES];
 
 /* ---------- state & utils ---------- */

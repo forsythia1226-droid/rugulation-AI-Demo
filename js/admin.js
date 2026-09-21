@@ -131,9 +131,9 @@ function adminReq(p){
  const l=escStore.list();
  p.innerHTML=`<section class="card pad">
   <div class="bh"><span class="bi">${IC.inbox}</span><h3>확인 요청</h3></div>
-  <p class="sub">AI가 규정만으로 답하지 못한 질문입니다. 답변을 등록하면 요청자에게 전달되고, 해석 지침에 추가되어 같은 질문에는 창구에서 바로 안내됩니다.</p>
+  <p class="sub">직원이 직접 남긴 문의와 AI가 규정만으로 답하지 못한 질문입니다. 답변을 등록하면 요청자에게 전달되고, 해석 지침에 추가되어 같은 질문에는 창구에서 바로 안내됩니다.</p>
   ${l.length?`<ul class="reqlist">${l.map(e=>`<li>
-   <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 필요"}</span><small>${esc(e.regName)} · 요청 ${esc(e.dept||"")} ${esc(e.user||"")} · ${new Date(e.at).toLocaleString("ko-KR")}</small></div>
+   <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 필요"}</span><span class="pill src">${e.via==="direct"?"직접 문의":"AI 확인 요청"}</span><small>${esc(e.regName)}${e.assignee?" · 담당 "+esc(e.assignee):""} · 요청 ${esc(e.dept||"")} ${esc(e.user||"")} · ${new Date(e.at).toLocaleString("ko-KR")}</small></div>
    <p class="q">${esc(e.q)}</p>${e.need?`<p class="need">${esc(e.need)}</p>`:""}
    ${e.status==="answered"?`<div class="ans"><b>${esc(e.answeredBy)} 답변</b>${esc(e.answer)}</div>`:
    `<textarea class="admin-ta sm" data-ans="${e.id}" placeholder="주관부서 답변을 입력하세요"></textarea>

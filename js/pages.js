@@ -1,4 +1,4 @@
-/* 로그인 · 설정 · 입사자 체크리스트 · 내 확인 요청 · 규정 인쇄/다운로드 */
+/* 로그인 · 설정 · 입사자 체크리스트 · 규정 문의 · 규정 인쇄/다운로드 */
 
 /* ---------- Login ---------- */
 function renderLogin(){
@@ -97,21 +97,59 @@ function renderChecklist(){
  v.querySelectorAll("[data-ckart]").forEach(b=>b.onclick=()=>{const c=CHECKLIST.find(x=>x.id===b.dataset.ckart);openNotice({doc:c.doc,art:c.art,quote:c.quote});});
 }
 
-/* ---------- 내 확인 요청 ---------- */
+
+/* 규정 문의: 규정을 골라 질문을 남기면 해당 규정 담당자에게 Teams로 전달 (+ AI 확인 요청 내역)
+ * - 시연: Teams 메시지 미리보기와 Teams 채팅 딥링크(담당자 메일은 가상 주소)
+ * - 운영: 백엔드가 Microsoft Graph API 또는 Power Automate로 담당자 1:1 채팅/팀 채널에 자동 게시 */
+let reqSel="";
+const staffMail=s=>{const n=nameOnly(s||"");return n?`${encodeURIComponent(n)}@taihan.example`:"";};
+function teamsText(e){return `[사내규정 문의] ${e.regNo} ${e.regName}\n문의자: ${e.dept} ${e.user}\n\n${e.q}\n\n- 사내규정 AI 에이전트에서 전송`;}
+function teamsLink(e){return `https://teams.microsoft.com/l/chat/0/0?users=${staffMail(e.assignee)}&message=${encodeURIComponent(teamsText(e))}`;}
 function renderMyReq(){
  const v=$("#view");v.className="";
  const mine=escStore.list().filter(e=>e.user===me().name);
+ const regs=[...ORDER].sort((a,b)=>D[a].no.localeCompare(D[b].no,undefined,{numeric:true}));
+ const o=reqSel&&D[reqSel]?ownerStore.get(reqSel):null;
  v.innerHTML=`<div class="wrap narrow">
-  <div class="ph"><h2>내 확인 요청</h2><p>AI가 규정만으로 답하지 못해 주관부서에 확인을 요청한 질문입니다. 답변이 등록되면 여기에 표시됩니다.</p></div>
-  <section class="card pad">${mine.length?`<ul class="reqlist">${mine.map(e=>`<li>
-   <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 중"}</span><small>${esc(e.regName)} · ${esc(e.owner)} · ${new Date(e.at).toLocaleString("ko-KR")}</small></div>
+  <div class="ph"><h2>규정 문의</h2><p>규정을 선택해 질문을 남기면 해당 규정 담당자에게 Teams 메시지로 전달됩니다. 답변은 이곳에서 확인할 수 있습니다.</p></div>
+  <section class="card pad">
+   <div class="bh"><span class="bi">${IC.chat}</span><h3>문의하기</h3></div>
+   <form class="form rq" id="rqf">
+    <label class="w2">규정<select id="rq-reg" required><option value="">규정을 선택하세요</option>
+     ${regs.map(k=>`<option value="${k}" ${k===reqSel?"selected":""}>${esc(D[k].no)} ${esc(short(D[k].name))}${D[k].parent?" (지침)":""}</option>`).join("")}</select></label>
+    <label>담당팀 · 담당자<input id="rq-own" readonly value="${o?`${esc(D[reqSel].owner)} · ${esc(o.main||"담당자 미지정")}`:""}" placeholder="규정을 선택하면 자동으로 지정됩니다"></label>
+    <label class="w3">질문<textarea id="rq-q" rows="4" required placeholder="상황을 구체적으로 적어주세요. 예) 해외출장 중 현지 법인 차량을 이용하면 교통비 정산은 어떻게 하나요?"></textarea></label>
+   </form>
+   <div class="formbar"><span class="rq-note">${IC.chat}전송 시 담당자 Teams로 알림이 갑니다</span><button class="save" id="rq-send">문의 보내기</button></div>
+   <div id="rq-done"></div>
+  </section>
+  <section class="card pad">
+   <div class="bh"><span class="bi">${IC.inbox}</span><h3>내 문의 내역</h3><span class="cnt">${mine.length}건</span></div>
+   ${mine.length?`<ul class="reqlist">${mine.map(e=>`<li>
+   <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 중"}</span><span class="pill src">${e.via==="direct"?"직접 문의":"AI 확인 요청"}</span><small>${esc(e.regName)} · ${esc(e.owner)}${e.assignee?" "+esc(nameOnly(e.assignee)):""} · ${new Date(e.at).toLocaleString("ko-KR")}</small></div>
    <p class="q">${esc(e.q)}</p>
    ${e.need?`<p class="need">${esc(e.need)}</p>`:""}
    ${e.answer?`<div class="ans"><b>${esc(e.answeredBy||e.owner)} 답변</b>${esc(e.answer)}</div>`:""}
-   <button class="cklink" data-reask="${e.id}">규정 창구에서 다시 묻기 →</button></li>`).join("")}</ul>`
-   :`<p class="empty">아직 확인 요청한 질문이 없습니다. 규정 창구에서 AI가 "확인 요청" 버튼을 보여주면 이곳에 쌓입니다.</p>`}</section>
+   <div class="rq-act">${e.assignee?`<a class="cklink" href="${teamsLink(e)}" target="_blank" rel="noopener">Teams 대화 열기 →</a>`:""}${D[e.key]&&D[e.key].loaded?`<button class="cklink" data-reask="${e.id}">규정 창구에서 다시 묻기 →</button>`:""}</div></li>`).join("")}</ul>`
+   :`<p class="empty">아직 문의 내역이 없습니다. 위에서 문의를 보내거나, 규정 창구에서 AI가 "확인 요청" 버튼을 보여주면 이곳에 쌓입니다.</p>`}
+  </section>
  </div>`;
- v.querySelectorAll("[data-reask]").forEach(b=>b.onclick=()=>{const e=mine.find(x=>x.id===b.dataset.reask);if(D[e.key])openGroup(D[e.key].group,e.q,D[e.docKey]?e.docKey:undefined);});
+ $("#rq-reg").onchange=e=>{reqSel=e.target.value;const q=$("#rq-q").value;renderMyReq();$("#rq-q").value=q;};
+ $("#rq-send").onclick=()=>{
+  const k=$("#rq-reg").value,q=$("#rq-q").value.trim();
+  if(!k||!q){alert("규정과 질문을 모두 입력해 주세요.");return;}
+  const d=D[k],own=ownerStore.get(k),u=me();
+  const e={via:"direct",q,key:d.group||k,docKey:k,regNo:d.no,regName:short(d.name),owner:d.owner,assignee:own.main||own.sub||"",need:"",user:u.name,dept:u.dept};
+  escStore.add(e);
+  reqSel="";renderMyReq();
+  $("#rq-done").innerHTML=`<div class="teams">
+   <div class="teams-h"><span class="teams-logo">T</span><b>Microsoft Teams</b><small>${esc(e.assignee?nameOnly(e.assignee)+" 님에게 전송됨":d.owner+" 채널에 전송됨")} · 시연 미리보기</small></div>
+   <div class="teams-card"><b>[사내규정 문의] ${esc(d.no)} ${esc(short(d.name))}</b><p>문의자: ${esc(u.dept)} ${esc(u.name)}</p><p class="tq">${esc(q)}</p>
+    <div class="teams-btns"><span>답변하기</span><span>규정 원문 보기</span></div></div>
+   ${e.assignee?`<a class="cklink" href="${teamsLink(e)}" target="_blank" rel="noopener">실제 Teams에서 대화 열기 →</a>`:""}
+   <p class="teams-note">시연에서는 전송을 미리보기로 보여줍니다. 운영 시에는 서버가 담당자에게 Teams 메시지를 자동으로 보냅니다.</p></div>`;
+ };
+ v.querySelectorAll("[data-reask]").forEach(b=>b.onclick=()=>{const e=mine.find(x=>x.id===b.dataset.reask);openGroup(D[e.key].group,e.q,D[e.docKey]?e.docKey:undefined);});
 }
 
 /* ---------- 규정 인쇄 / 다운로드 ---------- */
