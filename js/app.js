@@ -67,7 +67,7 @@ const NOTICES=[
   {ref:"TES-212-1 · 212-2",text:"네트워크 · 정보시스템 보안지침 제정",doc:"TES-212-2"},
   {ref:"TES-212-2 제8조",text:"생성형 AI 서비스 이용 기준 신설",doc:"TES-212-2",art:"2122-8",quote:"임직원은 회사가 승인한 생성형 AI 도구에 한하여 업무에 이용할 수 있다."}]}];
 const NAV=[
- {g:"NAV WORKSPACE",items:[["home","홈",IC.home]]},
+ {g:"대시보드",items:[["home","홈",IC.home]]},
  {g:"규정 탐색",items:[["cats","카테고리별 규정",IC.folder],["faq","자주 찾는 질문",IC.help],["notice","최근 개정 공지",IC.bell]]},
  {g:"나의 업무",items:[["myreq","내 확인 요청",IC.inbox],["manage","관리자 페이지",IC.edit]]}];
 const allNotices=()=>[...noticeStore.list(),...NOTICES];
