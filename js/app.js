@@ -247,7 +247,7 @@ async function routeAsk(q){
  if(!q)return;
  const note=$("#route"),btn=$("#go0");
  btn.disabled=true;note.textContent="어느 규정 소관인지 판단하는 중…";
- const list=ORDER.filter(k=>D[k].loaded&&!D[k].parent).map(k=>`${k}: ${D[k].no} ${D[k].name} — ${D[k].blurb}`).join("\n");
+ const list=ORDER.filter(k=>D[k].loaded&&D[k].group===k).map(k=>`${k}: ${D[k].no} ${D[k].name} — ${D[k].blurb}`).join("\n");
  try{
   const key=await (await provider()).route(q,list);
   if(D[key]&&D[key].loaded){openGroup(D[key].group,q,key);}
@@ -261,7 +261,7 @@ function renderCats(){
  const v=$("#view");v.className="";
  const inCat=ORDER.filter(k=>D[k].cat===state.cat);
  const rows=[];
- inCat.filter(k=>!D[k].parent).forEach(k=>{rows.push(k);inCat.filter(x=>D[x].parent===k).forEach(x=>rows.push(x));});
+ inCat.filter(k=>!D[k].parent).forEach(k=>{rows.push(k);inCat.filter(x=>D[x].parent===k).sort((a,b)=>D[a].no.localeCompare(D[b].no,undefined,{numeric:true})).forEach(x=>rows.push(x));});
  inCat.forEach(k=>{if(!rows.includes(k))rows.push(k);});
  v.innerHTML=`<div class="wrap">
   <div class="ph row"><h2>카테고리별 규정</h2><span class="cnt">등록 규정 <b>${ORDER.length}</b>건</span></div>

@@ -93,7 +93,7 @@ function adminEditor(p){
   const o=Object.assign({},isNew?{}:d,{key,no,name,cat:$("#f-cat").value,owner:$("#f-owner").value.trim(),effective:$("#f-eff").value.trim(),
    blurb:$("#f-blurb").value.trim(),starters:$("#f-starters").value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,3),
    chapters,loaded:chapters.some(c=>c.arts.length)});
-  if(parent){o.parent=parent;o.group=D[parent].group;}else{delete o.parent;o.group=key;}
+  if(parent){o.parent=parent;o.group=(!isNew&&d.parent===parent&&d.group)?d.group:D[parent].group;}else{delete o.parent;o.group=key;}
   return o;};
  $("#acancel").onclick=()=>{adminEdit=null;adminRegs(p);};
  $("#aprev").onclick=()=>{const o=read();const tmp=D.__prev;D.__prev=o;$("#aprevbox").innerHTML=`<div class="prevsheet">${docHTML("__prev")}</div>`;if(tmp)D.__prev=tmp;else delete D.__prev;};
@@ -199,7 +199,6 @@ function adminAudit(p){
   ${dups.map(([no,ks])=>`<p class="issue"><b>번호 중복 (자동)</b> ${esc(no)}이(가) ${ks.map(k=>esc(short(D[k].name))).join(", ")}에 함께 쓰이고 있습니다.</p>`).join("")}
   ${noOwner.map(k=>`<p class="issue"><b>주관부서 누락 (자동)</b> ${esc(D[k].no)} ${esc(D[k].name)}</p>`).join("")}
   <p class="issue"><b>분류 누락</b> 예산 관리 규정이 8xx 번호를 쓰고 있으나 제11조 업무분류에는 8번 분류가 없습니다. 예산통제는 분류 1의 설명에 포함되어 있습니다.</p>
-  <p class="issue"><b>번호 미부여</b> 취업규칙에 규정번호가 없습니다.</p>
   <p class="issue"><b>등록일 편중</b> 보안 규정군을 제외한 대부분이 2016~2017년 등록입니다. 게시판 등록일만으로는 최신 개정 여부를 알 수 없습니다.</p>
  </section>`;
 }
