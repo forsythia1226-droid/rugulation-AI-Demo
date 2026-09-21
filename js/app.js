@@ -280,8 +280,8 @@ function renderCats(){
 }
 
 /* ---------- FAQ ---------- */
-/* 자주 찾는 질문: 규정 필터 + 검색 + 펼쳐 보는 답변(검증된 시연 답변) */
-const faqUI={f:"all",q:"",open:new Set([0])};
+/* 자주 찾는 질문: 펼쳐 보는 답변(검증된 시연 답변) */
+const faqUI={open:new Set([0])};
 function faqAnswer(q,k){
  const a=DEMO_ANSWERS[demoNorm(q)];if(!a)return null;
  const all=groupArts(D[k].group);
@@ -290,16 +290,10 @@ function faqAnswer(q,k){
 }
 function renderFaq(){
  const v=$("#view");v.className="";
- const regs=[...new Set(FAQ.map(([,k])=>k))];
- const qn=faqUI.q.trim().toLowerCase();
- const items=FAQ.map(([q,k],i)=>({q,k,i})).filter(x=>(faqUI.f==="all"||x.k===faqUI.f)&&(!qn||x.q.toLowerCase().includes(qn)));
+ const items=FAQ.map(([q,k],i)=>({q,k,i}));
  v.innerHTML=`<div class="wrap faqpage">
   <div class="ph"><h2>자주 찾는 질문</h2><p>질문을 누르면 답변과 근거 조문을 바로 확인할 수 있습니다.</p></div>
   <section class="card faqbox">
-   <div class="faqtool">
-    <div class="faqf">${[["all","전체"],...regs.map(k=>[k,short(D[k].name)])].map(([k,l])=>`<button data-ff="${k}" aria-pressed="${faqUI.f===k}">${esc(l)}</button>`).join("")}</div>
-    <div class="sbar sm faqs">${IC.search}<input id="faqq" placeholder="질문 검색" value="${esc(faqUI.q)}"></div>
-   </div>
    <div class="faqacc">${items.map(({q,k,i})=>{const o=faqUI.open.has(i),a=o?faqAnswer(q,k):null;return `<div class="fq${o?" open":""}">
     <button class="fqh" data-fq="${i}" aria-expanded="${o}"><span class="rk${i<3?" hot":""}">${i+1}</span>
      <span class="fqt"><span class="ft">${esc(q)}</span><span class="fqtag">${esc(D[k].no)} ${esc(short(D[k].name))}</span></span>
@@ -310,8 +304,6 @@ function renderFaq(){
    </div>`;}).join("")||'<p class="empty">조건에 맞는 질문이 없습니다.</p>'}</div>
   </section>
  </div>`;
- v.querySelectorAll("[data-ff]").forEach(b=>b.onclick=()=>{faqUI.f=b.dataset.ff;renderFaq();});
- $("#faqq").oninput=e=>{faqUI.q=e.target.value;const p=e.target.selectionStart;renderFaq();const i=$("#faqq");i.focus();i.setSelectionRange(p,p);};
  v.querySelectorAll("[data-fq]").forEach(b=>b.onclick=()=>{const i=+b.dataset.fq;faqUI.open.has(i)?faqUI.open.delete(i):faqUI.open.add(i);renderFaq();});
  v.querySelectorAll("[data-fqgo]").forEach(b=>b.onclick=()=>{const[q,k]=FAQ[+b.dataset.fqgo];openGroup(D[k].group,q,k);});
 }
