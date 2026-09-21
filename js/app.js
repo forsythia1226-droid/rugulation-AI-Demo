@@ -260,8 +260,9 @@ async function routeAsk(q){
 function renderCats(){
  const v=$("#view");v.className="";
  const inCat=ORDER.filter(k=>D[k].cat===state.cat);
+ const byNo=(a,b)=>D[a].no.localeCompare(D[b].no,undefined,{numeric:true});
  const rows=[];
- inCat.filter(k=>!D[k].parent).forEach(k=>{rows.push(k);inCat.filter(x=>D[x].parent===k).sort((a,b)=>D[a].no.localeCompare(D[b].no,undefined,{numeric:true})).forEach(x=>rows.push(x));});
+ inCat.filter(k=>!D[k].parent).sort(byNo).forEach(k=>{rows.push(k);inCat.filter(x=>D[x].parent===k).sort(byNo).forEach(x=>rows.push(x));});
  inCat.forEach(k=>{if(!rows.includes(k))rows.push(k);});
  v.innerHTML=`<div class="wrap">
   <div class="ph row"><h2>카테고리별 규정</h2><span class="cnt">등록 규정 <b>${ORDER.length}</b>건</span></div>
