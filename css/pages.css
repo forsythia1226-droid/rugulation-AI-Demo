@@ -250,3 +250,46 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .faqlist .faq small,.home .faq small{margin:0;white-space:nowrap;flex-shrink:0;text-align:right}
 .faqlist .faq small{font-size:12px}
 @media (max-width:640px){.faqlist .faq>span:last-child{flex-direction:column;align-items:flex-start;gap:2px}}
+
+/* ---- FAQ v2: 필터 + 검색 + 아코디언 ---- */
+.faqpage{max-width:1000px}
+.faqbox{padding:6px 0 8px}
+.faqtool{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--bd-2)}
+.faqf{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.faqf button{padding:6px 12px;border:1px solid var(--bd);border-radius:999px;font-size:12.5px;color:var(--mu);background:var(--card)}
+.faqf button:hover{border-color:var(--ac-200);color:var(--ac)}
+.faqf button[aria-pressed="true"]{background:var(--acs);border-color:var(--acs);color:#fff;font-weight:600}
+.faqs{flex:0 1 240px;min-width:180px;height:38px}
+.faqacc{padding:4px 12px}
+.fq{border-bottom:1px solid var(--bd-2)}
+.fq:last-child{border-bottom:none}
+.fqh{display:flex;align-items:flex-start;gap:12px;width:100%;padding:14px 8px;text-align:left;border-radius:10px}
+.fqh:hover{background:var(--card-2)}
+.fqh:hover .ft{color:var(--ac)}
+.fqh .rk{margin-top:1px}
+.rk.hot{background:var(--acs);color:#fff}
+.fqt{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.fqt .ft{font-size:14px;font-weight:500}
+.fqtag{align-self:flex-start;font-size:11.5px;color:var(--ac);background:var(--ac-50);border-radius:6px;padding:2px 8px}
+.fqi{color:var(--mu-2);font-size:13px;margin-top:2px;transition:transform .2s}
+.fq.open .fqi{transform:rotate(180deg);color:var(--ac)}
+.fq.open .fqh .ft{font-weight:600}
+.fqa{margin:0 8px 16px 42px;padding:14px 16px;background:var(--card-2);border-radius:10px;font-size:13.5px;line-height:1.75}
+.fqa p{margin:0}
+.fqa strong{color:var(--ac);font-weight:600}
+.fqref{margin-top:10px!important;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.fqref b{color:var(--mu);font-weight:600;margin-right:2px}
+.fqref span{border:1px solid var(--bd);background:var(--card);border-radius:6px;padding:1px 8px;color:var(--tx-2)}
+.fqgo{margin-top:12px;font-size:12.8px;font-weight:600;color:var(--ac)}
+.fqgo:hover{text-decoration:underline}
+@media (max-width:640px){.fqa{margin-left:8px}.faqs{flex:1 1 100%}}
+/* 홈 TOP 5: 규정명은 질문 아래 한 줄 */
+.home .faq>span:last-child{display:block}
+.home .faq small{display:block;margin:2px 0 0;text-align:left}
+.home .faq{align-items:flex-start}
+.fqi{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;margin-top:-2px;flex-shrink:0}
+.fqi svg{width:18px;height:18px}
+.fqh:hover .fqi{background:var(--card)}
+.home .faq{padding:clamp(3px,.8vh,9px) 8px}
+.home .faq small{margin-top:1px}
+.home .grid2 .card.box{overflow:hidden}
