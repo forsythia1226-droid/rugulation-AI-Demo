@@ -85,7 +85,7 @@ const checkStore={get(){return ST.get("checklist",{});},set(v){ST.set("checklist
 
 function resetDemoData(){
  regStore.reset();try{indexedDB.deleteDatabase("reg-files");}catch{}
- ["regOwners","notices","escalations","askLog","ownerAnswers","checklist","qlog"].forEach(ST.del);
+ ["regOwners","noticeRead","notices","escalations","askLog","ownerAnswers","checklist","qlog"].forEach(ST.del);
  try{localStorage.removeItem("qlog");Object.keys(localStorage).filter(k=>k.startsWith("rp:")).forEach(k=>localStorage.removeItem(k));}catch{}
 }
 applySettings();

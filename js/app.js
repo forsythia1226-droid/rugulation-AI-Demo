@@ -158,7 +158,6 @@ function renderSidebar(){
  const sb=$("#sb"),cur=curNav();
  sb.className="sb"+(state.collapsed?" col":"");
  sb.innerHTML=`<div class="sb-top">
-   <span class="logo">${IC.book}</span>
    <span class="sb-name">사내규정 AI<small>Regulation Agent</small></span>
    <button class="tog" id="tog" aria-label="${state.collapsed?"사이드바 펼치기":"사이드바 접기"}" aria-expanded="${!state.collapsed}">${state.collapsed?IC.popen:IC.pclose}</button>
   </div>
@@ -182,7 +181,7 @@ function renderHeader(){
  $("#hd").innerHTML=`<span class="wm"><img class="lt" src="${LOGO_L}" alt="taihan"><img class="dk" src="${LOGO_D}" alt="" aria-hidden="true"></span><span class="hd-sep"></span><h1>사내규정 AI 에이전트</h1>
   <span class="status ${on?"on":""} ${m}" title="${tip}"><span class="dot"></span>${label}</span>
   <div class="hd-r">
-   <button class="ib${settings.get().notify?" new":""}" data-go="notice" aria-label="개정 공지">${IC.bell}</button>
+   <button class="ib${settings.get().notify&&unreadCount()?" new":""}" data-go="notice" aria-label="개정 공지">${IC.bell}</button>
    <button class="ib" data-go="settings" aria-label="설정">${IC.gear}</button>
    <div class="prof"><span class="av">${esc((me()?.name||"?")[0])}</span><span>${esc(me()?.dept||"")}<b>${esc(me()?.name||"")}</b></span>${isAdmin()?'<span class="role">관리자</span>':""}</div>
   </div>`;
@@ -212,7 +211,7 @@ function renderHome(){
    <section class="card box">
     <div class="bh"><span class="bi">${IC.bell}</span><h3>최근 규정 개정 공지</h3><button class="more" data-go="notice">전체 보기</button></div>
     <div class="nlist">${allNotices().slice(0,5).map(n=>`<button class="nrow" data-go="notice">
-     <span class="tnew">NEW</span><span class="nt">${esc(n.title)}</span>
+     ${isRead(n)?'<span class="tread">확인</span>':'<span class="tnew">NEW</span>'}<span class="nt">${esc(n.title)}</span>
      <span class="nmeta">${esc(n.owner)} · ${esc(n.date)}</span></button>`).join("")}</div>
    </section>
   </div>
@@ -309,13 +308,44 @@ function renderFaq(){
 }
 
 /* ---------- Notice ---------- */
+/* 개정 공지: 날짜별 타임라인 + 변경 유형 + 확인 표시(push) */
+const noticeId=n=>n.title+"|"+n.date;
+const readSet=()=>new Set(ST.get("noticeRead",[]));
+const isRead=n=>readSet().has(noticeId(n));
+const unreadCount=()=>allNotices().filter(n=>!isRead(n)).length;
+const markRead=(n,on=true)=>{const r=readSet();on?r.add(noticeId(n)):r.delete(noticeId(n));ST.set("noticeRead",[...r]);};
+const changeType=t=>/폐지/.test(t)?["del","폐지"]:/제정/.test(t)?["new","제정"]:/신설|추가/.test(t)?["add","신설"]:["mod","개정"];
+function noticeDate(n){const m=String(n.date).match(/(\d{2,4})\.(\d{1,2})\.(\d{1,2})/);if(!m)return{y:"",md:n.date};return{y:(m[1].length===2?"20"+m[1]:m[1]),md:`${m[2].padStart(2,"0")}.${m[3].padStart(2,"0")}`};}
 function renderNotice(){
  const v=$("#view");v.className="";
- v.innerHTML=`<div class="wrap">
-  <div class="ph"><h2>최근 규정 개정 공지</h2><p>항목을 누르면 개정된 조문으로 이동해 해당 문장을 표시합니다.</p></div>
-  <section class="card pad">${allNotices().map((n,ni)=>noticeCard(n,ni)).join("")}</section>
+ const ns=allNotices(),un=ns.filter(n=>!isRead(n)).length;
+ const regs=new Set(ns.flatMap(n=>n.items.map(it=>it.doc)).filter(Boolean));
+ v.innerHTML=`<div class="wrap ntcpage">
+  <div class="ph row"><div><h2>최근 규정 개정 공지</h2><p>개정된 조문으로 바로 이동해 바뀐 문장을 확인할 수 있습니다.</p></div>
+   ${un?`<button class="ghost" id="readAll">모두 확인 처리</button>`:""}</div>
+  <div class="nsum">
+   <div class="card"><small>미확인 공지</small><b class="${un?"hot":""}">${un}<em>건</em></b></div>
+   <div class="card"><small>전체 공지</small><b>${ns.length}<em>건</em></b></div>
+   <div class="card"><small>영향 받는 규정</small><b>${regs.size}<em>건</em></b></div>
+  </div>
+  <div class="tl">${ns.map((n,ni)=>{const d=noticeDate(n),r=isRead(n);return `<article class="tl-i${r?" read":""}">
+   <div class="tl-d"><b>${esc(d.md)}</b><small>${esc(d.y)}</small></div>
+   <div class="tl-dot"></div>
+   <section class="card tl-c">
+    <header class="tl-h">${r?'<span class="tread">확인</span>':'<span class="tnew">NEW</span>'}<h3>${esc(n.title)}</h3>
+     <span class="tl-own">${esc(n.owner)}</span></header>
+    <p class="tl-m">적용일자 ${esc(n.date)} · 변경 ${n.items.length}건</p>
+    <ul class="tl-items">${n.items.map((it,ii)=>{const[c,l]=changeType(it.text);const has=D[it.doc];return `<li>
+     <span class="ctype ${c}">${l}</span>
+     <div class="tl-t"><b>${esc(it.ref)}</b><span>${esc(it.text)}</span></div>
+     ${has?`<button class="tl-go" data-ntc="${ni}-${ii}">${it.art?"조문 보기":"규정 보기"} →</button>`:""}</li>`;}).join("")}</ul>
+    <footer class="tl-f">${r?`<button class="tl-read on" data-rd="${ni}">${IC.check}확인 완료</button>`:`<button class="tl-read" data-rd="${ni}">확인했습니다</button>`}</footer>
+   </section></article>`;}).join("")}</div>
  </div>`;
  bindCommon(v);
+ v.querySelectorAll("[data-ntc]").forEach(b=>{const f=b.onclick;b.onclick=()=>{markRead(ns[+b.dataset.ntc.split("-")[0]]);renderHeader();f();};});
+ v.querySelectorAll("[data-rd]").forEach(b=>b.onclick=()=>{const n=ns[+b.dataset.rd];markRead(n,!isRead(n));renderHeader();renderNotice();});
+ $("#readAll")&&($("#readAll").onclick=()=>{ns.forEach(n=>markRead(n));renderHeader();renderNotice();});
 }
 
 /* ---------- Soon ---------- */
