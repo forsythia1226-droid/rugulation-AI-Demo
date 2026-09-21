@@ -192,7 +192,7 @@ function renderHeader(){
 function renderHome(){
  const v=$("#view");v.className="";
  const loadedFaq=FAQ.slice(0,5);
- v.innerHTML=`<div class="wrap">
+ v.innerHTML=`<div class="wrap home">
   <section class="card box catcard">
    <div class="bh"><span class="bi">${IC.folder}</span><h3>카테고리별 규정</h3><button class="more" data-go="cats">전체 보기</button></div>
    <div class="catrow">${Object.entries(CATS).map(([c,x])=>
@@ -211,7 +211,9 @@ function renderHome(){
    </section>
    <section class="card box">
     <div class="bh"><span class="bi">${IC.bell}</span><h3>최근 규정 개정 공지</h3><button class="more" data-go="notice">전체 보기</button></div>
-    ${allNotices().slice(0,2).map((n,ni)=>noticeCard(n,ni)).join("")}
+    <div class="nlist">${allNotices().slice(0,5).map(n=>`<button class="nrow" data-go="notice">
+     <span class="tnew">NEW</span><span class="nt">${esc(n.title)}</span>
+     <span class="nmeta">${esc(n.owner)} · ${esc(n.date)}</span></button>`).join("")}</div>
    </section>
   </div>
   <div class="banner">시연용 파일럿입니다. 규정 목록과 분류 체계는 실제 사내규정 관리규정 제11조를 따르며, 조문 내용이 적재된 8건의 본문은 구조 검증을 위해 작성한 가상 조문입니다.</div>
