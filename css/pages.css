@@ -542,3 +542,5 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 @media (max-width:960px){#view,#view.wsv,#view:has(.home){padding-left:24px;padding-right:calc(24px - var(--sbw))}}
 /* ---- 본문 상단 여백 40px (모든 화면·모든 창 너비 공통) ---- */
 #view,#view.wsv,#view:has(.home){padding-top:40px}
+/* ---- 본문 하단 여백 40px (끝까지 스크롤했을 때, 모든 화면 공통) ---- */
+#view,#view.wsv,#view:has(.home){padding-bottom:40px}
