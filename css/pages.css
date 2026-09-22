@@ -498,3 +498,22 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .ax-o{width:66px}
 .ax-c{width:46px}
 .ax-line div{position:sticky;left:14px;max-width:calc(100% - 20px)}
+
+/* 위임전결기준표: 줄바꿈 없이 가로 스크롤, 업무내용 열은 고정 */
+.ax-wrap{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--mu-2) var(--card-2)}
+.ax-wrap::-webkit-scrollbar{height:10px}
+.ax-wrap::-webkit-scrollbar-track{background:var(--card-2);border-radius:0 0 10px 10px}
+.ax-wrap::-webkit-scrollbar-thumb{background:var(--mu-2);border-radius:99px;border:2px solid var(--card-2)}
+.ax{min-width:820px;width:max-content}
+.ax td,.ax th{white-space:nowrap}
+.ax .ax-item{position:sticky;left:0;z-index:2;background:var(--card);min-width:250px;box-shadow:1px 0 0 var(--bd)}
+.ax thead .ax-item{z-index:3;background:var(--card-2)}
+.ax-r:hover .ax-item,.ax-r.on .ax-item{background:var(--ac-50)}
+.ax-g td{position:sticky;left:0}
+.ax-c{width:72px;padding:7px 10px!important;font-size:12px}
+.ax th.ax-c{white-space:nowrap;font-size:11.5px}
+.ax-o{white-space:nowrap;width:auto;min-width:110px;font-size:12px;padding:7px 12px!important}
+.ax-hint{font-size:11.5px;color:var(--mu);margin:0 2px 6px;display:flex;align-items:center;gap:4px}
+.ax-g td{position:static}
+.ax-gt{position:sticky;left:10px;display:inline-block}
+.ax-g.lv1 td{padding-left:8px}.ax-g.lv1 .ax-gt{padding-left:14px}

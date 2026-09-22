@@ -104,11 +104,12 @@ function annexHTML(k){
  return `<div class="annex">
   <div class="ax-head"><div><h2>${esc(A.title)}</h2><p>${esc(A.sub)} · <b>●</b> 결정(전결) <b>◎</b> 보고 · 항목을 누르면 결재라인을 보여줍니다</p></div>
    <div class="sbar sm ax-q">${IC.search}<input id="axq" placeholder="업무 검색 (예: 출장, 접대비, 채용)" value="${esc(annexUI.q)}"></div></div>
+  <p class="ax-hint">↔ 표를 좌우로 스크롤하면 합의·참조 부서까지 볼 수 있습니다 (Shift + 휠)</p>
   <div class="ax-wrap"><table class="ax">
    <thead><tr><th rowspan="2" class="ax-item">업무내용</th><th colspan="${A.cols.length}">결재권자</th>${A.safety.length?`<th colspan="${A.safety.length}">안전보건경영</th>`:""}<th colspan="2">유관조직</th></tr>
     <tr>${all.map(([,l])=>`<th class="ax-c">${esc(l)}</th>`).join("")}<th>합의</th><th>참조</th></tr></thead>
    <tbody>${rows.map(({r,i})=>{
-    if(r.length<=2)return `<tr class="ax-g lv${r[0]}"><td colspan="${all.length+3}">${mark(r[1])}</td></tr>`;
+    if(r.length<=2)return `<tr class="ax-g lv${r[0]}"><td colspan="${all.length+3}"><span class="ax-gt">${mark(r[1])}</span></td></tr>`;
     const o=annexUI.open===i,ln=o?approvalLine(A,r):null;
     return `<tr class="ax-r lv${r[0]}${o?" on":""}" data-ax="${i}"><td class="ax-item">${mark(r[1])}${r[10]?`<small>${esc(r[10])}</small>`:""}</td>
      ${all.map((_,ci)=>`<td class="ax-c">${r[2+ci]?`<span class="${r[2+ci]==="●"?"dec":"rep"}">${r[2+ci]}</span>`:""}</td>`).join("")}
