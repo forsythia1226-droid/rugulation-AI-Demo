@@ -552,3 +552,5 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .sb.col .sb-logo{display:none}
 .sb-logo{height:22px}
 .sb-top .sb-name{font-size:13.5px;white-space:nowrap}
+.sb-top{justify-content:space-between}
+.sb.col .sb-top{justify-content:center}

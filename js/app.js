@@ -164,7 +164,7 @@ function renderSidebar(){
  const sb=$("#sb"),cur=curNav();
  sb.className="sb"+(state.collapsed?" col":"");
  sb.innerHTML=`<div class="sb-top">
-   <img class="sb-logo" src="assets/logo_w.svg" alt="taihan"><span class="sb-name">사내규정 AI</span>
+   <img class="sb-logo" src="assets/logo_w.svg" alt="taihan 사내규정 AI 에이전트">
    <button class="tog" id="tog" aria-label="${state.collapsed?"사이드바 펼치기":"사이드바 접기"}" aria-expanded="${!state.collapsed}">${state.collapsed?IC.popen:IC.pclose}</button>
   </div>
   <nav class="sb-nav">${NAV.map(g=>`<div class="grp">${g.g}</div>`+g.items.map(([v,l,ic])=>
