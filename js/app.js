@@ -171,7 +171,6 @@ function renderSidebar(){
   <nav class="sb-nav">${NAV.map(g=>`<div class="grp">${g.g}</div>`+g.items.map(([v,l,ic])=>
    `<button class="nav" data-go="${v}" data-tip="${l}" ${cur===v?'aria-current="page"':""}>${ic}<span class="lbl">${l}</span></button>`).join("")).join("")}</nav>
   <div class="sb-bottom">
-   <button class="nav" data-go="settings" data-tip="설정" ${cur==="settings"?'aria-current="page"':""}>${IC.gear}<span class="lbl">설정</span></button>
    ${isAdmin()?`<button class="nav" data-go="admin" data-tip="시스템 관리" ${cur==="admin"?'aria-current="page"':""}>${IC.shield}<span class="lbl">시스템 관리</span></button>`:""}
   </div>
   <div class="sb-acct" data-tip="${esc(me()?.name||"")} · 로그아웃">
@@ -191,8 +190,8 @@ function renderHeader(){
  $("#hd").innerHTML=`<h1>사내규정 AI 에이전트</h1>
   <span class="status ${on?"on":""} ${m}" title="${tip}"><span class="dot"></span>${label}</span>
   <div class="hd-r">
-   <button class="ib${settings.get().notify?" new":""}" data-go="notice" aria-label="개정 공지">${IC.bell}</button>
-   <button class="ib" data-go="settings" aria-label="설정">${IC.gear}</button>
+   <button class="hbtn${settings.get().notify?" new":""}" data-go="notice">${IC.bell}<span>알림</span></button>
+   <button class="hbtn" data-go="settings" ${state.view==="settings"?'aria-current="page"':""}>${IC.gear}<span>설정</span></button>
   </div>`;
 }
 

@@ -584,3 +584,17 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .acct-out svg{width:17px;height:17px}
 .sb.col .sb-acct{margin:0 8px 14px;padding:6px 0}
 .sb.col .sb-acct:hover{background:none}
+
+/* ---- 헤더 우측: 아이콘+텍스트 버튼 ---- */
+.hd-r{gap:8px}
+.hbtn{position:relative;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 10px;border:1px solid var(--bd);border-radius:9px;font-size:13px;font-weight:500;color:var(--tx-2);background:var(--card);white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.hbtn svg{width:16px;height:16px;color:var(--mu)}
+.hbtn:hover{background:var(--card-2);border-color:var(--ac-200);color:var(--tx)}
+.hbtn[aria-current="page"]{border-color:var(--ac-200);color:var(--ac);background:var(--ac-50)}.hbtn[aria-current="page"] svg{color:var(--ac)}
+.hbtn.new::after{content:"";position:absolute;top:6px;left:21px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:2px solid var(--card)}
+@media (max-width:640px){.hbtn span{display:none}.hbtn{padding:0 9px}}
+/* ---- LNB 하단: 빈 영역 숨김, 계정 줄을 메뉴와 같은 좌측 정렬 ---- */
+.sb-bottom:not(:has(button)){display:none}
+.sb-acct{margin:0 10px 14px;padding:7px 6px 7px 11px;gap:11px}
+.sb-acct .av{width:22px;height:22px;font-size:11px}
+.sb-acct{gap:7px}
