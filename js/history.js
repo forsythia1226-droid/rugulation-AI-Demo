@@ -129,7 +129,8 @@ function bindHist(k){
 }
 function syncDocTabs(){
  $("#view").querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-current",state.docMode==="text"&&b.dataset.tab===state.doc));
- $("#histTab")?.setAttribute("aria-current",state.docMode!=="text");
+ $("#histTab")?.setAttribute("aria-current",state.docMode==="hist"||state.docMode==="past");
+ $("#annexBtn")?.setAttribute("aria-pressed",state.docMode==="annex");
  const h=$("#histTab small");if(h)h.textContent=`${histStore.list(state.doc).length}건`;
 }
 

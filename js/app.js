@@ -218,7 +218,6 @@ function renderHome(){
      <span class="nmeta">${esc(n.owner)} · ${esc(n.date)}</span></button>`).join("")}</div>
    </section>
   </div>
-  <div class="banner">시연용 파일럿입니다. 규정 목록과 분류 체계는 실제 사내규정 관리규정 제11조를 따르며, 조문 내용이 적재된 8건의 본문은 구조 검증을 위해 작성한 가상 조문입니다.</div>
  </div>`;
  $("#go0").onclick=()=>routeAsk($("#q0").value.trim());
  $("#q0").onkeydown=e=>{if(e.key==="Enter")routeAsk($("#q0").value.trim());};
@@ -390,7 +389,7 @@ function renderWorkspace(){
   </section>
   <section class="card pane pane-doc">
    <div class="doc-head">${ds.map(k=>`<button class="dtab" data-tab="${k}" aria-current="${k===state.doc}">${esc(D[k].parent?short(D[k].name):D[k].name)}<small>${D[k].no}</small></button>`).join("")}<button class="dtab htab" id="histTab" aria-current="false">개정 이력<small>${histStore.list(state.doc).length}건</small></button>
-    <div class="doctools"><button class="tocbtn" id="tocBtn">조문 목차</button>
+    <div class="doctools">${annexOf(g)?`<button class="tocbtn annexbtn" id="annexBtn" aria-pressed="false">${IC.list}<span>${esc(annexOf(g).title)}</span></button>`:""}<button class="tocbtn" id="tocBtn">조문 목차</button>
      <button class="tocbtn icon" id="prtBtn" title="현재 규정 인쇄">${IC.print}<span>인쇄</span></button>
      <button class="tocbtn icon" id="dlBtn" title="현재 규정 원문 다운로드">${IC.down}<span>다운로드</span></button></div></div>
    <div class="doc-scroll" id="docScroll">${docHTML(state.doc)}</div>
@@ -402,6 +401,7 @@ function renderWorkspace(){
  state.docMode="text";
  $("#tocBtn").onclick=toggleToc;
  $("#histTab").onclick=()=>showHist(state.doc);
+ $("#annexBtn")&&($("#annexBtn").onclick=()=>state.docMode==="annex"?switchDoc(state.doc):showAnnex(g));
  $("#docScroll").addEventListener("click",e=>{const b=e.target.closest("[data-amark]");if(b){e.stopPropagation();showHist(state.doc,b.dataset.amark);}});
  $("#prtBtn").onclick=()=>printDoc(state.doc);
  $("#dlBtn").onclick=()=>downloadDoc(state.doc);
