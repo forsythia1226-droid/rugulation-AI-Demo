@@ -517,3 +517,4 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .ax-g td{position:static}
 .ax-gt{position:sticky;left:10px;display:inline-block}
 .ax-g.lv1 td{padding-left:8px}.ax-g.lv1 .ax-gt{padding-left:14px}
+.tl-dot{background:var(--acs)}
