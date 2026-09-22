@@ -569,3 +569,18 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .sb.col .acct-t{display:none}
 .sb.col .sb-acct:hover::after{content:attr(data-tip);position:absolute;left:calc(100% + 14px);top:50%;transform:translateY(-50%);background:#020617;color:#fff;font-size:12px;padding:6px 10px;border-radius:7px;white-space:nowrap;pointer-events:none;z-index:60}
 .sb-bottom{padding-bottom:10px}
+
+/* ---- LNB 하단: 구분선 제거, 계정 영역을 메뉴 항목과 같은 톤으로 ---- */
+.sb-bottom{border-top:none;padding:8px 10px 4px}
+.sb-acct{margin:0 10px 14px;padding:8px 6px 8px 11px;background:none;border:none;border-radius:9px;gap:11px}
+.sb-acct:hover{background:var(--sb-2)}
+.sb-acct .av{width:28px;height:28px;font-size:12px;background:rgba(99,102,241,.22);color:#c7d2fe}
+.acct-t b{font-size:13px;font-weight:500;color:var(--sb-t)}
+.acct-t em{background:none;padding:0;color:var(--sb-m);font-weight:500;font-size:11px}
+.acct-t em::before{content:"· "}
+.acct-t small{font-size:11px}
+.acct-out{width:30px;height:30px;color:var(--sb-m);opacity:.85}
+.acct-out:hover{background:rgba(148,163,184,.14);color:#fff;opacity:1}
+.acct-out svg{width:17px;height:17px}
+.sb.col .sb-acct{margin:0 8px 14px;padding:6px 0}
+.sb.col .sb-acct:hover{background:none}
