@@ -531,5 +531,6 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .mg-drop{position:relative}
 .mg-drop input{left:0;top:0}
 
-/* ---- 본문 좌우 여백 32px (모든 화면 공통, 좁은 화면은 기존 값 유지) ---- */
-@media (min-width:901px){#view,#view.wsv,#view:has(.home){padding-left:32px;padding-right:32px}}
+/* ---- 본문 좌우 여백 (모든 화면 공통): 960px 이하 24px, 960px 초과 40px ---- */
+@media (min-width:961px){#view,#view.wsv,#view:has(.home){padding-left:40px;padding-right:40px}}
+@media (max-width:960px){#view,#view.wsv,#view:has(.home){padding-left:24px;padding-right:24px}}
