@@ -531,8 +531,14 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .mg-drop{position:relative}
 .mg-drop input{left:0;top:0}
 
-/* ---- 본문 좌우 여백 (모든 화면 공통): 960px 이하 24px, 960px 초과 40px ---- */
-@media (min-width:961px){#view,#view.wsv,#view:has(.home){padding-left:40px;padding-right:40px}}
-@media (max-width:960px){#view,#view.wsv,#view:has(.home){padding-left:24px;padding-right:24px}}
+/* ---- 본문 좌우 여백 (모든 화면 공통): 960px 이하 24px, 960px 초과 40px
+
+   스크롤바 폭을 12px로 고정하고 오른쪽 여백에서 그만큼 빼서, 스크롤바를 포함한 좌우 여백이 같게 한다 */
+:root{--sbw:12px}
+#view::-webkit-scrollbar{width:var(--sbw)}
+#view::-webkit-scrollbar-track{background:transparent}
+#view::-webkit-scrollbar-thumb{background:var(--mu-2);border-radius:99px;border:3px solid var(--bg)}
+@media (min-width:961px){#view,#view.wsv,#view:has(.home){padding-left:40px;padding-right:calc(40px - var(--sbw))}}
+@media (max-width:960px){#view,#view.wsv,#view:has(.home){padding-left:24px;padding-right:calc(24px - var(--sbw))}}
 /* ---- 본문 상단 여백 40px (모든 화면·모든 창 너비 공통) ---- */
 #view,#view.wsv,#view:has(.home){padding-top:40px}
