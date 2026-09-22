@@ -53,8 +53,8 @@ async function renderManage(){
  const q=mgQ.toLowerCase();
  const rows=ORDER.filter(k=>(!mgMine||canEditFiles(k))&&(!q||(D[k].no+" "+D[k].name+" "+D[k].owner).toLowerCase().includes(q)));
  if(!rows.includes(mgSel))mgSel=rows[0]||null;
- v.innerHTML=`<div class="wrap">
-  <div class="ph row"><h2>관리자 페이지</h2><span class="cnt">규정별 담당자 · 개정 이력 관리</span></div>
+ v.innerHTML=`<div class="wrap page">
+  ${pageHead("관리자 페이지","규정별 담당자를 지정하고 개정 이력과 원본 파일을 관리합니다.",`담당 규정 <b>${ORDER.filter(canEditFiles).length}</b>건`)}
   <div class="mg">
    <section class="card mg-list">
     <div class="atool"><div class="sbar sm">${IC.search}<input id="mgq" placeholder="규정·담당팀 검색" value="${esc(mgQ)}"></div></div>

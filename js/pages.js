@@ -31,8 +31,8 @@ function renderSettings(){
  const v=$("#view");v.className="";
  const s=settings.get(),u=me();
  const seg=(name,opts,cur)=>`<div class="seg">${opts.map(([val,l])=>`<button data-set="${name}" data-val="${val}" aria-pressed="${cur===val}">${l}</button>`).join("")}</div>`;
- v.innerHTML=`<div class="wrap narrow">
-  <div class="ph"><h2>설정</h2><p>화면 표시와 AI 응답 방식을 설정합니다. 설정은 이 브라우저에 저장됩니다.</p></div>
+ v.innerHTML=`<div class="wrap page">
+  ${pageHead("설정","화면 표시와 AI 응답 방식을 설정합니다. 설정은 이 브라우저에 저장됩니다.")}
   <section class="card pad">
    <div class="bh"><span class="bi">${IC.user}</span><h3>계정</h3></div>
    <dl class="kv"><dt>이름</dt><dd>${esc(u.name)}</dd><dt>소속</dt><dd>${esc(u.dept)}</dd><dt>권한</dt><dd>${u.role==="admin"?"규정 관리자":"일반 임직원"}</dd><dt>로그인</dt><dd>${new Date(u.at).toLocaleString("ko-KR")}</dd></dl>
@@ -80,8 +80,8 @@ function renderChecklist(){
  const today=new Date();today.setHours(0,0,0,0);
  const items=CHECKLIST.map(c=>({...c,due:due(c.d)})).sort((a,b)=>a.due-b.due);
  const n=items.filter(c=>done[c.id]).length;
- v.innerHTML=`<div class="wrap narrow">
-  <div class="ph"><h2>입사자 체크리스트</h2><p>경력직은 무엇을 모르는지 모릅니다. 입사일을 기준으로 규정상 해야 할 일과 기한을 먼저 알려드립니다.</p></div>
+ v.innerHTML=`<div class="wrap page">
+  ${pageHead("입사자 체크리스트","입사일을 기준으로 규정상 해야 할 일과 기한을 먼저 알려드립니다.")}
   <section class="card pad">
    <div class="ckhead"><label>입사일 <input type="date" id="start" value="${start}"></label>
     <div class="ckprog"><span style="width:${Math.round(n/items.length*100)}%"></span></div><b>${n} / ${items.length} 완료</b></div>
@@ -110,8 +110,8 @@ function renderMyReq(){
  const mine=escStore.list().filter(e=>e.user===me().name);
  const regs=[...ORDER].sort((a,b)=>D[a].no.localeCompare(D[b].no,undefined,{numeric:true}));
  const o=reqSel&&D[reqSel]?ownerStore.get(reqSel):null;
- v.innerHTML=`<div class="wrap narrow">
-  <div class="ph"><h2>규정 문의</h2><p>규정을 선택해 질문을 남기면 해당 규정 담당자에게 Teams 메시지로 전달됩니다. 답변은 이곳에서 확인할 수 있습니다.</p></div>
+ v.innerHTML=`<div class="wrap page">
+  ${pageHead("규정 문의","규정을 선택해 질문을 남기면 해당 규정 담당자에게 Teams 메시지로 전달됩니다.",`내 문의 <b>${mine.length}</b>건`)}
   <section class="card pad">
    <div class="bh"><span class="bi">${IC.chat}</span><h3>문의하기</h3></div>
    <form class="form rq" id="rqf">

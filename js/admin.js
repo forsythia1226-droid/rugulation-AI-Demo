@@ -6,8 +6,8 @@ function refreshOrder(){ORDER=Object.keys(D);}
 function renderAdmin(){
  const v=$("#view");v.className="";
  const open=escStore.list().filter(e=>e.status==="open").length;
- v.innerHTML=`<div class="wrap">
-  <div class="ph row"><h2>시스템 관리</h2><span class="cnt">규정 관리자 · ${esc(me().name)}</span></div>
+ v.innerHTML=`<div class="wrap page">
+  ${pageHead("시스템 관리","규정 등록·수정, 해석 지침, 확인 요청 답변과 질의 현황을 관리합니다.",`규정 관리자 · ${esc(me().name)}`)}
   <div class="atabs">${ADMIN_TABS.map(([k,l])=>`<button data-atab="${k}" aria-pressed="${adminTab===k}">${l}${k==="req"&&open?`<span class="n">${open}</span>`:""}</button>`).join("")}</div>
   <div id="apane"></div>
  </div>`;

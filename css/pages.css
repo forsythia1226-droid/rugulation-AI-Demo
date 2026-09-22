@@ -518,3 +518,15 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .ax-gt{position:sticky;left:10px;display:inline-block}
 .ax-g.lv1 td{padding-left:8px}.ax-g.lv1 .ax-gt{padding-left:14px}
 .tl-dot{background:var(--acs)}
+
+/* ---- 하위 화면 공통 규격: 폭·제목 위치·간격 통일 ---- */
+.wrap.page,.wrap.page.faqpage,.wrap.page.ntcpage{max-width:1120px;gap:20px}
+.page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0;min-height:50px}
+.page-h h2{font-size:21px;font-weight:700;margin:0;letter-spacing:-.01em;line-height:1.3}
+.page-h p{margin:5px 0 0;font-size:13px;color:var(--mu);line-height:1.5}
+.page-h .cnt{font-size:12.5px;color:var(--mu);white-space:nowrap;padding-bottom:2px}
+.page-h .cnt b{color:var(--tx);font-weight:600}
+@media (max-width:640px){.page-h{flex-direction:column;align-items:flex-start;gap:6px}}
+#view{scrollbar-gutter:stable}
+.mg-drop{position:relative}
+.mg-drop input{left:0;top:0}

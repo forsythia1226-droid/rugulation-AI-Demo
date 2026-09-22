@@ -40,6 +40,9 @@ const CAT_IC={
  "7":I('<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11.5l2-8H6"/>'),
  "9":I('<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>')};
 
+/* 하위 화면 공통 제목 영역: 제목 + 한 줄 설명 + 오른쪽 보조 정보 (모든 화면 같은 규격) */
+const pageHead=(title,desc,right="")=>`<div class="ph page-h"><div><h2>${title}</h2><p>${desc}</p></div>${right?`<span class="cnt">${right}</span>`:""}</div>`;
+
 /* ---------- static content ---------- */
 const CHIPS=[
  ["#직제규정 안전총괄대표","직제규정에서 안전총괄대표는 어떤 역할과 권한을 가지나요?"],
@@ -265,8 +268,8 @@ function renderCats(){
  const rows=[];
  inCat.filter(k=>!D[k].parent).sort(byNo).forEach(k=>{rows.push(k);inCat.filter(x=>D[x].parent===k).sort(byNo).forEach(x=>rows.push(x));});
  inCat.forEach(k=>{if(!rows.includes(k))rows.push(k);});
- v.innerHTML=`<div class="wrap">
-  <div class="ph row"><h2>카테고리별 규정</h2><span class="cnt">등록 규정 <b>${ORDER.length}</b>건</span></div>
+ v.innerHTML=`<div class="wrap page">
+  ${pageHead("카테고리별 규정","업무분류를 선택하면 해당 분류의 규정과 하위지침을 볼 수 있습니다.",`등록 규정 <b>${ORDER.length}</b>건`)}
   <section class="card pad">
    <div class="cats">${Object.entries(CATS).map(([c,x])=>
     `<button data-catsel="${c}" aria-pressed="${c===state.cat}">${x.n}<span class="n">${ORDER.filter(k=>D[k].cat===c).length}</span></button>`).join("")}</div>
@@ -292,8 +295,8 @@ function faqAnswer(q,k){
 function renderFaq(){
  const v=$("#view");v.className="";
  const items=FAQ.map(([q,k],i)=>({q,k,i}));
- v.innerHTML=`<div class="wrap faqpage">
-  <div class="ph"><h2>자주 찾는 질문</h2><p>질문을 누르면 답변과 근거 조문을 바로 확인할 수 있습니다.</p></div>
+ v.innerHTML=`<div class="wrap page faqpage">
+  ${pageHead("자주 찾는 질문","질문을 누르면 답변과 근거 조문을 바로 확인할 수 있습니다.",`질문 <b>${FAQ.length}</b>개`)}
   <section class="card faqbox">
    <div class="faqacc">${items.map(({q,k,i})=>{const o=faqUI.open.has(i),a=o?faqAnswer(q,k):null;return `<div class="fq${o?" open":""}">
     <button class="fqh" data-fq="${i}" aria-expanded="${o}"><span class="rk${i<3?" hot":""}">${i+1}</span>
@@ -316,8 +319,8 @@ function noticeDate(n){const m=String(n.date).match(/(\d{2,4})\.(\d{1,2})\.(\d{1
 function renderNotice(){
  const v=$("#view");v.className="";
  const ns=allNotices();
- v.innerHTML=`<div class="wrap ntcpage">
-  <div class="ph"><h2>최근 규정 개정 공지</h2><p>개정된 조문으로 바로 이동해 바뀐 문장을 확인할 수 있습니다.</p></div>
+ v.innerHTML=`<div class="wrap page ntcpage">
+  ${pageHead("최근 규정 개정 공지","개정된 조문으로 바로 이동해 바뀐 문장을 확인할 수 있습니다.",`공지 <b>${ns.length}</b>건`)}
   <div class="tl">${ns.map((n,ni)=>{const d=noticeDate(n);return `<article class="tl-i">
    <div class="tl-d"><b>${esc(d.md)}</b><small>${esc(d.y)}</small></div>
    <div class="tl-dot"></div>
