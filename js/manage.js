@@ -1,4 +1,4 @@
-/* 관리자 페이지 (나의 업무): 규정별 담당자 지정 + 신설·개정 파일 업로드/삭제
+/* 관리자 페이지 (나의 업무): 규정별 담당자 지정 + 개정 이력 등록(현행 조문 반영·원본 파일) + 첨부 파일
  * - 담당자 지정: 규정 관리자(admin)만 가능
  * - 파일 업로드·삭제: 해당 규정의 정/부 담당자 또는 규정 관리자
  * - 파일은 브라우저 IndexedDB에 저장(시연용). 운영 시 사내 파일 서버/문서관리 API로 대체
@@ -39,7 +39,7 @@ const fileDB={
  get(id){return this.tx("readonly",s=>s.get(id));},
  del(id){return this.tx("readwrite",s=>s.delete(id));}
 };
-const FILE_KINDS=["신설","개정","폐지","참고"];
+const logHist=(k,note)=>{const h=regStore.history();h.unshift({key:k,no:D[k].no,name:D[k].name,note,by:me().name,at:new Date().toISOString()});ST.set("regHistory",h);};
 const FILE_MAX=10*1024*1024;
 const fmtSize=b=>b<1024?b+"B":b<1048576?(b/1024).toFixed(0)+"KB":(b/1048576).toFixed(1)+"MB";
 
@@ -54,7 +54,7 @@ async function renderManage(){
  const rows=ORDER.filter(k=>(!mgMine||canEditFiles(k))&&(!q||(D[k].no+" "+D[k].name+" "+D[k].owner).toLowerCase().includes(q)));
  if(!rows.includes(mgSel))mgSel=rows[0]||null;
  v.innerHTML=`<div class="wrap">
-  <div class="ph row"><h2>관리자 페이지</h2><span class="cnt">규정별 담당자 · 신설·개정 파일 관리</span></div>
+  <div class="ph row"><h2>관리자 페이지</h2><span class="cnt">규정별 담당자 · 개정 이력 관리</span></div>
   <div class="mg">
    <section class="card mg-list">
     <div class="atool"><div class="sbar sm">${IC.search}<input id="mgq" placeholder="규정·담당팀 검색" value="${esc(mgQ)}"></div></div>
@@ -74,6 +74,7 @@ async function renderManage(){
 async function renderManageDetail(p,k,tok){
  const d=D[k],o=ownerStore.get(k),staff=staffOf(d.owner),admin=isAdmin(),edit=canEditFiles(k);
  const files=(await fileDB.list(k).catch(()=>[])).sort((a,b)=>b.at.localeCompare(a.at));
+ const vers=histStore.list(k),artList=arts(k);
  if(tok!==mgTok)return;
  const sel=(id,val)=>`<select id="${id}" ${admin?"":"disabled"}><option value="">미지정</option>${staff.map(s=>`<option ${s===val?"selected":""}>${esc(s)}</option>`).join("")}</select>`;
  p.innerHTML=`<section class="card pad">
@@ -85,20 +86,30 @@ async function renderManageDetail(p,k,tok){
    <label>부 담당자${sel("mg-sub",o.sub)}</label>
    ${admin?`<div class="mg-save"><button class="save" id="mgsave">담당자 저장</button><span class="saved hidden" id="mgok">저장했습니다</span></div>`:""}
   </div>
-  <p class="sub">${admin?"규정 관리자만 담당자를 지정할 수 있습니다. 지정된 담당자는 이 규정의 파일을 올리고 지울 수 있습니다.":`담당자 지정은 규정 관리자가 합니다.${edit?" 회원님은 이 규정의 담당자입니다.":""}`}</p>
+  <p class="sub">${admin?"규정 관리자만 담당자를 지정할 수 있습니다. 지정된 담당자는 이 규정의 개정 이력과 파일을 등록·삭제할 수 있습니다.":`담당자 지정은 규정 관리자가 합니다.${edit?" 회원님은 이 규정의 담당자입니다.":""}`}</p>
 
-  <h4 class="mg-h">신설·개정 파일 <small>${files.length}건</small></h4>
-  ${edit?`<form class="mg-up" id="mgup">
-   <label class="mg-drop" id="mgdrop"><input type="file" id="mgfile" accept=".pdf,.hwp,.hwpx,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
-    <span>${IC.down}<b>파일을 끌어다 놓거나 클릭해서 선택</b><small>PDF · HWP · Word · Excel 등, 파일당 10MB 이하</small></span><em id="mgfname"></em></label>
+  <h4 class="mg-h">개정 이력 <small>${vers.length}회</small><button class="more" data-open="${k}">규정 창구에서 보기</button></h4>
+  ${vers.length?`<ul class="rv-list">${vers.map((v,vi)=>`<li><span class="rv-date">${esc(v.date)}</span><span class="ctype ${v.type==="제정"?"new":v.type==="폐지"?"del":"mod"}">${esc(v.type)}</span>${vi===0?'<span class="hv-cur">현행</span>':""}
+   <span class="rv-r">${esc(v.reason||"-")}<small>시행 ${esc(v.eff||"-")} · 변경 조문 ${(v.changes||[]).length}건${v.fileName?" · 파일 "+esc(v.fileName):""}${v.by?" · "+esc(v.by):""}</small></span>
+   ${edit?`<button class="ghost sm del" data-vdel="${v.id}">삭제</button>`:""}</li>`).join("")}</ul>`:'<p class="empty">등록된 개정 이력이 없습니다.</p>'}
+
+  ${edit?`<h4 class="mg-h">개정 이력 등록</h4>
+  <form class="mg-up" id="mgup">
    <div class="form mg-meta">
-    <label>구분<select id="mgkind">${FILE_KINDS.map(x=>`<option>${x}</option>`).join("")}</select></label>
-    <label>시행일<input id="mgeff" value="${esc(d.effective)}"></label>
-    <label class="w3">내용<input id="mgnote" placeholder="예: 제14조 야근 식대 한도 조정"></label>
+    <label>구분<select id="mgkind">${["개정","제정","폐지","참고"].map(x=>`<option>${x}</option>`).join("")}</select></label>
+    <label>개정일<input id="mgdate" value="${new Date().toISOString().slice(0,10).replace(/-/g,".")}"></label>
+    <label>시행일<input id="mgeff" value="${new Date().toISOString().slice(0,10).replace(/-/g,".")}"></label>
+    <label class="w3">개정 사유<input id="mgnote" placeholder="예: 제14조 야근 식대 한도 조정"></label>
    </div>
-   <div class="formbar"><label class="chk"><input type="checkbox" id="mgntc" checked> 개정 공지로 게시</label><button class="save" type="submit">업로드</button></div>
+   ${artList.length?`<div class="rv-rows" id="rvrows"></div>
+   <button type="button" class="ghost sm" id="rvadd">+ 바뀐 조문 추가</button>`:'<p class="sub">이 규정은 조문이 적재되지 않아 원본 파일과 개정 사유만 기록합니다.</p>'}
+   <label class="mg-drop" id="mgdrop"><input type="file" id="mgfile" accept=".pdf,.hwp,.hwpx,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
+    <span>${IC.down}<b>개정 원본 파일 (선택)</b><small>PDF · HWP · Word 등 파일당 10MB 이하 · 끌어다 놓거나 클릭</small></span><em id="mgfname"></em></label>
+   <div class="formbar">${artList.length?'<label class="chk"><input type="checkbox" id="mgapply" checked> 현행 조문에 반영</label>':""}<label class="chk"><input type="checkbox" id="mgntc" checked> 개정 공지로 게시</label><button class="save" type="submit">개정 이력 등록</button></div>
    <p class="login-err" id="mgerr" hidden></p>
-  </form>`:`<p class="empty">이 규정의 담당자만 파일을 올릴 수 있습니다.</p>`}
+  </form>`:`<p class="empty">이 규정의 담당자만 개정 이력을 등록할 수 있습니다.</p>`}
+
+  <h4 class="mg-h">첨부 파일 <small>${files.length}건</small></h4>
   ${files.length?`<ul class="mg-files">${files.map(f=>`<li>
    <span class="pill ${f.kind==="폐지"?"":"answered"}">${esc(f.kind)}</span>
    <span class="mg-fn"><b>${esc(f.name)}</b><small>${fmtSize(f.size)} · ${esc(f.note||"-")} · 시행 ${esc(f.eff||"-")} · ${esc(f.by)} · ${new Date(f.at).toLocaleString("ko-KR")}</small></span>
@@ -121,15 +132,39 @@ async function renderManageDetail(p,k,tok){
  drop.ondragover=e=>{e.preventDefault();drop.classList.add("over");};
  drop.ondragleave=()=>drop.classList.remove("over");
  drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");if(e.dataTransfer.files[0]){input.files=e.dataTransfer.files;input.onchange();}};
- $("#mgup").onsubmit=async e=>{e.preventDefault();const f=input.files[0],err=$("#mgerr");
-  if(!f){err.textContent="파일을 선택해 주세요.";err.hidden=false;return;}
-  if(f.size>FILE_MAX){err.textContent="파일당 10MB까지 올릴 수 있습니다.";err.hidden=false;return;}
-  const kind=$("#mgkind").value,note=$("#mgnote").value.trim(),eff=$("#mgeff").value.trim();
-  try{await fileDB.put({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),key:k,name:f.name,size:f.size,type:f.type,blob:f,kind,note,eff,by:me().name,at:new Date().toISOString()});}
-  catch(x){err.textContent="저장 공간이 부족해 업로드하지 못했습니다.";err.hidden=false;return;}
-  const h=regStore.history();h.unshift({key:k,no:d.no,name:d.name,note:`파일 업로드(${kind}): ${f.name}${note?" · "+note:""}`,by:me().name,at:new Date().toISOString()});ST.set("regHistory",h);
+ p.querySelectorAll("[data-vdel]").forEach(b=>b.onclick=()=>{const v=histStore.get(b.dataset.vdel);
+  if(!confirm(`${v.date} ${v.type} 이력을 삭제할까요? (현행 조문은 바뀌지 않습니다)`))return;
+  histStore.remove(v.id);logHist(k,`개정 이력 삭제: ${v.date} ${v.type}`);renderManage();});
+ const rows=$("#rvrows");
+ const lineOpts=id=>{const a=artList.find(x=>x.id===id);return `<option value="__new">(새 문단 신설)</option>`+(a?a.body.filter(b=>b!=="TABLE").map((b,i)=>`<option value="${i}">${esc(b.length>60?b.slice(0,60)+"…":b)}</option>`).join(""):"");};
+ const addRow=()=>{const r=document.createElement("div");r.className="rv-row";
+  r.innerHTML=`<div class="rv-sel"><select class="rv-art">${artList.map(a=>`<option value="${a.id}">${esc(a.n)}(${esc(a.h)})</option>`).join("")}</select>
+   <select class="rv-line"></select><button type="button" class="ghost sm del rv-x">삭제</button></div>
+   <div class="rv-pair"><label>개정 전<textarea class="rv-before" rows="2" readonly></textarea></label>
+   <label>개정 후 <small>비워 두면 이 문단 삭제</small><textarea class="rv-after" rows="2"></textarea></label></div>`;
+  const art=r.querySelector(".rv-art"),line=r.querySelector(".rv-line"),bf=r.querySelector(".rv-before"),af=r.querySelector(".rv-after");
+  const fill=()=>{const a=artList.find(x=>x.id===art.value),b=a.body.filter(x=>x!=="TABLE");const v=line.value==="__new"?"":b[+line.value]||"";bf.value=v;af.value=v;};
+  art.onchange=()=>{line.innerHTML=lineOpts(art.value);line.value=line.options.length>1?"0":"__new";fill();};
+  line.onchange=fill;r.querySelector(".rv-x").onclick=()=>r.remove();
+  rows.appendChild(r);art.onchange();};
+ if(rows){addRow();$("#rvadd").onclick=addRow;}
+ $("#mgup").onsubmit=async e=>{e.preventDefault();const f=input.files[0],err=$("#mgerr");err.hidden=true;
+  const kind=$("#mgkind").value,note=$("#mgnote").value.trim(),eff=$("#mgeff").value.trim(),date=$("#mgdate").value.trim();
+  if(!note){err.textContent="개정 사유를 입력해 주세요.";err.hidden=false;return;}
+  const changes=rows?[...rows.querySelectorAll(".rv-row")].map(r=>({art:r.querySelector(".rv-art").value,before:r.querySelector(".rv-before").value.trim()||null,after:r.querySelector(".rv-after").value.trim()||null}))
+   .filter(c=>(c.before||c.after)&&c.before!==c.after):[];
+  if(kind==="개정"&&!changes.length&&!f){err.textContent="바뀐 조문이나 원본 파일 중 하나는 있어야 합니다.";err.hidden=false;return;}
+  if(f&&f.size>FILE_MAX){err.textContent="파일당 10MB까지 올릴 수 있습니다.";err.hidden=false;return;}
+  let fileId=null;
+  if(f){fileId=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+   try{await fileDB.put({id:fileId,key:k,name:f.name,size:f.size,type:f.type,blob:f,kind,note,eff,by:me().name,at:new Date().toISOString()});}
+   catch(x){err.textContent="저장 공간이 부족해 업로드하지 못했습니다.";err.hidden=false;return;}}
+  let applied=0;
+  if(changes.length&&$("#mgapply")?.checked){applied=applyRevision(k,changes,kind==="참고"?null:eff);regStore.save(D[k],`개정 반영: ${note}`,me().name);}
+  histStore.add({key:k,date,eff,type:kind,reason:note,changes,fileId,fileName:f?f.name:"",by:me().name});
+  logHist(k,`개정 이력 등록(${kind}): ${note}${applied?` · 현행 조문 ${applied}곳 반영`:""}${f?" · 파일 "+f.name:""}`);
   if($("#mgntc").checked&&kind!=="참고"){const t=new Date();
    noticeStore.add({title:`${short(d.name)} ${kind} 안내`,owner:d.owner,date:`'${String(t.getFullYear()).slice(2)}.${String(t.getMonth()+1).padStart(2,"0")}.${String(t.getDate()).padStart(2,"0")} 부`,
-    items:[{ref:d.no,text:note||`${kind} 파일 등록 (${f.name})`,doc:k}]});}
+    items:(changes.length?changes.map(c=>{const a=artList.find(x=>x.id===c.art);return{ref:`${d.no} ${a?a.n:""}`,text:note,doc:k,art:c.art,quote:c.after||""};}):[{ref:d.no,text:note,doc:k}])});}
   renderManage();};
 }

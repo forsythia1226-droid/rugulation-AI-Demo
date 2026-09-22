@@ -73,7 +73,7 @@ const NAV=[
 const allNotices=()=>[...noticeStore.list(),...NOTICES];
 
 /* ---------- state & utils ---------- */
-const state={view:"home",cat:"1",group:null,doc:null,turns:[],busy:false,collapsed:window.innerWidth<900};
+const state={docMode:"text",view:"home",cat:"1",group:null,doc:null,turns:[],busy:false,collapsed:window.innerWidth<900};
 let SAMPLE=null,TRIED=false;
 const ready=window.claude?.use?.("sample");
 const readyP=ready&&ready.then?ready.then(s=>{SAMPLE=s;}).catch(()=>{}).finally(()=>{TRIED=true;renderHeader();syncAvail();}):Promise.resolve();
@@ -144,7 +144,10 @@ const PROVIDERS={
    const oa=ownerAnswers.get(q);
    if(oa&&D[oa.key]&&D[oa.key].group===g)return{answer:oa.answer,citations:oa.citations||[],related:[],needsOwner:false,ownerQuestion:"",fromOwner:oa.by};
    const hit=DEMO_ANSWERS[demoNorm(q)];
-   if(hit&&D[hit.key].group===g)return hit;
+   if(hit&&D[hit.key].group===g){
+    /* 실행 시 인용 검증: 준비된 답변의 근거 문장이 현행 조문에 그대로 있는지 확인 (개정되면 경고) */
+    const all=groupArts(g),stale=hit.citations.some(c=>{const x=all.find(y=>y.id===c.id);return !x||!x.body.some(b=>b.includes(c.quote));});
+    return stale?{...hit,stale:true}:hit;}
    const top=scored(g,q).slice(0,3).map(x=>x.a);
    return{answer:top.length?"시연 모드에서는 준비된 질문에만 AI가 답합니다. 관련 조문을 찾았습니다."
      :"시연 모드에서는 준비된 질문에만 AI가 답합니다. 이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요.",
@@ -386,7 +389,7 @@ function renderWorkspace(){
    </div>
   </section>
   <section class="card pane pane-doc">
-   <div class="doc-head">${ds.map(k=>`<button class="dtab" data-tab="${k}" aria-current="${k===state.doc}">${esc(D[k].parent?short(D[k].name):D[k].name)}<small>${D[k].no}</small></button>`).join("")}
+   <div class="doc-head">${ds.map(k=>`<button class="dtab" data-tab="${k}" aria-current="${k===state.doc}">${esc(D[k].parent?short(D[k].name):D[k].name)}<small>${D[k].no}</small></button>`).join("")}<button class="dtab htab" id="histTab" aria-current="false">개정 이력<small>${histStore.list(state.doc).length}건</small></button>
     <div class="doctools"><button class="tocbtn" id="tocBtn">조문 목차</button>
      <button class="tocbtn icon" id="prtBtn" title="현재 규정 인쇄">${IC.print}<span>인쇄</span></button>
      <button class="tocbtn icon" id="dlBtn" title="현재 규정 원문 다운로드">${IC.down}<span>다운로드</span></button></div></div>
@@ -396,15 +399,18 @@ function renderWorkspace(){
  $("#send").onclick=()=>{const t=$("#qin").value.trim();if(t){$("#qin").value="";$("#qin").style.height="auto";ask(t);}};
  $("#qin").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#send").click();}};
  $("#qin").oninput=e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,120)+"px";};
+ state.docMode="text";
  $("#tocBtn").onclick=toggleToc;
+ $("#histTab").onclick=()=>showHist(state.doc);
+ $("#docScroll").addEventListener("click",e=>{const b=e.target.closest("[data-amark]");if(b){e.stopPropagation();showHist(state.doc,b.dataset.amark);}});
  $("#prtBtn").onclick=()=>printDoc(state.doc);
  $("#dlBtn").onclick=()=>downloadDoc(state.doc);
  v.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>switchDoc(b.dataset.tab));
  syncAvail();
 }
 function switchDoc(k,then){
- state.doc=k;$("#docScroll").innerHTML=docHTML(k);
- $("#view").querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===k));
+ state.doc=k;state.docMode="text";$("#docScroll").innerHTML=docHTML(k);
+ syncDocTabs();
  if(then)then();
 }
 function toggleToc(){
@@ -419,7 +425,7 @@ function docHTML(k){
  return `<div class="doc-sheet"><h1 class="doc-title">${esc(short(d.name))}</h1>
   <p class="doc-sub">${d.no} · 시행 ${d.effective} · 주관 ${d.owner}</p>
   ${(d.chapters||[]).map(ch=>`<h2 class="chapter">${esc(ch.t)}</h2>`+ch.arts.map(a=>`
-   <article class="art" id="art-${a.id}"><h3>${a.n}(${a.h})</h3>
+   <article class="art" id="art-${a.id}"><h3>${a.n}(${a.h})${k!=="__past"&&k!=="__prev"?(v=>v?`<button class="amark" data-amark="${v.id}" title="${esc(v.reason||"")}">${esc(v.eff)} ${esc(v.type)}</button>`:"")(lastChangeOf(k,a.id)):""}</h3>
    ${a.body.map(b=>b==="TABLE"?tableHTML(a.table):`<p>${esc(b)}</p>`).join("")}
    ${a.xref?`<p class="xref"><b>연계</b> ${esc(a.xref)}</p>`:""}</article>`).join("")).join("")}</div>`;
 }
@@ -440,7 +446,7 @@ function paint(cits,to){
 }
 function highlight(cits,to){
  const target=cits.find(c=>c.id===to)||cits[0];if(!target)return;
- if(target.docKey!==state.doc)switchDoc(target.docKey,()=>paint(cits,target.id));else paint(cits,target.id);
+ if(target.docKey!==state.doc||state.docMode!=="text")switchDoc(target.docKey,()=>paint(cits,target.id));else paint(cits,target.id);
 }
 function markInside(root,quote){
  const q=quote.trim().replace(/\s+/g," ");
@@ -497,6 +503,8 @@ JSON만 출력하세요:
   const all=groupArts(g),multi=docsOf(g).filter(k=>D[k].loaded).length>1;
   const cits=(r.citations||[]).map(c=>{const a=all.find(x=>x.id===c.id);return a?{...c,docKey:a.docKey,label:`${a.n} ${a.h}`,docNo:D[a.docKey].no}:null;}).filter(Boolean);
   box.innerHTML=(r.fromOwner?`<span class="ownerbadge">${esc(head.owner)} 답변 반영</span>`:"")+esc(r.answer||"").replace(/제(\d+)조/g,'<strong>제$1조</strong>');
+  if(r.stale)box.insertAdjacentHTML("afterbegin",`<div class="stale">${IC.help}<span><b>근거 조문이 개정되었습니다.</b> 이 답변은 개정 전 조문 기준일 수 있습니다. 오른쪽 현행 원문과 <button data-stalehist>개정 이력</button>을 확인하고, 필요하면 주관부서에 확인하세요.</span></div>`);
+  box.querySelector("[data-stalehist]")?.addEventListener("click",()=>showHist(state.doc));
   askLog.add({q,key:g,needsOwner:!!r.needsOwner,user:me()?.name||""});
   if(cits.length){
    const w=document.createElement("div");w.className="cites";

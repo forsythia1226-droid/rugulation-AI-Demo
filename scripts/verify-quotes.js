@@ -41,5 +41,17 @@ const grab=name=>{const m=app.match(new RegExp(`const ${name}=(\\[[\\s\\S]*?\\]\
 const shown=[...grab("CHIPS").map(x=>x[1]),...grab("FAQ").map(x=>x[0]),...Object.values(D).flatMap(d=>d.starters||[])];
 shown.forEach(q=>{if(!seen[demoNorm(q)])errs.push(`준비되지 않은 노출 질문: ${q}`);});
 
+/* 개정 이력(js/history.js): '개정 후' 문장이 현행 조문과 정확히 일치하는지 */
+const H={};vm.runInNewContext(src("js/history.js")+"\n;this.H=HISTORY;",Object.assign(H,{esc:s=>s}));
+let hn=0;
+H.H.forEach(v=>{
+ if(!D[v.key])errs.push(`이력 ${v.id}: 없는 규정 ${v.key}`);
+ (v.changes||[]).forEach(c=>{hn++;const a=art[c.art],tag=`이력 ${v.id} ${c.art}`;
+  if(!a){errs.push(`${tag}: 없는 조문`);return;}
+  if(a.docKey!==v.key)errs.push(`${tag}: ${v.key}의 조문이 아닙니다`);
+  if(c.table){if(c.after&&!(a.table&&a.table.rows.some(r=>r.join("|")===c.after.join("|"))))errs.push(`${tag}: 표 행이 현행과 불일치`);}
+  else if(c.after&&!a.body.includes(c.after))errs.push(`${tag}: 개정 후 문장이 현행과 불일치 → "${c.after}"`);
+  if(c.before&&c.after&&String(c.before)===String(c.after))errs.push(`${tag}: 개정 전후가 같습니다`);});
+});
 if(errs.length){console.error(`✗ 인용 검증 실패 (${errs.length}건)\n  `+errs.join("\n  "));process.exit(1);}
-console.log(`✓ 인용 검증 통과: 답변 ${DEMO_QA.length}건 · 질문 ${Object.keys(seen).length}개 · 인용 ${n}건 · 노출 질문 ${shown.length}개 전부 대응`);
+console.log(`✓ 인용 검증 통과: 답변 ${DEMO_QA.length}건 · 질문 ${Object.keys(seen).length}개 · 인용 ${n}건 · 노출 질문 ${shown.length}개 전부 대응 · 개정 이력 ${H.H.length}건(변경 ${hn}건) 현행 일치`);
