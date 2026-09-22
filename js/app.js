@@ -15,7 +15,8 @@ const IC={
  help:I('<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/>'),
  bell:I('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
  user:I('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
- gear:I('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>'),
+ gear:I('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>'),
+ usercog:I('<circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><circle cx="18" cy="15" r="3"/><path d="m21.7 16.4-.9-.3M15.2 13.9l-.9-.3M16.6 18.7l.3-.9M19.1 12.2l.3-.9M19.6 18.7l-.4-1M16.8 12.3l-.4-1M14.3 16.6l1-.4M20.7 13.8l1-.4"/>'),
  book:I('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/>'),
  file:I('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>'),
  chat:I('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),
@@ -72,7 +73,7 @@ const NOTICES=[
 const NAV=[
  {g:"대시보드",items:[["home","홈",IC.home]]},
  {g:"규정 탐색",items:[["cats","카테고리별 규정",IC.folder],["faq","자주 찾는 질문",IC.help],["notice","최근 개정 공지",IC.bell]]},
- {g:"나의 업무",items:[["myreq","규정 문의",IC.chat],["manage","관리자 페이지",IC.edit]]}];
+ {g:"나의 업무",items:[["myreq","규정 문의",IC.chat],["manage","관리자 페이지",IC.usercog]]}];
 const allNotices=()=>[...noticeStore.list(),...NOTICES];
 
 /* ---------- state & utils ---------- */
@@ -172,9 +173,12 @@ function renderSidebar(){
   <div class="sb-bottom">
    <button class="nav" data-go="settings" data-tip="설정" ${cur==="settings"?'aria-current="page"':""}>${IC.gear}<span class="lbl">설정</span></button>
    ${isAdmin()?`<button class="nav" data-go="admin" data-tip="시스템 관리" ${cur==="admin"?'aria-current="page"':""}>${IC.shield}<span class="lbl">시스템 관리</span></button>`:""}
-   <button class="nav" id="logout" data-tip="로그아웃">${IC.logout}<span class="lbl">로그아웃</span></button>
   </div>
-  <div class="sb-foot">등록 규정 ${ORDER.length}건 · 조문 적재 ${ORDER.filter(k=>D[k].loaded).length}건</div>`;
+  <div class="sb-acct" data-tip="${esc(me()?.name||"")} · 로그아웃">
+   <span class="av">${esc((me()?.name||"?")[0])}</span>
+   <span class="acct-t"><b>${esc(me()?.name||"")}${isAdmin()?'<em>관리자</em>':""}</b><small>${esc(me()?.dept||"")}</small></span>
+   <button class="acct-out" id="logout" aria-label="로그아웃" title="로그아웃">${IC.logout}</button>
+  </div>`;
  $("#logout").onclick=()=>{session.logout();go("home");};
  $("#tog").onclick=()=>{state.collapsed=!state.collapsed;renderSidebar();};
 }
@@ -189,7 +193,6 @@ function renderHeader(){
   <div class="hd-r">
    <button class="ib${settings.get().notify?" new":""}" data-go="notice" aria-label="개정 공지">${IC.bell}</button>
    <button class="ib" data-go="settings" aria-label="설정">${IC.gear}</button>
-   <div class="prof"><span class="av">${esc((me()?.name||"?")[0])}</span><span>${esc(me()?.dept||"")}<b>${esc(me()?.name||"")}</b></span>${isAdmin()?'<span class="role">관리자</span>':""}</div>
   </div>`;
 }
 

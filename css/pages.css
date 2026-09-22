@@ -554,3 +554,18 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .sb-top .sb-name{font-size:13.5px;white-space:nowrap}
 .sb-top{justify-content:space-between}
 .sb.col .sb-top{justify-content:center}
+
+/* ---- LNB 하단 계정 영역 (프로필 + 로그아웃) ---- */
+.sb-acct{position:relative;display:flex;align-items:center;gap:10px;margin:0 10px 12px;padding:10px 8px 10px 10px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.14)}
+.sb-acct .av{width:32px;height:32px;border-radius:50%;background:var(--acs);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;flex-shrink:0}
+.acct-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3;white-space:nowrap;overflow:hidden}
+.acct-t b{color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.acct-t em{font-style:normal;font-size:10px;font-weight:600;color:#c7d2fe;background:rgba(99,102,241,.3);border-radius:99px;padding:1px 6px}
+.acct-t small{color:var(--sb-m);font-size:11.5px;overflow:hidden;text-overflow:ellipsis}
+.acct-out{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--sb-t);flex-shrink:0}
+.acct-out:hover{background:var(--sb-2);color:#fff}
+.acct-out svg{width:18px;height:18px}
+.sb.col .sb-acct{flex-direction:column;gap:8px;padding:8px 0;margin:0 8px 12px;background:none;border:none}
+.sb.col .acct-t{display:none}
+.sb.col .sb-acct:hover::after{content:attr(data-tip);position:absolute;left:calc(100% + 14px);top:50%;transform:translateY(-50%);background:#020617;color:#fff;font-size:12px;padding:6px 10px;border-radius:7px;white-space:nowrap;pointer-events:none;z-index:60}
+.sb-bottom{padding-bottom:10px}
