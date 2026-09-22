@@ -374,7 +374,7 @@ function openGroup(g,q,focus){
 function renderWorkspace(){
  const g=state.group,head=groupHead(g),ds=docsOf(g).filter(k=>D[k].loaded);
  const v=$("#view");v.className="wsv";
- v.innerHTML=`<div class="crumb"><button data-go="cats">카테고리별 규정</button><span>›</span><span>${CATS[head.cat].n}</span><span>›</span><b>${head.no} ${esc(head.name)}</b><span class="eff">시행 ${head.effective}</span></div>
+ v.innerHTML=`<div class="crumb"><button data-go="cats">카테고리별 규정</button><span>›</span><span>${CATS[head.cat].n}</span><span>›</span><b id="crumbDoc">${esc(D[state.doc].no)} ${esc(D[state.doc].name)}</b><span class="eff" id="crumbEff">시행 ${esc(D[state.doc].effective)}</span></div>
  <div class="ws">
   <section class="card pane">
    <div class="pbar"><span class="bi">${IC.chat}</span><h3>AI 규정 상담</h3><span class="ow">주관 ${esc(head.owner)}</span></div>
@@ -388,7 +388,7 @@ function renderWorkspace(){
    </div>
   </section>
   <section class="card pane pane-doc">
-   <div class="doc-head">${ds.map(k=>`<button class="dtab" data-tab="${k}" aria-current="${k===state.doc}">${esc(D[k].parent?short(D[k].name):D[k].name)}<small>${D[k].no}</small></button>`).join("")}<button class="dtab htab" id="histTab" aria-current="false">개정 이력<small>${histStore.list(state.doc).length}건</small></button>
+   <div class="doc-head"><button class="dtab" id="docTab" data-tab="${state.doc}" aria-current="true">${docTabLabel(state.doc)}</button><button class="dtab htab" id="histTab" aria-current="false">개정 이력<small>${histStore.list(state.doc).length}건</small></button>
     <div class="doctools">${annexOf(g)?`<button class="tocbtn annexbtn" id="annexBtn" aria-pressed="false">${IC.list}<span>${esc(annexOf(g).title)}</span></button>`:""}<button class="tocbtn" id="tocBtn">조문 목차</button>
      <button class="tocbtn icon" id="prtBtn" title="현재 규정 인쇄">${IC.print}<span>인쇄</span></button>
      <button class="tocbtn icon" id="dlBtn" title="현재 규정 원문 다운로드">${IC.down}<span>다운로드</span></button></div></div>
@@ -405,11 +405,15 @@ function renderWorkspace(){
  $("#docScroll").addEventListener("click",e=>{const b=e.target.closest("[data-amark]");if(b){e.stopPropagation();showHist(state.doc,b.dataset.amark);}});
  $("#prtBtn").onclick=()=>printDoc(state.doc);
  $("#dlBtn").onclick=()=>downloadDoc(state.doc);
- v.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>switchDoc(b.dataset.tab));
+ $("#docTab").onclick=()=>switchDoc(state.doc);
  syncAvail();
 }
+/* 규정 창구 원문 탭: 누른 규정 하나만 보여준다 (AI 검색은 본규정·하위지침을 함께) */
+const docTabLabel=k=>`${esc(D[k].parent?short(D[k].name):D[k].name)}<small>${esc(D[k].no)}</small>`;
 function switchDoc(k,then){
  state.doc=k;state.docMode="text";$("#docScroll").innerHTML=docHTML(k);
+ const t=$("#docTab");if(t){t.dataset.tab=k;t.innerHTML=docTabLabel(k);}
+ if($("#crumbDoc")){$("#crumbDoc").textContent=`${D[k].no} ${D[k].name}`;$("#crumbEff").textContent=`시행 ${D[k].effective}`;}
  syncDocTabs();
  if(then)then();
 }
