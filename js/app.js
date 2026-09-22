@@ -164,7 +164,7 @@ function renderSidebar(){
  const sb=$("#sb"),cur=curNav();
  sb.className="sb"+(state.collapsed?" col":"");
  sb.innerHTML=`<div class="sb-top">
-   <span class="sb-name">사내규정 AI<small>Regulation Agent</small></span>
+   <img class="sb-logo" src="assets/logo_w.svg" alt="taihan"><span class="sb-name">사내규정 AI</span>
    <button class="tog" id="tog" aria-label="${state.collapsed?"사이드바 펼치기":"사이드바 접기"}" aria-expanded="${!state.collapsed}">${state.collapsed?IC.popen:IC.pclose}</button>
   </div>
   <nav class="sb-nav">${NAV.map(g=>`<div class="grp">${g.g}</div>`+g.items.map(([v,l,ic])=>
@@ -184,7 +184,7 @@ function renderHeader(){
  const m=aiMode(),on=m!=="checking";
  const label={live:"● Online / RAG Engine Active",demo:"● Demo / 시연 모드",checking:"연결 확인 중"}[m];
  const tip={live:"AI 응답을 사용할 수 있습니다",demo:"사전 작성된 답변으로 AI 흐름을 시연합니다. 근거 조문 하이라이트는 실제 원문과 대조됩니다",checking:"AI 연결을 확인하고 있습니다"}[m];
- $("#hd").innerHTML=`<span class="wm"><img class="lt" src="${LOGO_L}" alt="taihan"><img class="dk" src="${LOGO_D}" alt="" aria-hidden="true"></span><span class="hd-sep"></span><h1>사내규정 AI 에이전트</h1>
+ $("#hd").innerHTML=`<h1>사내규정 AI 에이전트</h1>
   <span class="status ${on?"on":""} ${m}" title="${tip}"><span class="dot"></span>${label}</span>
   <div class="hd-r">
    <button class="ib${settings.get().notify?" new":""}" data-go="notice" aria-label="개정 공지">${IC.bell}</button>

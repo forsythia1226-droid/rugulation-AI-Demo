@@ -544,3 +544,11 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 #view,#view.wsv,#view:has(.home){padding-top:40px}
 /* ---- 본문 하단 여백 40px (끝까지 스크롤했을 때, 모든 화면 공통) ---- */
 #view,#view.wsv,#view:has(.home){padding-bottom:40px}
+
+/* ---- 사이드바 상단 로고 ---- */
+.sb-top{gap:12px}
+.sb-logo{height:20px;width:auto;flex-shrink:0;display:block}
+.sb-top .sb-name{padding-left:12px;border-left:1px solid rgba(148,163,184,.28);font-size:13px}
+.sb.col .sb-logo{display:none}
+.sb-logo{height:22px}
+.sb-top .sb-name{font-size:13.5px;white-space:nowrap}
