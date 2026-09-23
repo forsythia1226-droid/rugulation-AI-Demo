@@ -618,3 +618,13 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 
 /* 조문 표: 첫 열(조직명 등)은 줄바꿈 없이 */
 .doc-sheet table td:first-child,.doc-sheet table th:first-child{white-space:nowrap}
+
+/* ---- 홈: 내 문의 알림 줄 ---- */
+.mystrip{display:flex;align-items:center;gap:10px;width:100%;padding:12px 18px;border:1px solid var(--bd);border-radius:12px;background:var(--card);font-size:13px;text-align:left;transition:border-color .15s,background .15s}
+.mystrip:hover{border-color:var(--ac-200);background:var(--ac-50)}
+.mystrip svg{width:18px;height:18px;color:var(--ac);flex-shrink:0}
+.mystrip b{font-weight:600;margin-right:2px}
+.ms-hot{font-weight:600;color:var(--ok-t);background:var(--card-2);border-radius:999px;padding:3px 10px}
+.ms-wait{color:var(--amb);background:var(--amb-50);border:1px solid var(--amb-bd);border-radius:999px;padding:2px 10px;font-size:12.5px}
+.ms-go{margin-left:auto;color:var(--ac);font-size:12.5px;font-weight:600;white-space:nowrap}
+.home .catcard{margin-top:0}

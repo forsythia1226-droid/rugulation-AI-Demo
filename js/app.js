@@ -227,11 +227,12 @@ function renderHome(){
    <div class="qchips">${CHIPS.map(([l,q],i)=>`<button class="qchip" data-chip="${i}">${esc(l)}</button>`).join("")}</div>
    <p class="note" id="route"></p>
   </section>
-  <section class="card box catcard">
-   <div class="bh"><span class="bi">${IC.folder}</span><h3>카테고리별 규정</h3><button class="more" data-go="cats">전체 보기</button></div>
-   <div class="catrow">${Object.entries(CATS).map(([c,x])=>
-    `<button class="ctile" data-cat="${c}" title="${esc(x.d)}"><span class="cti">${CAT_IC[c]||IC.folder}</span><span class="ctn">${x.n}</span><span class="ctc">${ORDER.filter(k=>D[k].cat===c).length}<small>건</small></span></button>`).join("")}</div>
-  </section>
+  ${(()=>{const mine=escStore.list().filter(e=>e.user===me().name);
+   if(!mine.length)return "";
+   const ans=mine.filter(e=>e.status==="answered").length,wait=mine.length-ans;
+   return `<button class="mystrip" data-go="myreq">${IC.inbox}<b>내 문의</b>
+    ${ans?`<span class="ms-hot">답변 도착 ${ans}건</span>`:""}${wait?`<span class="ms-wait">확인 중 ${wait}건</span>`:""}
+    <span class="ms-go">규정 문의에서 보기 →</span></button>`;})()}
   <div class="grid2">
    <section class="card box">
     <div class="bh"><span class="bi">${IC.help}</span><h3>자주 찾는 질문 TOP 5</h3><button class="more" data-go="faq">더 보기</button></div>
@@ -244,6 +245,11 @@ function renderHome(){
      <span class="nmeta">${esc(n.owner)} · ${esc(n.date)}</span></button>`).join("")}</div>
    </section>
   </div>
+  <section class="card box catcard">
+   <div class="bh"><span class="bi">${IC.folder}</span><h3>카테고리별 규정</h3><button class="more" data-go="cats">전체 보기</button></div>
+   <div class="catrow">${Object.entries(CATS).map(([c,x])=>
+    `<button class="ctile" data-cat="${c}" title="${esc(x.d)}"><span class="cti">${CAT_IC[c]||IC.folder}</span><span class="ctn">${x.n}</span><span class="ctc">${ORDER.filter(k=>D[k].cat===c).length}<small>건</small></span></button>`).join("")}</div>
+  </section>
  </div>`;
  $("#go0").onclick=()=>routeAsk($("#q0").value.trim());
  $("#q0").onkeydown=e=>{if(e.key==="Enter")routeAsk($("#q0").value.trim());};
