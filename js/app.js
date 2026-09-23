@@ -524,7 +524,10 @@ JSON만 출력하세요:
   askLog.add({q,key:g,needsOwner:!!r.needsOwner,user:me()?.name||""});
   if(cits.length){
    const w=document.createElement("div");w.className="cites";
-   cits.forEach(c=>{const b=document.createElement("button");b.className="cite";b.textContent=(multi?c.docNo+" ":"")+c.label;b.onclick=()=>highlight(cits,c.id);w.appendChild(b);});
+   /* 같은 조문을 여러 문장 인용해도 버튼은 조문당 하나만 (하이라이트는 인용 문장 전부) */
+   const seenCite=new Set();
+   cits.filter(c=>!seenCite.has(c.id)&&seenCite.add(c.id)).forEach(c=>{
+    const b=document.createElement("button");b.className="cite";b.textContent=(multi?c.docNo+" ":"")+c.label;b.onclick=()=>highlight(cits,c.id);w.appendChild(b);});
    box.appendChild(w);highlight(cits);
   }
   const rel=(r.related||[]).filter(k=>D[k]&&D[k].loaded&&D[k].group!==g);
