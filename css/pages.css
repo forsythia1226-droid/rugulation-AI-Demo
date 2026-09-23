@@ -715,3 +715,4 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 /* 검색바: 찾기 버튼을 우측·상하 8px 여백으로 */
 .hero .sbar{padding:8px 8px 8px 16px}
 .hero .btn{height:auto;align-self:stretch;border-radius:9px;padding:0 20px}
+.tl-h .tnew{margin-right:0;vertical-align:0}

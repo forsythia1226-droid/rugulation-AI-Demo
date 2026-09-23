@@ -352,7 +352,7 @@ function renderNotice(){
    <div class="tl-d"><b>${esc(d.md)}</b><small>${esc(d.y)}</small></div>
    <div class="tl-dot"></div>
    <section class="card tl-c">
-    <header class="tl-h"><span class="tnew">NEW</span><h3>${esc(n.title)}</h3>
+    <header class="tl-h"><h3>${esc(n.title)}</h3><span class="tnew">NEW</span>
      <span class="tl-own">${esc(n.owner)}</span></header>
     <p class="tl-m">적용일자 ${esc(n.date)} · 변경 ${n.items.length}건</p>
     <ul class="tl-items">${n.items.map((it,ii)=>{const[c,l]=changeType(it.text);const has=D[it.doc];return `<li>
