@@ -221,16 +221,16 @@ function renderHome(){
  const v=$("#view");v.className="";
  const loadedFaq=FAQ.slice(0,5);
  v.innerHTML=`<div class="wrap home">
-  <section class="card box catcard">
-   <div class="bh"><span class="bi">${IC.folder}</span><h3>카테고리별 규정</h3><button class="more" data-go="cats">전체 보기</button></div>
-   <div class="catrow">${Object.entries(CATS).map(([c,x])=>
-    `<button class="ctile" data-cat="${c}" title="${esc(x.d)}"><span class="cti">${CAT_IC[c]||IC.folder}</span><span class="ctn">${x.n}</span><span class="ctc">${ORDER.filter(k=>D[k].cat===c).length}<small>건</small></span></button>`).join("")}</div>
-  </section>
   <section class="card hero">
    <div class="bh"><span class="bi">${IC.spark}</span><h3>AI 규정 검색</h3></div>
    <div class="sbar">${IC.search}<input id="q0" placeholder="궁금하신 내용을 적어주세요. 어느 규정인지 몰라도 됩니다." autocomplete="off"><button class="btn" id="go0">찾기</button></div>
    <div class="qchips">${CHIPS.map(([l,q],i)=>`<button class="qchip" data-chip="${i}">${esc(l)}</button>`).join("")}</div>
    <p class="note" id="route"></p>
+  </section>
+  <section class="card box catcard">
+   <div class="bh"><span class="bi">${IC.folder}</span><h3>카테고리별 규정</h3><button class="more" data-go="cats">전체 보기</button></div>
+   <div class="catrow">${Object.entries(CATS).map(([c,x])=>
+    `<button class="ctile" data-cat="${c}" title="${esc(x.d)}"><span class="cti">${CAT_IC[c]||IC.folder}</span><span class="ctn">${x.n}</span><span class="ctc">${ORDER.filter(k=>D[k].cat===c).length}<small>건</small></span></button>`).join("")}</div>
   </section>
   <div class="grid2">
    <section class="card box">
