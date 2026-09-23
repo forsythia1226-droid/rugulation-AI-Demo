@@ -54,9 +54,9 @@ const CHIPS=[
  ["#야근 식대 정산 한도","야근 식대는 얼마까지 정산할 수 있나요?"]];
 const FAQ=[
  ["배우자 부친상인데 며칠 쉬고 경조금은 얼마인가요?","TES-203"],
- ["팀장 부재 시 급한 품의는 누가 결재하나요?","TES-105"],
- ["업무에 ChatGPT 같은 생성형 AI를 써도 되나요?","TES-212"],
- ["경력직인데 수습기간이 적용되나요?","TES-201"],
+ ["각 직급별 승진소요연수가 어떻게 되나요?","TES-201"],
+ ["올해 경력직 10월 입사자인데, 인사평가 대상인가요?","TES-201"],
+ ["인사평가등급 기준 및 평가 방법은 어떻게 되나요?","TES-201"],
  ["재택근무는 주 며칠까지 가능한가요?","TES-203"],
  ["육아휴직 중인데 자녀 학자금 신청할 수 있나요?","TES-201-1B"],
  ["해외출장 전에 반드시 해야 하는 게 있나요?","TES-216"],
@@ -393,8 +393,8 @@ function renderWorkspace(){
   <section class="card pane">
    <div class="pbar"><span class="bi">${IC.chat}</span><h3>AI 규정 상담</h3><span class="ow">주관 ${esc(head.owner)}</span></div>
    <div class="thread" id="thread"><div class="starter" id="starter">
-    <p>${esc(head.blurb||"")}${ds.length>1?` 하위지침 ${ds.length-1}건을 함께 검색합니다.`:""}</p>
-    ${(head.starters||[]).map(s=>`<button class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("")}
+    <p>${esc(D[state.doc].blurb||head.blurb||"")}${ds.length>1?` 본규정과 하위지침을 함께 검색합니다.`:""}</p>
+    ${((D[state.doc].starters&&D[state.doc].starters.length?D[state.doc]:head).starters||[]).map(s=>`<button class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("")}
    </div></div>
    <div class="composer">
     <div class="cin"><textarea id="qin" rows="1" placeholder="상황을 구체적으로 적을수록 정확합니다"></textarea><button class="send" id="send">질문</button></div>
