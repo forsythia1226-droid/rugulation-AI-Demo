@@ -211,7 +211,9 @@ function renderHeader(){
  $("#hd").innerHTML=`<h1>사내규정 AI 에이전트</h1>
   <span class="status ${on?"on":""} ${m}" title="${tip}"><span class="dot"></span>${label}</span>
   <div class="hd-r">
-   <button class="hbtn${settings.get().notify?" new":""}" data-go="notice">${IC.bell}<span>알림</span></button>
+   ${(()=>{const mine=escStore.list().filter(e=>e.user===me()?.name);
+    const ans=mine.filter(e=>e.status==="answered").length;
+    return `<button class="hbtn${settings.get().notify&&ans?" new":""}" data-go="myreq" title="${ans?`답변 도착 ${ans}건`:"내가 남긴 규정 문의"}">${IC.inbox}<span>내 문의${mine.length?` <b>${mine.length}</b>`:""}</span></button>`;})()}
    <button class="hbtn" data-go="settings" ${state.view==="settings"?'aria-current="page"':""}>${IC.gear}<span>설정</span></button>
   </div>`;
 }
@@ -227,17 +229,11 @@ function renderHome(){
     `<button class="ctile" data-cat="${c}" title="${esc(x.d)}"><span class="cti">${CAT_IC[c]||IC.folder}</span><span class="ctn">${x.n}</span><span class="ctc">${ORDER.filter(k=>D[k].cat===c).length}<small>건</small></span></button>`).join("")}</div>
   </section>
   <section class="card hero">
-   <div class="bh"><span class="bi">${IC.spark}</span><h3>AI 규정 검색</h3></div>
+   <div class="bh"><h3>AI 규정 검색</h3></div>
    <div class="sbar">${IC.search}<input id="q0" placeholder="궁금하신 내용을 적어주세요. 어느 규정인지 몰라도 됩니다." autocomplete="off"><button class="btn" id="go0">찾기</button></div>
    <div class="qchips">${CHIPS.map(([l,q],i)=>`<button class="qchip" data-chip="${i}">${esc(l)}</button>`).join("")}</div>
    <p class="note" id="route"></p>
   </section>
-  ${(()=>{const mine=escStore.list().filter(e=>e.user===me().name);
-   if(!mine.length)return "";
-   const ans=mine.filter(e=>e.status==="answered").length,wait=mine.length-ans;
-   return `<button class="mystrip" data-go="myreq">${IC.inbox}<b>내 문의</b>
-    ${ans?`<span class="ms-hot">답변 도착 ${ans}건</span>`:""}${wait?`<span class="ms-wait">확인 중 ${wait}건</span>`:""}
-    <span class="ms-go">규정 문의에서 보기 →</span></button>`;})()}
   <div class="grid2">
    <section class="card box">
     <div class="bh"><span class="bi">${IC.help}</span><h3>자주 찾는 질문 TOP 5</h3><button class="more" data-go="faq">더 보기</button></div>

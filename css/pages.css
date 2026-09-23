@@ -659,3 +659,14 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 /* 좁은 화면에서는 분류 아이콘 숨겨 한 줄 유지 (카드·제목은 그대로) */
 @media (max-width:1560px){.home .cti{display:none!important}.home .ctile{grid-template-columns:1fr auto}}
 @media (min-width:1561px){.home .ctile{grid-template-columns:auto 1fr auto}}
+
+/* 홈 카테고리 카드: 제목·아이콘을 다른 카드(자주 찾는 질문)와 같은 규격으로 */
+.home .catcard{padding:18px 22px}
+.home .catcard .bh h3{font-size:14.5px;color:var(--tx);font-weight:700}
+.home .catcard .bi{width:30px;height:30px;border-radius:8px;background:var(--ac-50);color:var(--ac)}
+.home .catcard .bi svg{width:16px;height:16px}
+.home .catrow{margin-top:14px}
+/* 자주 찾는 질문: 1~3위도 같은 스타일 */
+.faq.top .rk,.home .faq.top .rk{background:var(--card-2);color:var(--mu)}
+/* 헤더 '내 문의' 버튼 */
+.hbtn b{font-weight:700;color:var(--ac)}
