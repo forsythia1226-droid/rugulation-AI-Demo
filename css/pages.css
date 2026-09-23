@@ -677,3 +677,6 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .bi svg{width:18px;height:18px}
 .home .catcard .bi{width:auto;height:auto;background:transparent;border-radius:0}
 .home .catcard .bi svg{width:18px;height:18px}
+
+/* 카드 제목 16px */
+.bh h3,.home .catcard .bh h3{font-size:16px}
