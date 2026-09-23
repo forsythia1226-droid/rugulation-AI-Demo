@@ -530,7 +530,13 @@ JSON만 출력하세요:
     const b=document.createElement("button");b.className="cite";b.textContent=(multi?c.docNo+" ":"")+c.label;b.onclick=()=>highlight(cits,c.id);w.appendChild(b);});
    box.appendChild(w);highlight(cits);
   }
-  const rel=(r.related||[]).filter(k=>D[k]&&D[k].loaded&&D[k].group!==g);
+  /* 같은 규정이 여러 번 와도 버튼은 하나만 (규정 키·표시 이름 둘 다 기준) */
+  const relSeen=new Set();
+  const rel=(r.related||[]).filter(k=>{
+   if(!D[k]||!D[k].loaded||D[k].group===g)return false;
+   const label=short(D[k].name);
+   if(relSeen.has(k)||relSeen.has(label))return false;
+   relSeen.add(k);relSeen.add(label);return true;});
   if(rel.length){
    const w=document.createElement("div");w.className="rel";
    rel.forEach(k=>{const b=document.createElement("button");b.textContent=`${short(D[k].name)}에서 이어 확인 →`;b.onclick=()=>openGroup(D[k].group,q,k);w.appendChild(b);});
