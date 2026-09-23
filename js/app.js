@@ -20,7 +20,7 @@ const IC={
  book:I('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/>'),
  file:I('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>'),
  chat:I('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),
- ai:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 3.2 12.9 8a2 2 0 0 0 1.3 1.3l4.8 1.5-4.8 1.5a2 2 0 0 0-1.3 1.3l-1.5 4.8-1.5-4.8a2 2 0 0 0-1.3-1.3L3.8 10.8l4.8-1.5A2 2 0 0 0 9.9 8z"/><path d="M19 3.2v3.4M20.7 4.9h-3.4M5.2 16.6V20M6.9 18.3H3.5"/></svg>`,
+ ai:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 3.2 12.9 8a2 2 0 0 0 1.3 1.3l4.8 1.5-4.8 1.5a2 2 0 0 0-1.3 1.3l-1.5 4.8-1.5-4.8a2 2 0 0 0-1.3-1.3L3.8 10.8l4.8-1.5A2 2 0 0 0 9.9 8z"/><path d="M19 3.2v3.4M20.7 4.9h-3.4M5.2 16.6V20M6.9 18.3H3.5"/></svg>`,
 
  spark:I('<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>'),
  edit:I('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),

@@ -727,5 +727,6 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .hero .bh{gap:5px}
 
 /* 홈 공지 목록: 항목 제목을 카드 제목 글자와 같은 x에서 시작 */
-.nlist{padding-left:17px}
+.nlist{padding-left:0}
 .nrow{padding-left:0;padding-right:0}
+.home .nrow{padding-left:0;padding-right:0}
