@@ -6,5 +6,5 @@
 window.__ENV={
   GEMINI_PROXY:"http://localhost:8787",   // 프록시 서버 주소 (권장). 비우면 직접 호출
   GEMINI_API_KEY:"",                      // 직접 호출용 키. 로컬 테스트 외에는 사용하지 마세요
-  GEMINI_MODEL:"gemini-1.5-flash"
+  GEMINI_MODEL:"gemini-3.5-flash"
 };

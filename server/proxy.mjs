@@ -27,7 +27,7 @@ for(const f of [".env",".env.local"]){
  }
 }
 const API_KEY=process.env.GEMINI_API_KEY||"";
-const MODEL=process.env.GEMINI_MODEL||"gemini-1.5-flash";
+const MODEL=process.env.GEMINI_MODEL||"gemini-3.5-flash";
 if(!API_KEY)console.warn("⚠ GEMINI_API_KEY 가 설정되지 않았습니다. /api/chat 호출은 실패하고 화면은 준비된 답변으로 전환됩니다.");
 
 const MIME={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8",

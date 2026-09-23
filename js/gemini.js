@@ -7,7 +7,7 @@
  * - 실패(네트워크·쿼터·차단 등) 시 예외를 던지고, 호출 측에서 준비된 답변(시연 모드)으로 자동 전환한다.
  */
 const AI_ORG="대한전선";
-const GEMINI_DEFAULT_MODEL="gemini-1.5-flash";
+const GEMINI_DEFAULT_MODEL="gemini-3.5-flash";   /* 무료 등급 사용 가능 모델. AI Studio에서 최신 목록 확인 */
 const GEMINI_REFUSAL=`죄송합니다. 저는 ${AI_ORG} 사내규정 안내 AI 에이전트입니다. 사내 규정과 관련된 문의를 입력해 주세요.`;
 
 function aiCfg(){
