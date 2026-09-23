@@ -639,3 +639,23 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .home .ctc{font-size:14.5px;color:var(--tx-2);font-weight:600}
 .home .ctc small{font-size:11px}
 .home .hero{box-shadow:0 14px 34px -14px rgba(79,70,229,.34)}
+
+/* 홈 카테고리 줄: 경계·이름은 되돌리고, 크기와 색만 낮춰 검색보다 약하게 */
+.home .catcard{padding:14px 18px 16px;background:var(--card);border-color:var(--bd);box-shadow:none}
+.home .catcard .bh{display:flex;margin-bottom:0}
+.home .catcard .bh h3{font-size:13px;color:var(--mu);font-weight:600}
+.home .catcard .bi{width:24px;height:24px;border-radius:7px;background:var(--card-2);color:var(--mu)}
+.home .catcard .bi svg{width:14px;height:14px}
+.home .catrow{margin-top:10px}
+.home .ctile{background:var(--card-2);border-color:transparent;padding:9px 12px}
+.home .ctile:hover{background:var(--ac-50);border-color:var(--ac-200)}
+.home .cti{display:grid!important;width:22px;height:22px;border-radius:6px;background:transparent;color:var(--mu)}
+.home .cti svg{width:14px;height:14px}
+.home .ctile:hover .cti{color:var(--ac);background:transparent}
+.home .ctn{font-size:12.4px;color:var(--tx-2)}
+.home .ctc{font-size:14px;color:var(--ac);font-weight:700}
+.home .ctc small{color:var(--mu-2)}
+
+/* 좁은 화면에서는 분류 아이콘 숨겨 한 줄 유지 (카드·제목은 그대로) */
+@media (max-width:1560px){.home .cti{display:none!important}.home .ctile{grid-template-columns:1fr auto}}
+@media (min-width:1561px){.home .ctile{grid-template-columns:auto 1fr auto}}
