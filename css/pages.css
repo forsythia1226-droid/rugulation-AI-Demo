@@ -720,3 +720,8 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 /* 홈 공지 목록: NEW 배지를 제목 바로 뒤(8px)에 붙이고, 주관·날짜는 오른쪽 끝 */
 .nrow{grid-template-columns:auto auto 1fr;gap:8px}
 .nrow .nmeta{text-align:right;margin-left:0}
+
+/* 1~3위: 파란 배경 + 흰 숫자 */
+.faq.top .rk,.home .faq.top .rk{background:var(--acs);color:#fff;font-weight:700}
+/* AI 아이콘은 오른쪽 여백이 비어 보여 시각적으로 2px 좁힘 */
+.hero .bh{gap:5px}
