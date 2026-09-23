@@ -615,3 +615,6 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .ai-state{margin:8px 0 0;font-size:12.5px;color:var(--mu)}
 .ai-state.ok{color:var(--ok-t)}
 .ai-state.bad{color:#dc2626}
+
+/* 조문 표: 첫 열(조직명 등)은 줄바꿈 없이 */
+.doc-sheet table td:first-child,.doc-sheet table th:first-child{white-space:nowrap}
