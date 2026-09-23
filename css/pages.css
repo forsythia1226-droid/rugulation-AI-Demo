@@ -716,3 +716,7 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .hero .sbar{padding:8px 8px 8px 16px}
 .hero .btn{height:auto;align-self:stretch;border-radius:9px;padding:0 20px}
 .tl-h .tnew{margin-right:0;vertical-align:0}
+
+/* 홈 공지 목록: NEW 배지를 제목 바로 뒤(8px)에 붙이고, 주관·날짜는 오른쪽 끝 */
+.nrow{grid-template-columns:auto auto 1fr;gap:8px}
+.nrow .nmeta{text-align:right;margin-left:0}
