@@ -680,3 +680,14 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 
 /* 카드 제목 16px */
 .bh h3,.home .catcard .bh h3{font-size:16px}
+
+/* 카드 제목: 아이콘과 제목 세로 중앙 정렬 */
+.bh{align-items:center}
+.bi{display:inline-flex;align-items:center;justify-content:center;line-height:0}
+.bi svg{display:block}
+/* 자주 찾는 질문: 항목 왼쪽을 제목 아이콘과 맞추고, 1~3위 숫자만 파란색 */
+.home .faq,.faqlist .faq{padding-left:0}
+.faq.top .rk,.home .faq.top .rk{background:var(--card-2);color:var(--ac);font-weight:700}
+/* 질문 글자 시작점을 제목 글자와 맞춤 (번호 칸 18px + 간격 7px) */
+.home .faq{gap:7px}
+.home .faq .rk{width:18px;height:18px;font-size:11px;border-radius:5px}
