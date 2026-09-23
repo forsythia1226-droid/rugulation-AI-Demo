@@ -19,6 +19,8 @@ const session={
   const s={id:a.id,name:a.name,dept:a.dept,role:a.role,at:new Date().toISOString()};ST.set("session",s);return s;},
  logout(){ST.del("session");}
 };
+/* 페이지에 들어올 때마다 로그인 화면부터 시작한다 (새로고침 포함) */
+ST.del("session");
 
 /* ---- 설정 ---- */
 const SETTINGS_DEFAULT={theme:"light",font:"md",aiMode:"demo",notify:true};
