@@ -44,7 +44,17 @@ function renderSettings(){
   </section>
   <section class="card pad">
    <div class="bh"><span class="bi">${IC.spark}</span><h3>AI 응답</h3></div>
-   <div class="setrow"><div><b>응답 방식</b><small>시연 고정: 준비된 질문에 검증된 답변만 표시합니다. 실시간 LLM: 백엔드가 연결된 환경에서만 동작합니다.</small></div>${seg("aiMode",[["demo","시연 고정"],["live","실시간 LLM"]],s.aiMode)}</div>
+   <div class="setrow"><div><b>응답 방식</b><small>시연 고정: 준비된 질문에 검증된 답변만 표시합니다. 실시간 AI: Gemini로 답변하고, 호출에 실패하면 준비된 답변으로 자동 전환합니다.</small></div>${seg("aiMode",[["demo","시연 고정"],["gemini","실시간 AI(Gemini)"]],s.aiMode==="live"?"demo":s.aiMode)}</div>
+   ${s.aiMode==="gemini"?`<div class="setrow col">
+    <div class="form ai-cfg">
+     <label class="w2">프록시 주소 <small>권장 · 서버가 키를 보관합니다 (예: http://localhost:8787)</small><input id="ai-proxy" value="${esc(s.aiProxy)}" placeholder="비워 두면 브라우저에서 직접 호출"></label>
+     <label>모델<input id="ai-model" value="${esc(s.aiModel)}" placeholder="gemini-1.5-flash"></label>
+     <label class="w3">API 키 <small>프록시를 쓰면 비워 둡니다. 입력하면 이 브라우저에만 저장됩니다</small><input id="ai-key" type="password" value="${esc(s.aiKey)}" placeholder="직접 호출용 (공개 시연에는 권장하지 않음)"></label>
+    </div>
+    <div class="formbar"><span class="rq-note">${IC.help}공개 페이지에서는 키가 노출될 수 있습니다. 실제 규정으로 시연할 때는 프록시를 사용하세요.</span>
+     <button class="save" id="ai-save">연결 저장</button><button class="ghost" id="ai-test">연결 테스트</button><span class="saved hidden" id="ai-ok"></span></div>
+    <p class="ai-state" id="ai-state"></p>
+   </div>`:""}
   </section>
   <section class="card pad">
    <div class="bh"><span class="bi">${IC.bell}</span><h3>알림</h3></div>
@@ -55,6 +65,16 @@ function renderSettings(){
    <div class="setrow"><div><b>초기화</b><small>관리자 화면에서 등록·수정한 규정, 공지, 확인 요청, 해석 지침을 모두 지우고 원래 상태로 되돌립니다.</small></div><button class="danger" id="reset">시연 데이터 초기화</button></div>
   </section>`:""}
  </div>`;
+ $("#ai-save")&&($("#ai-save").onclick=()=>{
+  settings.set({aiProxy:$("#ai-proxy").value.trim(),aiModel:$("#ai-model").value.trim(),aiKey:$("#ai-key").value.trim()});
+  renderHeader();const ok=$("#ai-ok");ok.textContent="저장했습니다";ok.classList.remove("hidden");setTimeout(()=>ok.classList.add("hidden"),1800);});
+ $("#ai-test")&&($("#ai-test").onclick=async()=>{
+  settings.set({aiProxy:$("#ai-proxy").value.trim(),aiModel:$("#ai-model").value.trim(),aiKey:$("#ai-key").value.trim()});
+  const st=$("#ai-state");st.className="ai-state";st.textContent="연결 확인 중…";
+  try{const t=await geminiGenerate("너는 연결 테스트용 도우미다. 한국어로 '연결 정상'이라고만 답해라.","연결 테스트");
+   st.classList.add("ok");st.textContent="연결 정상 · 응답: "+t.slice(0,40);}
+  catch(e){st.classList.add("bad");st.textContent="연결 실패: "+String(e.message||e)+" — 질문 시 준비된 답변으로 안내됩니다.";}
+  renderHeader();});
  v.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{
   const k=b.dataset.set,val=b.dataset.val;
   settings.set({[k]:k==="notify"?val==="on":val});renderHeader();renderSettings();});

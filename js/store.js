@@ -23,7 +23,7 @@ const session={
 ST.del("session");
 
 /* ---- 설정 ---- */
-const SETTINGS_DEFAULT={theme:"light",font:"md",aiMode:"demo",notify:true};
+const SETTINGS_DEFAULT={theme:"light",font:"md",aiMode:"demo",notify:true,aiProxy:"",aiKey:"",aiModel:""};
 const settings={
  get(){return Object.assign({},SETTINGS_DEFAULT,ST.get("settings",{}));},
  set(p){const s=Object.assign(settings.get(),p);ST.set("settings",s);applySettings();return s;}

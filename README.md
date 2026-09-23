@@ -26,3 +26,26 @@
 - 배포: `main`에 push하면 GitHub Actions(`.github/workflows/pages.yml`)가 인용 검증(`node scripts/verify-quotes.js`)을 통과한 경우에만 GitHub Pages로 배포합니다.
   - 최초 1회: 저장소 Settings → Pages → Build and deployment → Source를 **GitHub Actions**로 지정
 - 데이터(로그인 세션, 관리자 편집, 업로드 파일)는 각 방문자의 브라우저에만 저장됩니다. 실제 사규·실제 파일을 올리지 마십시오.
+
+## 실시간 AI (Gemini) 연동
+
+기본값은 **시연 고정**(검증된 사전 답변)입니다. 실시간 응답을 쓰려면 아래처럼 연결합니다.
+
+### 1) 프록시 방식 (권장 · API 키가 브라우저에 남지 않음)
+```bash
+cp .env.example .env          # GEMINI_API_KEY=... 채우기 (.env 는 git에 올라가지 않음)
+node server/proxy.mjs         # http://localhost:8787
+```
+- 브라우저에서 http://localhost:8787 접속 → 설정 → 응답 방식 **실시간 AI(Gemini)** 선택
+- 프록시 주소는 비워 두면 같은 서버(`/api/chat`)를 사용합니다. 다른 PC에서 접속하면 `http://<서버IP>:8787` 입력
+- 키는 서버 환경변수(`GEMINI_API_KEY`)에만 존재합니다.
+
+### 2) 직접 호출 (로컬 테스트용)
+설정 화면에 API 키를 입력하면 그 브라우저에만 저장되어 직접 호출합니다.
+**공개 주소(GitHub Pages)에서는 키가 노출될 수 있으므로 실제 규정·실제 키로 사용하지 마십시오.**
+
+### 안전장치
+- 호출 실패(키 오류, 쿼터 초과, 네트워크 오류, 20초 초과)는 모두 `try/catch`로 잡아
+  **검증된 사전 답변으로 자동 전환**하고, 답변 위에 전환 사유를 표시합니다. 시연이 끊기지 않습니다.
+- System Prompt에 출처 명시, 사내 규정 외 질문 거절(가드레일), 마크다운 출력 포맷을 강제합니다.
+- 무료 등급은 입력 데이터가 서비스 개선에 사용될 수 있습니다. **실제 사규로는 사용하지 마십시오.**

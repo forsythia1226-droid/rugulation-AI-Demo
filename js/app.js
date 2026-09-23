@@ -120,8 +120,9 @@ function artText(a){
 /* ---------- AI provider ----------
  * live: 아티팩트 런타임(window.claude)의 LLM
  * demo: window.claude가 없을 때 사전 작성 답변(js/demo-answers.js) */
+const useGemini=()=>settings.get().aiMode==="gemini"&&geminiReady();
 const useLive=()=>!!SAMPLE&&settings.get().aiMode==="live";
-const aiMode=()=>useLive()?"live":(TRIED||settings.get().aiMode==="demo")?"demo":"checking";
+const aiMode=()=>useGemini()?"gemini":useLive()?"live":(TRIED||settings.get().aiMode!=="live")?"demo":"checking";
 const demoDelay=()=>new Promise(r=>setTimeout(r,600+Math.random()*300));
 function bestLine(a,q){
  const ts=tokens(q),ls=a.body.filter(b=>b!=="TABLE");
@@ -141,6 +142,23 @@ const PROVIDERS={
    const r=await SAMPLE.json(`사내 규정 중 아래 질문이 어느 규정 소관인지 고르세요.\n\n${list}\n\n질문: ${q}\n\nJSON만 출력: {"key":"위 목록의 키","reason":"한 문장"}`,{modelTier:"quick"});
    return r.key;},
   answer:(g,q,turns)=>SAMPLE.json(turns,{cache:false})},
+ /* Gemini 실시간 응답. 실패하면 준비된 답변(demo)으로 자동 전환한다 */
+ gemini:{
+  async route(q){return DEMO_ROUTES[demoNorm(q)]||bestGroup(q);},
+  async answer(g,q,turns){
+   const head=groupHead(g);
+   try{
+    const corpus=retrieve(g,q).map(artText).join("\n\n---\n\n");
+    const guide=docsOf(g).filter(k=>D[k].loaded).map(ownerPrompt).filter(Boolean).join("\n\n");
+    const text=await geminiGenerate(geminiSystemPrompt(head,corpus,guide),q,state.turns.slice(-4));
+    const refused=text.replace(/\s/g,"").includes(GEMINI_REFUSAL.replace(/\s/g,""));
+    return{answer:text,markdown:true,source:"gemini",
+     citations:refused?[]:citationsFromText(g,text),related:[],needsOwner:false,ownerQuestion:""};
+   }catch(e){
+    console.warn("Gemini 호출 실패 → 준비된 답변으로 전환:",e);
+    const fb=await PROVIDERS.demo.answer(g,q,turns);
+    return{...fb,fallback:String(e&&e.message||e)};
+   }}},
  demo:{
   async route(q){await demoDelay();return DEMO_ROUTES[demoNorm(q)]||bestGroup(q);},
   async answer(g,q){
@@ -157,7 +175,10 @@ const PROVIDERS={
      :"시연 모드에서는 준비된 질문에만 AI가 답합니다. 이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요.",
     citations:top.map(a=>({id:a.id,quote:bestLine(a,q)})),related:[],needsOwner:false,ownerQuestion:""};}}
 };
-async function provider(){if(settings.get().aiMode==="live"&&!TRIED)await readyP;return PROVIDERS[useLive()?"live":"demo"];}
+async function provider(){
+ if(useGemini())return PROVIDERS.gemini;
+ if(settings.get().aiMode==="live"&&!TRIED)await readyP;
+ return PROVIDERS[useLive()?"live":"demo"];}
 
 /* ---------- Sidebar ---------- */
 function curNav(){return {reg:"cats",soon:"cats"}[state.view]||state.view;}
@@ -185,8 +206,8 @@ function renderSidebar(){
 /* ---------- Header ---------- */
 function renderHeader(){
  const m=aiMode(),on=m!=="checking";
- const label={live:"● Online / RAG Engine Active",demo:"● Demo / 시연 모드",checking:"연결 확인 중"}[m];
- const tip={live:"AI 응답을 사용할 수 있습니다",demo:"사전 작성된 답변으로 AI 흐름을 시연합니다. 근거 조문 하이라이트는 실제 원문과 대조됩니다",checking:"AI 연결을 확인하고 있습니다"}[m];
+ const label={gemini:"● Gemini / 실시간 응답",live:"● Online / RAG Engine Active",demo:"● Demo / 시연 모드",checking:"연결 확인 중"}[m];
+ const tip={gemini:"Gemini로 실시간 답변합니다. 호출에 실패하면 준비된 답변으로 전환됩니다",live:"AI 응답을 사용할 수 있습니다",demo:"사전 작성된 답변으로 AI 흐름을 시연합니다. 근거 조문 하이라이트는 실제 원문과 대조됩니다",checking:"AI 연결을 확인하고 있습니다"}[m];
  $("#hd").innerHTML=`<h1>사내규정 AI 에이전트</h1>
   <span class="status ${on?"on":""} ${m}" title="${tip}"><span class="dot"></span>${label}</span>
   <div class="hd-r">
@@ -495,7 +516,9 @@ JSON만 출력하세요:
   const r=await (await provider()).answer(g,q,turns);
   const all=groupArts(g),multi=docsOf(g).filter(k=>D[k].loaded).length>1;
   const cits=(r.citations||[]).map(c=>{const a=all.find(x=>x.id===c.id);return a?{...c,docKey:a.docKey,label:`${a.n} ${a.h}`,docNo:D[a.docKey].no}:null;}).filter(Boolean);
-  box.innerHTML=(r.fromOwner?`<span class="ownerbadge">${esc(head.owner)} 답변 반영</span>`:"")+esc(r.answer||"").replace(/제(\d+)조/g,'<strong>제$1조</strong>');
+  box.innerHTML=(r.fromOwner?`<span class="ownerbadge">${esc(head.owner)} 답변 반영</span>`:"")
+   +(r.fallback?`<div class="fbnote">${IC.help}<span>실시간 AI 응답을 받지 못해 준비된 답변으로 안내합니다. (${esc(String(r.fallback).slice(0,60))})</span></div>`:"")
+   +(r.markdown?`<div class="md">${mdToHtml(r.answer||"")}</div>`:esc(r.answer||"").replace(/제(\d+)조/g,'<strong>제$1조</strong>'));
   if(r.stale)box.insertAdjacentHTML("afterbegin",`<div class="stale">${IC.help}<span><b>근거 조문이 개정되었습니다.</b> 이 답변은 개정 전 조문 기준일 수 있습니다. 오른쪽 현행 원문과 <button data-stalehist>개정 이력</button>을 확인하고, 필요하면 주관부서에 확인하세요.</span></div>`);
   box.querySelector("[data-stalehist]")?.addEventListener("click",()=>showHist(state.doc));
   askLog.add({q,key:g,needsOwner:!!r.needsOwner,user:me()?.name||""});

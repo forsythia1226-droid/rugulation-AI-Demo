@@ -3,3 +3,6 @@
 *.key
 node_modules/
 .DS_Store
+js/env.js
+.env.local
+!.env.example
