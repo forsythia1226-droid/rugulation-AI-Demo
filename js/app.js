@@ -244,7 +244,7 @@ function renderHome(){
    <section class="card box">
     <div class="bh"><span class="bi">${IC.bell}</span><h3>최근 규정 개정 공지</h3><button class="more" data-go="notice">전체 보기</button></div>
     <div class="nlist">${allNotices().slice(0,5).map(n=>`<button class="nrow" data-go="notice">
-     <span class="tnew">NEW</span><span class="nt">${esc(n.title)}</span>
+     <span class="nt">${esc(n.title)}</span><span class="tnew">NEW</span>
      <span class="nmeta">${esc(n.owner)} · ${esc(n.date)}</span></button>`).join("")}</div>
    </section>
   </div>

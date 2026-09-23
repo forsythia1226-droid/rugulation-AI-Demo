@@ -706,3 +706,12 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .acct-t em{font-size:10px;border:1px solid rgba(148,163,184,.3);border-radius:99px;padding:0 6px;color:#c7d2fe}
 /* 검색 카드 아이콘도 다른 카드와 동일하게 배경 없는 선 아이콘 */
 .hero .bi{background:transparent;color:var(--ac);width:auto;height:auto;border-radius:0}
+
+/* 홈 개정 공지: NEW 배지를 제목 뒤로, 제목 굵기는 FAQ 항목과 동일 */
+.nrow{grid-template-columns:1fr auto auto;gap:8px}
+.nrow .nt{font-weight:400;font-size:13.2px}
+.nrow .tnew{margin-right:0;vertical-align:0;flex-shrink:0}
+.nrow .nmeta{margin-left:8px}
+/* 검색바: 찾기 버튼을 우측·상하 8px 여백으로 */
+.hero .sbar{padding:8px 8px 8px 16px}
+.hero .btn{height:auto;align-self:stretch;border-radius:9px;padding:0 20px}
