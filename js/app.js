@@ -226,7 +226,7 @@ function renderHome(){
  const loadedFaq=FAQ.slice(0,5);
  v.innerHTML=`<div class="wrap home">
   <section class="card box catcard">
-   <div class="bh"><span class="bi">${IC.folder}</span><h3>카테고리별 규정</h3><button class="more" data-go="cats">전체 보기</button></div>
+   <div class="bh"><span class="bi">${IC.folder}</span><h3>카테고리별 규정</h3><button class="more" data-go="cats">더보기</button></div>
    <div class="catrow">${Object.entries(CATS).map(([c,x])=>
     `<button class="ctile" data-cat="${c}" title="${esc(x.d)}"><span class="cti">${CAT_IC[c]||IC.folder}</span><span class="ctn">${x.n}</span><span class="ctc">${ORDER.filter(k=>D[k].cat===c).length}<small>건</small></span></button>`).join("")}</div>
   </section>
@@ -238,11 +238,11 @@ function renderHome(){
   </section>
   <div class="grid2">
    <section class="card box">
-    <div class="bh"><span class="bi">${IC.help}</span><h3>자주 찾는 질문 TOP 5</h3><button class="more" data-go="faq">더 보기</button></div>
+    <div class="bh"><span class="bi">${IC.help}</span><h3>자주 찾는 질문 TOP 5</h3><button class="more" data-go="faq">더보기</button></div>
     <div>${loadedFaq.map(([q,k],i)=>faqBtn(q,k,i)).join("")}</div>
    </section>
    <section class="card box">
-    <div class="bh"><span class="bi">${IC.bell}</span><h3>최근 규정 개정 공지</h3><button class="more" data-go="notice">전체 보기</button></div>
+    <div class="bh"><span class="bi">${IC.bell}</span><h3>최근 규정 개정 공지</h3><button class="more" data-go="notice">더보기</button></div>
     <div class="nlist">${allNotices().slice(0,5).map(n=>`<button class="nrow" data-go="notice">
      <span class="nt">${esc(n.title)}</span><span class="tnew">NEW</span>
      <span class="nmeta">${esc(n.owner)} · ${esc(n.date)}</span></button>`).join("")}</div>
