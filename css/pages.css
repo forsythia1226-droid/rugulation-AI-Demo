@@ -725,3 +725,7 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .faq.top .rk,.home .faq.top .rk{background:var(--acs);color:#fff;font-weight:700}
 /* AI 아이콘은 오른쪽 여백이 비어 보여 시각적으로 2px 좁힘 */
 .hero .bh{gap:5px}
+
+/* 홈 공지 목록: 항목 제목을 카드 제목 글자와 같은 x에서 시작 */
+.nlist{padding-left:17px}
+.nrow{padding-left:0;padding-right:0}
