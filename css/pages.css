@@ -730,3 +730,7 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .nlist{padding-left:0}
 .nrow{padding-left:0;padding-right:0}
 .home .nrow{padding-left:0;padding-right:0}
+
+/* 카드 제목과 내용 사이 간격 (문의 내역·확인 요청 등) */
+.reqlist{margin-top:16px}
+.bh + .empty,.bh + .rv-list,.bh + .mg-files{margin-top:14px}
