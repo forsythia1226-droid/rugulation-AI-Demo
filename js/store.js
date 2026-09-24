@@ -68,7 +68,8 @@ const noticeStore={
 /* ---- 확인 요청 / 질의 로그 ---- */
 const escStore={
  list(){return ST.get("escalations",[]);},
- add(e){const l=escStore.list();l.unshift(Object.assign({id:Date.now().toString(36),status:"open",at:new Date().toISOString()},e));ST.set("escalations",l.slice(0,100));},
+ add(e){const l=escStore.list();l.unshift(Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),status:"open",at:new Date().toISOString()},e));ST.set("escalations",l.slice(0,100));},
+ remove(id){ST.set("escalations",escStore.list().filter(x=>x.id!==id));},
  answer(id,text,by){const l=escStore.list();const e=l.find(x=>x.id===id);if(!e)return null;
   e.status="answered";e.answer=text;e.answeredBy=by;e.answeredAt=new Date().toISOString();ST.set("escalations",l);return e;}
 };

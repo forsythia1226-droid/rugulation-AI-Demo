@@ -150,7 +150,7 @@ function renderMyReq(){
    <p class="q">${esc(e.q)}</p>
    ${e.need?`<p class="need">${esc(e.need)}</p>`:""}
    ${e.answer?`<div class="ans"><b>${esc(e.answeredBy||e.owner)} 답변</b>${esc(e.answer)}</div>`:""}
-   <div class="rq-act">${e.assignee?`<a class="cklink" href="${teamsLink(e)}" target="_blank" rel="noopener">Teams 대화 열기 →</a>`:""}${D[e.key]&&D[e.key].loaded?`<button class="cklink" data-reask="${e.id}">규정 창구에서 다시 묻기 →</button>`:""}</div></li>`).join("")}</ul>`
+   <div class="rq-act">${e.assignee?`<a class="cklink" href="${teamsLink(e)}" target="_blank" rel="noopener">Teams 대화 열기 →</a>`:""}${D[e.key]&&D[e.key].loaded?`<button class="cklink" data-reask="${e.id}">규정 창구에서 다시 묻기 →</button>`:""}<button class="cklink del" data-reqdel="${e.id}">삭제</button></div></li>`).join("")}</ul>`
    :`<p class="empty">아직 문의 내역이 없습니다. 위에서 문의를 보내거나, 규정 창구에서 AI가 "확인 요청" 버튼을 보여주면 이곳에 쌓입니다.</p>`}
   </section>
  </div>`;
@@ -166,6 +166,11 @@ function renderMyReq(){
   setTimeout(()=>teamsToast({...e,at:new Date().toISOString()}),700);
  };
  v.querySelectorAll("[data-reask]").forEach(b=>b.onclick=()=>{const e=mine.find(x=>x.id===b.dataset.reask);openGroup(D[e.key].group,e.q,D[e.docKey]?e.docKey:undefined);});
+ v.querySelectorAll("[data-reqdel]").forEach(b=>b.onclick=()=>{const e=mine.find(x=>x.id===b.dataset.reqdel);
+  if(!confirm(`이 문의를 삭제할까요?
+
+"${e.q}"`))return;
+  escStore.remove(e.id);renderHeader();renderMyReq();});
 }
 
 /* ---------- Teams 알림 시연 (토스트 + 채팅 창 팝업) ----------
