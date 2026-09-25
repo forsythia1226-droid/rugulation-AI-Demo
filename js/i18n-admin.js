@@ -96,3 +96,9 @@ Object.assign(DATA_EN,{
 "상황을 구체적으로 적어주세요. 예) 해외출장 중 현지 법인 차량을 이용하면 교통비 정산은 어떻게 하나요?":"Describe your situation. e.g. How do I settle transport costs if I use a local subsidiary's car on an overseas trip?"
 });
 Object.assign(DATA_EN,{"내가 남긴 규정 문의":"Inquiries I have sent","답변 도착":"Answers received"});
+
+/* 시연용으로 남겨 둔 문의 본문 (브라우저에 저장된 값이라 사전으로 대응한다) */
+Object.assign(DATA_EN,{
+"해외출장 시, 전결기준이 어떻게 될까?":"What are the approval limits for an overseas business trip?",
+"해외출장 시, 출장비 규정은 어떻게 되나요?":"What are the travel expense rules for an overseas business trip?"
+});

@@ -123,7 +123,7 @@ function renderChecklist(){
  * - 운영: 백엔드가 Microsoft Graph API 또는 Power Automate로 담당자 1:1 채팅/팀 채널에 자동 게시 */
 let reqSel="";
 const staffMail=s=>{const n=nameOnly(s||"");return n?`${encodeURIComponent(n)}@taihan.example`:"";};
-function teamsText(e){return `${t("[사내규정 문의]")} ${e.regNo} ${t(e.regName)}\n${t("문의자")}: ${t(e.dept)} ${t(e.user)}\n\n${e.q}\n\n- ${t("사내규정 AI 에이전트에서 전송")}`;}
+function teamsText(e){return `${t("[사내규정 문의]")} ${e.regNo} ${t(e.regName)}\n${t("문의자")}: ${t(e.dept)} ${t(e.user)}\n\n${t(e.q)}\n\n- ${t("사내규정 AI 에이전트에서 전송")}`;}
 function teamsLink(e){return `https://teams.microsoft.com/l/chat/0/0?users=${staffMail(e.assignee)}&message=${encodeURIComponent(teamsText(e))}`;}
 function renderMyReq(){
  const v=$("#view");v.className="";
@@ -147,7 +147,7 @@ function renderMyReq(){
    <div class="bh"><span class="bi">${IC.inbox}</span><h3>내 문의 내역</h3><span class="cnt">${mine.length}건</span></div>
    ${mine.length?`<ul class="reqlist">${mine.map(e=>`<li>
    <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 중"}</span><span class="pill src">${e.via==="direct"?"직접 문의":"AI 확인 요청"}</span><small>${esc(t(e.regName))} · ${esc(t(e.owner))}${e.assignee?" "+esc(t(nameOnly(e.assignee))):""} · ${new Date(e.at).toLocaleString(lang()==="en"?"en-US":"ko-KR")}</small></div>
-   <p class="q">${esc(e.q)}</p>
+   <p class="q">${esc(t(e.q))}</p>
    ${e.need?`<p class="need">${esc(e.need)}</p>`:""}
    ${e.answer?`<div class="ans"><b>${esc(t(e.answeredBy||e.owner))} ${t("답변")}</b>${esc(e.answer)}</div>`:""}
    <div class="rq-act">${e.assignee?`<a class="cklink" href="${teamsLink(e)}" target="_blank" rel="noopener">Teams 대화 열기 →</a>`:""}${D[e.key]&&D[e.key].loaded?`<button class="cklink" data-reask="${e.id}">규정 창구에서 다시 묻기 →</button>`:""}<button class="cklink del" data-reqdel="${e.id}">삭제</button></div></li>`).join("")}</ul>`
@@ -169,7 +169,7 @@ function renderMyReq(){
  v.querySelectorAll("[data-reqdel]").forEach(b=>b.onclick=()=>{const e=mine.find(x=>x.id===b.dataset.reqdel);
   if(!confirm(`${t("이 문의를 삭제할까요?")}
 
-"${e.q}"`))return;
+"${t(e.q)}"`))return;
   escStore.remove(e.id);renderHeader();renderMyReq();});
 }
 
@@ -181,7 +181,7 @@ function teamsToast(e){
  const t=document.createElement("div");t.className="tt";t.setAttribute("role","status");
  t.innerHTML=`<div class="tt-top"><span class="teams-logo">T</span><b>Microsoft Teams</b><span class="tt-demo">${t("시연")}</span><button class="tt-x" aria-label="${t("닫기")}">✕</button></div>
   <div class="tt-body"><span class="tt-av">AI</span><div><b>${t("사내규정 AI 에이전트")}</b><small>→ ${esc(t(who))}</small>
-   <p><b>${t("[사내규정 문의]")} ${esc(e.regNo)} ${esc(t(e.regName))}</b><br>${esc(t(e.dept))} ${esc(t(e.user))}: ${esc(e.q.length>60?e.q.slice(0,60)+"…":e.q)}</p></div></div>
+   <p><b>${t("[사내규정 문의]")} ${esc(e.regNo)} ${esc(t(e.regName))}</b><br>${esc(t(e.dept))} ${esc(t(e.user))}: ${esc((x=>x.length>60?x.slice(0,60)+"…":x)(t(e.q)))}</p></div></div>
   <div class="tt-act"><button class="tt-open">${t("보기")}</button><button class="tt-close">${t("닫기")}</button></div>
   <i class="tt-bar"></i>`;
  document.body.appendChild(t);
@@ -198,7 +198,7 @@ function teamsWindow(e){
   <div class="tw-top"><span class="teams-logo">T</span><b>${esc(t(who))}</b><small>Microsoft Teams · ${t("담당자 화면 (시연)")}</small><button class="tt-x" aria-label="${t("닫기")}">✕</button></div>
   <div class="tw-chat">
    <div class="tw-msg"><span class="tt-av">AI</span><div><div class="tw-meta"><b>${t("사내규정 AI 에이전트")}</b> ${time}</div>
-    <div class="teams-card"><b>${t("[사내규정 문의]")} ${esc(e.regNo)} ${esc(t(e.regName))}</b><p>${t("문의자")}: ${esc(t(e.dept))} ${esc(t(e.user))} · ${t("담당")}: ${esc(t(who))}</p><p class="tq">${esc(e.q)}</p>
+    <div class="teams-card"><b>${t("[사내규정 문의]")} ${esc(e.regNo)} ${esc(t(e.regName))}</b><p>${t("문의자")}: ${esc(t(e.dept))} ${esc(t(e.user))} · ${t("담당")}: ${esc(t(who))}</p><p class="tq">${esc(t(e.q))}</p>
      <div class="teams-btns"><span>${t("답변하기")}</span><span>${t("규정 원문 보기")}</span></div></div></div></div>
   </div>
   <div class="tw-in"><span>${t("새 메시지 입력")}</span></div>
