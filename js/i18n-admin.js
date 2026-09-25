@@ -73,3 +73,26 @@ Object.assign(DATA_EN,{
 "시연 모드에서는 준비된 질문에만 AI가 답합니다. 관련 조문을 찾았습니다.":"In demo mode the AI answers only prepared questions. Here are the related articles.",
 "시연 모드에서는 준비된 질문에만 AI가 답합니다. 이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요.":"In demo mode the AI answers only prepared questions, and no related article was found at this desk. Please check the contents list on the right."
 });
+
+/* 규정 문의 · Teams 알림 시연 · 인쇄본 */
+Object.assign(DATA_EN,{
+"[사내규정 문의]":"[Regulation inquiry]","문의자":"From","담당":"Owner","지침":"Guideline",
+"사내규정 AI 에이전트에서 전송":"Sent from the Regulation AI Agent",
+"사내규정 AI 에이전트":"Regulation AI Agent",
+"담당자 미지정":"No owner assigned",
+"규정과 질문을 모두 입력해 주세요.":"Please choose a regulation and write your question.",
+"이 문의를 삭제할까요?":"Delete this inquiry?",
+"님에게 Teams 알림을 보냈습니다. 답변이 오면 아래 내역에 표시됩니다.":" has been notified on Teams. Their answer will appear in the list below.",
+"Teams 대화 열기 →":"Open Teams chat →","규정 창구에서 다시 묻기 →":"Ask again at the regulation desk →","삭제":"Delete",
+"아직 문의 내역이 없습니다. 위에서 문의를 보내거나, 규정 창구에서 AI가 \"확인 요청\" 버튼을 보여주면 이곳에 쌓입니다.":"No inquiries yet. Send one above, or raise an escalation from the regulation desk.",
+"시연":"Demo","닫기":"Close","보기":"Open","답변하기":"Reply","규정 원문 보기":"View regulation",
+"새 메시지 입력":"Type a message","담당자 화면 (시연)":"owner's screen (demo)","Teams 채팅 미리보기":"Teams chat preview",
+"전송 시 담당자 Teams로 알림이 갑니다":"Sending notifies the owner on Teams",
+"시연 화면입니다. 운영 시에는 서버가 담당자 Teams로 이 메시지를 자동 전송하고, 담당자가 남긴 답변이 문의자의 규정 문의 내역에 표시됩니다.":"This is a demo. In production the server posts this message to the owner's Teams automatically, and the owner's reply appears in the requester's inquiry list.",
+"사내 한정 · 시연용 가상 조문입니다. 출력·저장본은 최신 개정이 반영되지 않을 수 있으니 시스템에서 최신본을 확인하십시오.":"Internal only · fictional articles for demonstration. A printed or saved copy may not reflect the latest revision; check the system for the current version.",
+"출력":"printed"
+});
+Object.assign(DATA_EN,{
+"상황을 구체적으로 적어주세요. 예) 해외출장 중 현지 법인 차량을 이용하면 교통비 정산은 어떻게 하나요?":"Describe your situation. e.g. How do I settle transport costs if I use a local subsidiary's car on an overseas trip?"
+});
+Object.assign(DATA_EN,{"내가 남긴 규정 문의":"Inquiries I have sent","답변 도착":"Answers received"});

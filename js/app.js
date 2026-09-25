@@ -220,7 +220,7 @@ function renderHeader(){
   <div class="hd-r">
    ${(()=>{const mine=escStore.list().filter(e=>e.user===me()?.name);
     const ans=mine.filter(e=>e.status==="answered").length;
-    return `<button class="hbtn${settings.get().notify&&ans?" new":""}" data-go="myreq" title="${ans?`답변 도착 ${ans}건`:"내가 남긴 규정 문의"}">${IC.inbox}<span>${t("내 문의")}${mine.length?` <b>${mine.length}</b>`:""}</span></button>`;})()}
+    return `<button class="hbtn${settings.get().notify&&ans?" new":""}" data-go="myreq" title="${ans?`${t("답변 도착")} ${ans}`:t("내가 남긴 규정 문의")}">${IC.inbox}<span>${t("내 문의")}${mine.length?` <b>${mine.length}</b>`:""}</span></button>`;})()}
    <button class="hbtn" data-go="settings" ${state.view==="settings"?'aria-current="page"':""}>${IC.gear}<span>${t("설정")}</span></button>
    ${(()=>{const cur=LANGS.find(([v])=>v===lang())||LANGS[0];
     return `<div class="langsel">
