@@ -96,10 +96,10 @@ async function renderManageDetail(p,k,tok){
   ${edit?`<h4 class="mg-h">개정 이력 등록</h4>
   <form class="mg-up" id="mgup">
    <div class="form mg-meta">
-    <label>구분<select id="mgkind">${["개정","제정","폐지","참고"].map(x=>`<option>${x}</option>`).join("")}</select></label>
+    <label>구분<select id="mgkind">${["개정","제정","폐지","참고"].map(x=>`<option value="${x}">${t(x)}</option>`).join("")}</select></label>
     <label>개정일<input id="mgdate" value="${new Date().toISOString().slice(0,10).replace(/-/g,".")}"></label>
     <label>시행일<input id="mgeff" value="${new Date().toISOString().slice(0,10).replace(/-/g,".")}"></label>
-    <label class="w3">개정 사유<input id="mgnote" placeholder="예: 제14조 야근 식대 한도 조정"></label>
+    <label class="w3">개정 사유<input id="mgnote" placeholder="${t("예: 제14조 야근 식대 한도 조정")}"></label>
    </div>
    ${artList.length?`<div class="rv-rows" id="rvrows"></div>
    <button type="button" class="ghost sm" id="rvadd">+ 바뀐 조문 추가</button>`:'<p class="sub">이 규정은 조문이 적재되지 않아 원본 파일과 개정 사유만 기록합니다.</p>'}
@@ -111,19 +111,19 @@ async function renderManageDetail(p,k,tok){
 
   <h4 class="mg-h">첨부 파일 <small>${files.length}건</small></h4>
   ${files.length?`<ul class="mg-files">${files.map(f=>`<li>
-   <span class="pill ${f.kind==="폐지"?"":"answered"}">${esc(f.kind)}</span>
-   <span class="mg-fn"><b>${esc(f.name)}</b><small>${fmtSize(f.size)} · ${esc(f.note||"-")} · 시행 ${esc(f.eff||"-")} · ${esc(f.by)} · ${new Date(f.at).toLocaleString("ko-KR")}</small></span>
-   <button class="ghost sm" data-fdl="${f.id}">다운로드</button>${edit?`<button class="ghost sm del" data-fdel="${f.id}">삭제</button>`:""}</li>`).join("")}</ul>`
+   <span class="pill ${f.kind==="폐지"?"":"answered"}">${esc(t(f.kind))}</span>
+   <span class="mg-fn"><b>${esc(f.name)}</b><small>${fmtSize(f.size)} · ${esc(t(f.note||"-"))} · ${t("시행")} ${esc(f.eff||"-")} · ${esc(t(f.by))} · ${new Date(f.at).toLocaleString(lang()==="en"?"en-US":"ko-KR")}</small></span>
+   <button class="ghost sm" data-fdl="${f.id}">${t("다운로드")}</button>${edit?`<button class="ghost sm del" data-fdel="${f.id}">${t("삭제")}</button>`:""}</li>`).join("")}</ul>`
    :'<p class="empty">아직 올라온 파일이 없습니다.</p>'}
  </section>`;
- if(admin)$("#mgsave").onclick=()=>{if($("#mg-main").value&&$("#mg-main").value===$("#mg-sub").value){alert("정 담당자와 부 담당자는 다른 사람이어야 합니다.");return;}
+ if(admin)$("#mgsave").onclick=()=>{if($("#mg-main").value&&$("#mg-main").value===$("#mg-sub").value){alert(t("정 담당자와 부 담당자는 다른 사람이어야 합니다."));return;}
   ownerStore.set(k,{main:$("#mg-main").value,sub:$("#mg-sub").value});
   const h=regStore.history();h.unshift({key:k,no:d.no,name:d.name,note:`담당자 지정: 정 ${$("#mg-main").value||"-"} / 부 ${$("#mg-sub").value||"-"}`,by:me().name,at:new Date().toISOString()});ST.set("regHistory",h);
   renderManage();};
  p.querySelectorAll("[data-fdl]").forEach(b=>b.onclick=async()=>{const f=await fileDB.get(b.dataset.fdl);
   const a=document.createElement("a");a.href=URL.createObjectURL(f.blob);a.download=f.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);});
  p.querySelectorAll("[data-fdel]").forEach(b=>b.onclick=async()=>{const f=await fileDB.get(b.dataset.fdel);
-  if(!confirm(`'${f.name}' 파일을 삭제할까요?`))return;await fileDB.del(f.id);
+  if(!confirm(`'${f.name}' ${t("파일을 삭제할까요?")}`))return;await fileDB.del(f.id);
   const h=regStore.history();h.unshift({key:k,no:d.no,name:d.name,note:`파일 삭제: ${f.name}`,by:me().name,at:new Date().toISOString()});ST.set("regHistory",h);
   renderManage();});
  if(!edit)return;
@@ -133,32 +133,36 @@ async function renderManageDetail(p,k,tok){
  drop.ondragleave=()=>drop.classList.remove("over");
  drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");if(e.dataTransfer.files[0]){input.files=e.dataTransfer.files;input.onchange();}};
  p.querySelectorAll("[data-vdel]").forEach(b=>b.onclick=()=>{const v=histStore.get(b.dataset.vdel);
-  if(!confirm(`${v.date} ${v.type} 이력을 삭제할까요? (현행 조문은 바뀌지 않습니다)`))return;
+  if(!confirm(`${v.date} ${t(v.type)} ${t("이력을 삭제할까요? (현행 조문은 바뀌지 않습니다)")}`))return;
   histStore.remove(v.id);logHist(k,`개정 이력 삭제: ${v.date} ${v.type}`);renderManage();});
  const rows=$("#rvrows");
  const lineOpts=id=>{const a=artList.find(x=>x.id===id);return `<option value="__new">(새 문단 신설)</option>`+(a?a.body.filter(b=>b!=="TABLE").map((b,i)=>{const v=t(b);return `<option value="${i}">${esc(v.length>60?v.slice(0,60)+"…":v)}</option>`;}).join(""):"");};
  const addRow=()=>{const r=document.createElement("div");r.className="rv-row";
-  r.innerHTML=`<div class="rv-sel"><select class="rv-art">${artList.map(a=>`<option value="${a.id}">${esc(a.n)}(${esc(a.h)})</option>`).join("")}</select>
+  r.innerHTML=`<div class="rv-sel"><select class="rv-art">${artList.map(a=>`<option value="${a.id}">${esc(t(a.n))}(${esc(t(a.h))})</option>`).join("")}</select>
    <select class="rv-line"></select><button type="button" class="ghost sm del rv-x">삭제</button></div>
    <div class="rv-pair"><label>개정 전<textarea class="rv-before" rows="2" readonly></textarea></label>
    <label>개정 후 <small>비워 두면 이 문단 삭제</small><textarea class="rv-after" rows="2"></textarea></label></div>`;
   const art=r.querySelector(".rv-art"),line=r.querySelector(".rv-line"),bf=r.querySelector(".rv-before"),af=r.querySelector(".rv-after");
-  const fill=()=>{const a=artList.find(x=>x.id===art.value),b=a.body.filter(x=>x!=="TABLE");const v=line.value==="__new"?"":b[+line.value]||"";bf.value=v;af.value=v;};
+  const fill=()=>{const a=artList.find(x=>x.id===art.value),b=a.body.filter(x=>x!=="TABLE");const v=line.value==="__new"?"":b[+line.value]||"";
+   bf.dataset.src=v;af.dataset.src=v;bf.value=t(v);af.value=t(v);};
   art.onchange=()=>{line.innerHTML=lineOpts(art.value);line.value=line.options.length>1?"0":"__new";fill();};
   line.onchange=fill;r.querySelector(".rv-x").onclick=()=>r.remove();
   rows.appendChild(r);art.onchange();};
  if(rows){addRow();$("#rvadd").onclick=addRow;}
  $("#mgup").onsubmit=async e=>{e.preventDefault();const f=input.files[0],err=$("#mgerr");err.hidden=true;
   const kind=$("#mgkind").value,note=$("#mgnote").value.trim(),eff=$("#mgeff").value.trim(),date=$("#mgdate").value.trim();
-  if(!note){err.textContent="개정 사유를 입력해 주세요.";err.hidden=false;return;}
-  const changes=rows?[...rows.querySelectorAll(".rv-row")].map(r=>({art:r.querySelector(".rv-art").value,before:r.querySelector(".rv-before").value.trim()||null,after:r.querySelector(".rv-after").value.trim()||null}))
+  if(!note){err.textContent=t("개정 사유를 입력해 주세요.");err.hidden=false;return;}
+  const changes=rows?[...rows.querySelectorAll(".rv-row")].map(r=>{
+    const af=r.querySelector(".rv-after"),src=(r.querySelector(".rv-before").dataset.src||"").trim(),typed=af.value.trim();
+    /* 화면에는 번역문을 보여주므로, 사용자가 고치지 않았으면 저장은 원문 그대로 한다 */
+    return{art:r.querySelector(".rv-art").value,before:src||null,after:(typed===t(src).trim()?src:typed)||null};})
    .filter(c=>(c.before||c.after)&&c.before!==c.after):[];
-  if(kind==="개정"&&!changes.length&&!f){err.textContent="바뀐 조문이나 원본 파일 중 하나는 있어야 합니다.";err.hidden=false;return;}
-  if(f&&f.size>FILE_MAX){err.textContent="파일당 10MB까지 올릴 수 있습니다.";err.hidden=false;return;}
+  if(kind==="개정"&&!changes.length&&!f){err.textContent=t("바뀐 조문이나 원본 파일 중 하나는 있어야 합니다.");err.hidden=false;return;}
+  if(f&&f.size>FILE_MAX){err.textContent=t("파일당 10MB까지 올릴 수 있습니다.");err.hidden=false;return;}
   let fileId=null;
   if(f){fileId=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
    try{await fileDB.put({id:fileId,key:k,name:f.name,size:f.size,type:f.type,blob:f,kind,note,eff,by:me().name,at:new Date().toISOString()});}
-   catch(x){err.textContent="저장 공간이 부족해 업로드하지 못했습니다.";err.hidden=false;return;}}
+   catch(x){err.textContent=t("저장 공간이 부족해 업로드하지 못했습니다.");err.hidden=false;return;}}
   let applied=0;
   if(changes.length&&$("#mgapply")?.checked){applied=applyRevision(k,changes,kind==="참고"?null:eff);regStore.save(D[k],`개정 반영: ${note}`,me().name);}
   histStore.add({key:k,date,eff,type:kind,reason:note,changes,fileId,fileName:f?f.name:"",by:me().name});

@@ -102,3 +102,21 @@ Object.assign(DATA_EN,{
 "해외출장 시, 전결기준이 어떻게 될까?":"What are the approval limits for an overseas business trip?",
 "해외출장 시, 출장비 규정은 어떻게 되나요?":"What are the travel expense rules for an overseas business trip?"
 });
+
+/* 관리자 페이지: 개정 이력 등록 폼 */
+Object.assign(DATA_EN,{
+"예: 제14조 야근 식대 한도 조정":"e.g. Article 14 overtime meal limit adjusted",
+"개정 이력 등록":"Add revision","구분":"Type","개정 사유":"Reason",
+"폐지":"Repealed","참고":"Reference",
+"개정 전":"Before","개정 후":"After","다운로드":"Download",
+"이 규정은 조문이 적재되지 않아 원본 파일과 개정 사유만 기록합니다.":"This regulation has no articles loaded, so only the source file and the reason are recorded.",
+"이 규정의 담당자만 개정 이력을 등록할 수 있습니다.":"Only this regulation's owner can add a revision.",
+"정 담당자와 부 담당자는 다른 사람이어야 합니다.":"The primary and backup owners must be different people.",
+"파일을 삭제할까요?":"— delete this file?",
+"이력을 삭제할까요? (현행 조문은 바뀌지 않습니다)":"— delete this revision record? (the current text is unchanged)",
+"개정 사유를 입력해 주세요.":"Please enter a reason for the revision.",
+"바뀐 조문이나 원본 파일 중 하나는 있어야 합니다.":"Add at least one changed article or a source file.",
+"파일당 10MB까지 올릴 수 있습니다.":"Each file may be up to 10MB.",
+"저장 공간이 부족해 업로드하지 못했습니다.":"Not enough storage space to upload the file."
+});
+Object.assign(DATA_EN,{"삭제할까요?":"delete this?","규정번호와 규정명은 필수입니다.":"Regulation number and name are required.","요청":"From"});

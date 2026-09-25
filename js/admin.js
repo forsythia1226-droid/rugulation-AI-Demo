@@ -35,7 +35,7 @@ function adminRegs(p){
  $("#anew").onclick=()=>{adminEdit="";adminRegs(p);};
  p.querySelectorAll("[data-aedit]").forEach(b=>b.onclick=()=>{adminEdit=b.dataset.aedit;adminRegs(p);});
  p.querySelectorAll("[data-adel]").forEach(b=>b.onclick=()=>{const k=b.dataset.adel;
-  if(!confirm(`${D[k].no} ${D[k].name}을(를) 삭제할까요?`))return;
+  if(!confirm(`${D[k].no} ${t(D[k].name)} — ${t("삭제할까요?")}`))return;
   regStore.remove(k,me().name);delete D[k];refreshOrder();renderSidebar();adminRegs(p);});
 }
 /* 조문 ↔ 편집용 텍스트 */
@@ -99,7 +99,7 @@ function adminEditor(p){
  $("#aprev").onclick=()=>{const o=read();const tmp=D.__prev;D.__prev=o;$("#aprevbox").innerHTML=`<div class="prevsheet">${docHTML("__prev")}</div>`;if(tmp)D.__prev=tmp;else delete D.__prev;};
  $("#asave").onclick=()=>{
   const o=read();
-  if(!o.no||!o.name){alert("규정번호와 규정명은 필수입니다.");return;}
+  if(!o.no||!o.name){alert(t("규정번호와 규정명은 필수입니다."));return;}
   const note=$("#f-note").value.trim()||(isNew?"신규 등록":"수정");
   regStore.save(o,note,me().name);D[o.key]=o;refreshOrder();
   if($("#f-notice").checked){const t=new Date();
@@ -133,7 +133,7 @@ function adminReq(p){
   <div class="bh"><span class="bi">${IC.inbox}</span><h3>확인 요청</h3></div>
   <p class="sub">직원이 직접 남긴 문의와 AI가 규정만으로 답하지 못한 질문입니다. 답변을 등록하면 요청자에게 전달되고, 해석 지침에 추가되어 같은 질문에는 창구에서 바로 안내됩니다.</p>
   ${l.length?`<ul class="reqlist">${l.map(e=>`<li>
-   <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 필요"}</span><span class="pill src">${e.via==="direct"?"직접 문의":"AI 확인 요청"}</span><small>${esc(e.regName)}${e.assignee?" · 담당 "+esc(e.assignee):""} · 요청 ${esc(e.dept||"")} ${esc(e.user||"")} · ${new Date(e.at).toLocaleString("ko-KR")}</small></div>
+   <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 필요"}</span><span class="pill src">${e.via==="direct"?"직접 문의":"AI 확인 요청"}</span><small>${esc(t(e.regName))}${e.assignee?" · "+t("담당")+" "+esc(t(e.assignee)):""} · ${t("요청")} ${esc(t(e.dept||""))} ${esc(t(e.user||""))} · ${new Date(e.at).toLocaleString(lang()==="en"?"en-US":"ko-KR")}</small></div>
    <p class="q">${esc(e.q)}</p>${e.need?`<p class="need">${esc(e.need)}</p>`:""}
    ${e.status==="answered"?`<div class="ans"><b>${esc(e.answeredBy)} 답변</b>${esc(e.answer)}</div>`:
    `<textarea class="admin-ta sm" data-ans="${e.id}" placeholder="주관부서 답변을 입력하세요"></textarea>
@@ -176,7 +176,7 @@ function adminHist(p){
  p.innerHTML=`<section class="card pad"><div class="bh"><span class="bi">${IC.file}</span><h3>규정 변경 이력</h3></div>
   <p class="sub">운영 시 조문 단위 버전(article_version)으로 저장되어, 과거 답변의 근거가 개정되었는지 추적할 수 있습니다.</p>
   ${h.length?`<div class="tblwrap"><table class="atbl"><thead><tr><th>일시</th><th>규정</th><th>내용</th><th>처리자</th></tr></thead><tbody>
-  ${h.map(x=>`<tr><td>${new Date(x.at).toLocaleString("ko-KR")}</td><td>${esc(x.no)} ${esc(short(x.name||""))}</td><td>${esc(x.note)}</td><td>${esc(x.by)}</td></tr>`).join("")}</tbody></table></div>`
+  ${h.map(x=>`<tr><td>${new Date(x.at).toLocaleString(lang()==="en"?"en-US":"ko-KR")}</td><td>${esc(x.no)} ${esc(t(short(x.name||"")))}</td><td>${esc(t(x.note))}</td><td>${esc(t(x.by))}</td></tr>`).join("")}</tbody></table></div>`
   :'<p class="empty">아직 변경 이력이 없습니다.</p>'}</section>`;
 }
 
