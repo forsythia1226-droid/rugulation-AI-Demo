@@ -44,6 +44,9 @@ const CAT_IC={
  "9":I('<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>')};
 
 /* 하위 화면 공통 제목 영역: 제목 + 한 줄 설명 + 오른쪽 보조 정보 (모든 화면 같은 규격) */
+/* 영어 모드에서 질문 라벨을 영어로 보여주되, 내부 처리는 한국어 원문으로 한다 */
+const qLabel=q=>isEN()&&EN_Q[q]?EN_Q[q]:q;
+
 const pageHead=(title,desc,right="")=>`<div class="ph page-h"><div><h2>${title}</h2><p>${desc}</p></div>${right?`<span class="cnt">${right}</span>`:""}</div>`;
 
 /* ---------- static content ---------- */
@@ -191,14 +194,14 @@ function renderSidebar(){
    <img class="sb-logo" src="assets/logo_w.svg" alt="taihan 사내규정 AI 에이전트">
    <button class="tog" id="tog" aria-label="${state.collapsed?"사이드바 펼치기":"사이드바 접기"}" aria-expanded="${!state.collapsed}">${state.collapsed?IC.popen:IC.pclose}</button>
   </div>
-  <nav class="sb-nav">${NAV.map(g=>`<div class="grp">${g.g}</div>`+g.items.map(([v,l,ic])=>
-   `<button class="nav" data-go="${v}" data-tip="${l}" ${cur===v?'aria-current="page"':""}>${ic}<span class="lbl">${l}</span></button>`).join("")).join("")}</nav>
+  <nav class="sb-nav">${NAV.map(g=>`<div class="grp">${t(g.g)}</div>`+g.items.map(([v,l,ic])=>
+   `<button class="nav" data-go="${v}" data-tip="${t(l)}" ${cur===v?'aria-current="page"':""}>${ic}<span class="lbl">${t(l)}</span></button>`).join("")).join("")}</nav>
   <div class="sb-bottom">
-   ${isAdmin()?`<button class="nav" data-go="admin" data-tip="시스템 관리" ${cur==="admin"?'aria-current="page"':""}>${IC.shield}<span class="lbl">시스템 관리</span></button>`:""}
+   ${isAdmin()?`<button class="nav" data-go="admin" data-tip="시스템 관리" ${cur==="admin"?'aria-current="page"':""}>${IC.shield}<span class="lbl">${t("시스템 관리")}</span></button>`:""}
   </div>
   <div class="sb-acct" data-tip="${esc(me()?.name||"")} · 로그아웃">
    <span class="av">${esc((me()?.name||"?")[0])}</span>
-   <span class="acct-t" title="${esc(me()?.dept||"")} ${esc(me()?.name||"")}"><b>${esc(me()?.name||"")}</b>${isAdmin()?'<em>관리자</em>':""}<small>${esc(me()?.dept||"")}</small></span>
+   <span class="acct-t" title="${esc(me()?.dept||"")} ${esc(me()?.name||"")}"><b>${esc(me()?.name||"")}</b>${isAdmin()?'<em>${t("관리자")}</em>':""}<small>${esc(me()?.dept||"")}</small></span>
    <button class="acct-out" id="logout" aria-label="로그아웃" title="로그아웃">${IC.logout}</button>
   </div>`;
  $("#logout").onclick=()=>{session.logout();go("home");};
@@ -210,14 +213,20 @@ function renderHeader(){
  const m=aiMode(),on=m!=="checking";
  const label={gemini:"● Gemini / 실시간 응답",live:"● Online / RAG Engine Active",demo:"● Demo / 시연 모드",checking:"연결 확인 중"}[m];
  const tip={gemini:"Gemini로 실시간 답변합니다. 호출에 실패하면 준비된 답변으로 전환됩니다",live:"AI 응답을 사용할 수 있습니다",demo:"사전 작성된 답변으로 AI 흐름을 시연합니다. 근거 조문 하이라이트는 실제 원문과 대조됩니다",checking:"AI 연결을 확인하고 있습니다"}[m];
- $("#hd").innerHTML=`<h1>사내규정 AI 에이전트</h1>
+ $("#hd").innerHTML=`<h1>${t("사내규정 AI 에이전트")}</h1>
   <span class="status ${on?"on":""} ${m}" title="${tip}"><span class="dot"></span>${label}</span>
   <div class="hd-r">
    ${(()=>{const mine=escStore.list().filter(e=>e.user===me()?.name);
     const ans=mine.filter(e=>e.status==="answered").length;
-    return `<button class="hbtn${settings.get().notify&&ans?" new":""}" data-go="myreq" title="${ans?`답변 도착 ${ans}건`:"내가 남긴 규정 문의"}">${IC.inbox}<span>내 문의${mine.length?` <b>${mine.length}</b>`:""}</span></button>`;})()}
-   <button class="hbtn" data-go="settings" ${state.view==="settings"?'aria-current="page"':""}>${IC.gear}<span>설정</span></button>
+    return `<button class="hbtn${settings.get().notify&&ans?" new":""}" data-go="myreq" title="${ans?`답변 도착 ${ans}건`:"내가 남긴 규정 문의"}">${IC.inbox}<span>${t("내 문의")}${mine.length?` <b>${mine.length}</b>`:""}</span></button>`;})()}
+   <button class="hbtn" data-go="settings" ${state.view==="settings"?'aria-current="page"':""}>${IC.gear}<span>${t("설정")}</span></button>
+   <div class="langsw" role="group" aria-label="Language">${LANGS.map(([v,flag,label])=>`<button data-lang="${v}" aria-pressed="${lang()===v}" title="${label}"><span>${flag}</span>${v==="ko"?"KO":"EN"}</button>`).join("")}</div>
   </div>`;
+ bindLang();
+}
+
+function bindLang(){
+ document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{if(lang()===b.dataset.lang)return;setLang(b.dataset.lang);document.documentElement.lang=b.dataset.lang;go(state.view);});
 }
 
 /* ---------- Home ---------- */
@@ -226,23 +235,23 @@ function renderHome(){
  const loadedFaq=FAQ.slice(0,5);
  v.innerHTML=`<div class="wrap home">
   <section class="card box catcard">
-   <div class="bh"><span class="bi">${IC.folder}</span><h3>카테고리별 규정</h3><button class="more" data-go="cats">더보기</button></div>
+   <div class="bh"><span class="bi">${IC.folder}</span><h3>${t("카테고리별 규정")}</h3><button class="more" data-go="cats">${t("더보기")}</button></div>
    <div class="catrow">${Object.entries(CATS).map(([c,x])=>
     `<button class="ctile" data-cat="${c}" title="${esc(x.d)}"><span class="cti">${CAT_IC[c]||IC.folder}</span><span class="ctn">${x.n}</span><span class="ctc">${ORDER.filter(k=>D[k].cat===c).length}<small>건</small></span></button>`).join("")}</div>
   </section>
   <section class="card hero">
-   <div class="bh"><span class="bi">${IC.ai}</span><h3>AI 규정 검색</h3></div>
-   <div class="sbar">${IC.search}<input id="q0" placeholder="궁금하신 내용을 적어주세요. 어느 규정인지 몰라도 됩니다." autocomplete="off"><button class="btn" id="go0">찾기</button></div>
-   <div class="qchips">${CHIPS.map(([l,q],i)=>`<button class="qchip" data-chip="${i}">${esc(l)}</button>`).join("")}</div>
+   <div class="bh"><span class="bi">${IC.ai}</span><h3>${t("AI 규정 검색")}</h3></div>
+   <div class="sbar">${IC.search}<input id="q0" placeholder="${t("궁금하신 내용을 적어주세요. 어느 규정인지 몰라도 됩니다.")}" autocomplete="off"><button class="btn" id="go0">${t("찾기")}</button></div>
+   <div class="qchips">${CHIPS.map(([l,q],i)=>`<button class="qchip" data-chip="${i}">${esc(isEN()&&EN_Q[q]?"#"+EN_Q[q]:l)}</button>`).join("")}</div>
    <p class="note" id="route"></p>
   </section>
   <div class="grid2">
    <section class="card box">
-    <div class="bh"><span class="bi">${IC.help}</span><h3>자주 찾는 질문 TOP 5</h3><button class="more" data-go="faq">더보기</button></div>
+    <div class="bh"><span class="bi">${IC.help}</span><h3>${t("자주 찾는 질문 TOP 5")}</h3><button class="more" data-go="faq">${t("더보기")}</button></div>
     <div>${loadedFaq.map(([q,k],i)=>faqBtn(q,k,i)).join("")}</div>
    </section>
    <section class="card box">
-    <div class="bh"><span class="bi">${IC.bell}</span><h3>최근 규정 개정 공지</h3><button class="more" data-go="notice">더보기</button></div>
+    <div class="bh"><span class="bi">${IC.bell}</span><h3>${t("최근 규정 개정 공지")}</h3><button class="more" data-go="notice">${t("더보기")}</button></div>
     <div class="nlist">${allNotices().slice(0,5).map(n=>`<button class="nrow" data-go="notice">
      <span class="nt">${esc(n.title)}</span><span class="tnew">NEW</span>
      <span class="nmeta">${esc(n.owner)} · ${esc(n.date)}</span></button>`).join("")}</div>
@@ -256,7 +265,7 @@ function renderHome(){
  syncAvail();
 }
 function faqBtn(q,k,i){
- return `<button class="faq${i<3?" top":""}" data-faq="${esc(q)}" data-key="${k}"><span class="rk">${i+1}</span><span><span class="ft">${esc(q)}</span><small>${D[k].no} ${esc(short(D[k].name))}</small></span></button>`;
+ return `<button class="faq${i<3?" top":""}" data-faq="${esc(q)}" data-key="${k}"><span class="rk">${i+1}</span><span><span class="ft">${esc(qLabel(q))}</span><small>${D[k].no} ${esc(short(D[k].name))}</small></span></button>`;
 }
 function noticeCard(n,ni){
  return `<div class="ntc"><h4><span class="tnew">NEW</span>[공지] ${esc(n.title)}</h4>
@@ -296,7 +305,7 @@ function renderCats(){
  inCat.filter(k=>!D[k].parent).sort(byNo).forEach(k=>{rows.push(k);inCat.filter(x=>D[x].parent===k).sort(byNo).forEach(x=>rows.push(x));});
  inCat.forEach(k=>{if(!rows.includes(k))rows.push(k);});
  v.innerHTML=`<div class="wrap page">
-  ${pageHead("카테고리별 규정","업무분류를 선택하면 해당 분류의 규정과 하위지침을 볼 수 있습니다.",`등록 규정 <b>${ORDER.length}</b>건`)}
+  ${pageHead(t("카테고리별 규정"),t("업무분류를 선택하면 해당 분류의 규정과 하위지침을 볼 수 있습니다."),`${t("등록 규정")} <b>${ORDER.length}</b>${t("건")}`)}
   <section class="card pad">
    <div class="cats">${Object.entries(CATS).map(([c,x])=>
     `<button data-catsel="${c}" aria-pressed="${c===state.cat}">${x.n}<span class="n">${ORDER.filter(k=>D[k].cat===c).length}</span></button>`).join("")}</div>
@@ -317,17 +326,17 @@ function faqAnswer(q,k){
  const a=DEMO_ANSWERS[demoNorm(q)];if(!a)return null;
  const all=groupArts(D[k].group);
  const refs=[...new Set(a.citations.map(c=>{const x=all.find(y=>y.id===c.id);return x?`${x.n} ${x.h}`:null;}).filter(Boolean))];
- return{text:a.answer,refs};
+ return{text:isEN()&&EN_A[q]?EN_A[q]:a.answer,refs};
 }
 function renderFaq(){
  const v=$("#view");v.className="";
  const items=FAQ.map(([q,k],i)=>({q,k,i}));
  v.innerHTML=`<div class="wrap page faqpage">
-  ${pageHead("자주 찾는 질문","질문을 누르면 답변과 근거 조문을 바로 확인할 수 있습니다.",`질문 <b>${FAQ.length}</b>개`)}
+  ${pageHead(t("자주 찾는 질문"),t("질문을 누르면 답변과 근거 조문을 바로 확인할 수 있습니다."),`${t("질문")} <b>${FAQ.length}</b>`)}
   <section class="card faqbox">
    <div class="faqacc">${items.map(({q,k,i})=>{const o=faqUI.open.has(i),a=o?faqAnswer(q,k):null;return `<div class="fq${o?" open":""}">
     <button class="fqh" data-fq="${i}" aria-expanded="${o}"><span class="rk${i<3?" hot":""}">${i+1}</span>
-     <span class="fqt"><span class="ft">${esc(q)}</span><span class="fqtag">${esc(D[k].no)} ${esc(short(D[k].name))}</span></span>
+     <span class="fqt"><span class="ft">${esc(qLabel(q))}</span><span class="fqtag">${esc(D[k].no)} ${esc(short(D[k].name))}</span></span>
      <span class="fqi" aria-hidden="true">${I('<path d="m6 9 6 6 6-6"/>')}</span></button>
     ${o?`<div class="fqa">${a?`<p>${esc(a.text).replace(/제(\d+)조/g,'<strong>제$1조</strong>')}</p>
      ${a.refs.length?`<p class="fqref"><b>근거</b>${a.refs.map(r=>`<span>${esc(r)}</span>`).join("")}</p>`:""}`:`<p class="mu">준비된 답변이 없습니다. 규정 창구에서 확인해 주세요.</p>`}
@@ -347,7 +356,7 @@ function renderNotice(){
  const v=$("#view");v.className="";
  const ns=allNotices();
  v.innerHTML=`<div class="wrap page ntcpage">
-  ${pageHead("최근 규정 개정 공지","개정된 조문으로 바로 이동해 바뀐 문장을 확인할 수 있습니다.",`공지 <b>${ns.length}</b>건`)}
+  ${pageHead(t("최근 규정 개정 공지"),t("개정된 조문으로 바로 이동해 바뀐 문장을 확인할 수 있습니다."),`${t("공지")} <b>${ns.length}</b>`)}
   <div class="tl">${ns.map((n,ni)=>{const d=noticeDate(n);return `<article class="tl-i">
    <div class="tl-d"><b>${esc(d.md)}</b><small>${esc(d.y)}</small></div>
    <div class="tl-dot"></div>
@@ -391,21 +400,21 @@ function renderWorkspace(){
  v.innerHTML=`<div class="crumb"><button data-go="cats">카테고리별 규정</button><span>›</span><span>${CATS[head.cat].n}</span><span>›</span><b id="crumbDoc">${esc(D[state.doc].no)} ${esc(D[state.doc].name)}</b><span class="eff" id="crumbEff">시행 ${esc(D[state.doc].effective)}</span></div>
  <div class="ws">
   <section class="card pane">
-   <div class="pbar"><span class="bi">${IC.chat}</span><h3>AI 규정 상담</h3><span class="ow">주관 ${esc(head.owner)}</span></div>
+   <div class="pbar"><span class="bi">${IC.chat}</span><h3>${t("AI 규정 상담")}</h3><span class="ow">${t("주관")} ${esc(head.owner)}</span></div>
    <div class="thread" id="thread"><div class="starter" id="starter">
     <p>${esc(D[state.doc].blurb||head.blurb||"")}${ds.length>1?` 본규정과 하위지침을 함께 검색합니다.`:""}</p>
-    ${((D[state.doc].starters&&D[state.doc].starters.length?D[state.doc]:head).starters||[]).map(s=>`<button class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("")}
+    ${((D[state.doc].starters&&D[state.doc].starters.length?D[state.doc]:head).starters||[]).map(s=>`<button class="chip" data-ask="${esc(s)}">${esc(qLabel(s))}</button>`).join("")}
    </div></div>
    <div class="composer">
-    <div class="cin"><textarea id="qin" rows="1" placeholder="상황을 구체적으로 적을수록 정확합니다"></textarea><button class="send" id="send">질문</button></div>
-    <p class="hint" id="hint">답변의 근거 조문을 누르면 오른쪽 원문에서 해당 문장을 표시합니다.</p>
+    <div class="cin"><textarea id="qin" rows="1" placeholder="${t("상황을 구체적으로 적을수록 정확합니다")}"></textarea><button class="send" id="send">${t("질문")}</button></div>
+    <p class="hint" id="hint">${t("답변의 근거 조문을 누르면 오른쪽 원문에서 해당 문장을 표시합니다.")}</p>
    </div>
   </section>
   <section class="card pane pane-doc">
-   <div class="doc-head"><button class="dtab" id="docTab" data-tab="${state.doc}" aria-current="true">${docTabLabel(state.doc)}</button><button class="dtab htab" id="histTab" aria-current="false">개정 이력<small>${histStore.list(state.doc).length}건</small></button>
-    <div class="doctools">${annexOf(g)?`<button class="tocbtn annexbtn" id="annexBtn" aria-pressed="false">${IC.list}<span>${esc(annexOf(g).title)}</span></button>`:""}<button class="tocbtn" id="tocBtn">조문 목차</button>
-     <button class="tocbtn icon" id="prtBtn" title="현재 규정 인쇄">${IC.print}<span>인쇄</span></button>
-     <button class="tocbtn icon" id="dlBtn" title="현재 규정 원문 다운로드">${IC.down}<span>다운로드</span></button></div></div>
+   <div class="doc-head"><button class="dtab" id="docTab" data-tab="${state.doc}" aria-current="true">${docTabLabel(state.doc)}</button><button class="dtab htab" id="histTab" aria-current="false">${t("개정 이력")}<small>${histStore.list(state.doc).length}</small></button>
+    <div class="doctools">${annexOf(g)?`<button class="tocbtn annexbtn" id="annexBtn" aria-pressed="false">${IC.list}<span>${esc(annexOf(g).title)}</span></button>`:""}<button class="tocbtn" id="tocBtn">${t("조문 목차")}</button>
+     <button class="tocbtn icon" id="prtBtn" title="현재 규정 인쇄">${IC.print}<span>${t("인쇄")}</span></button>
+     <button class="tocbtn icon" id="dlBtn" title="현재 규정 원문 다운로드">${IC.down}<span>${t("다운로드")}</span></button></div></div>
    <div class="doc-scroll" id="docScroll">${docHTML(state.doc)}</div>
   </section>
  </div>`;
@@ -488,7 +497,7 @@ async function ask(q){
  if(state.busy)return;
  $("#starter")?.remove();bubble("me",esc(q));
  state.busy=true;$("#send").disabled=true;
- const holder=bubble("ai",`<span class="thinking dots">근거 조문을 찾는 중</span>`),box=holder.querySelector(".bub");
+ const holder=bubble("ai",`<span class="thinking dots">${t("근거 조문을 찾는 중")}</span>`),box=holder.querySelector(".bub");
  const g=state.group,head=groupHead(g);
  const corpus=retrieve(g,q).map(artText).join("\n\n---\n\n");
  const others=ORDER.filter(k=>D[k].loaded&&D[k].group!==g&&!D[k].parent).map(k=>`${k}: ${D[k].no} ${D[k].name}`).join("\n");
@@ -517,9 +526,10 @@ JSON만 출력하세요:
  const turns=[{role:"user",content:instruction}];
  state.turns.slice(-4).forEach(t=>turns.push(t));turns.push({role:"user",content:q});
  try{
-  const r=await (await provider()).answer(g,q,turns);
+  let r=await (await provider()).answer(g,q,turns);
   const all=groupArts(g),multi=docsOf(g).filter(k=>D[k].loaded).length>1;
   const cits=(r.citations||[]).map(c=>{const a=all.find(x=>x.id===c.id);return a?{...c,docKey:a.docKey,label:`${a.n} ${a.h}`,docNo:D[a.docKey].no}:null;}).filter(Boolean);
+  if(isEN()&&EN_A[q]&&!r.markdown)r={...r,answer:EN_A[q]};
   box.innerHTML=(r.fromOwner?`<span class="ownerbadge">${esc(head.owner)} 답변 반영</span>`:"")
    +(r.fallback?`<div class="fbnote">${IC.help}<span>실시간 AI 응답을 받지 못해 준비된 답변으로 안내합니다. (${esc(String(r.fallback).slice(0,60))})</span></div>`:"")
    +(r.markdown?`<div class="md">${mdToHtml(r.answer||"")}</div>`:esc(r.answer||"").replace(/제(\d+)조/g,'<strong>제$1조</strong>'));
@@ -565,7 +575,7 @@ JSON만 출력하세요:
 }
 
 /* ---------- routing ---------- */
-function syncAvail(){const h=$("#hint");if(h&&aiMode()==="demo")h.textContent="시연 모드 · 준비된 질문에 AI가 답합니다. 근거 조문을 누르면 오른쪽 원문에서 해당 문장을 표시합니다.";}
+function syncAvail(){const h=$("#hint");if(h&&aiMode()==="demo")h.textContent=t("시연 모드 · 준비된 질문에 AI가 답합니다. 근거 조문을 누르면 오른쪽 원문에서 해당 문장을 표시합니다.");}
 const me=()=>session.get();
 const isAdmin=()=>me()?.role==="admin";
 function go(v){

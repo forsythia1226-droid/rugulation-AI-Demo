@@ -736,3 +736,11 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .bh + .empty,.bh + .rv-list,.bh + .mg-files{margin-top:14px}
 .cklink.del{color:var(--mu)}
 .cklink.del:hover{color:#dc2626}
+
+/* 언어 전환 버튼 */
+.langsw{display:inline-flex;border:1px solid var(--bd);border-radius:9px;overflow:hidden;margin-left:2px}
+.langsw button{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px;font-size:12.5px;font-weight:600;color:var(--mu);background:var(--card)}
+.langsw button+button{border-left:1px solid var(--bd)}
+.langsw button:hover{background:var(--card-2);color:var(--tx)}
+.langsw button[aria-pressed="true"]{background:var(--ac-50);color:var(--ac)}
+.langsw span{font-size:14px;line-height:1}
