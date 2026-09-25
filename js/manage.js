@@ -86,7 +86,7 @@ async function renderManageDetail(p,k,tok){
    <label>부 담당자${sel("mg-sub",o.sub)}</label>
    ${admin?`<div class="mg-save"><button class="save" id="mgsave">담당자 저장</button><span class="saved hidden" id="mgok">저장했습니다</span></div>`:""}
   </div>
-  <p class="sub">${admin?"규정 관리자만 담당자를 지정할 수 있습니다. 지정된 담당자는 이 규정의 개정 이력과 파일을 등록·삭제할 수 있습니다.":`담당자 지정은 규정 관리자가 합니다.${edit?" 회원님은 이 규정의 담당자입니다.":""}`}</p>
+  <p class="sub">${admin?t("규정 관리자만 담당자를 지정할 수 있습니다. 지정된 담당자는 이 규정의 개정 이력과 파일을 등록·삭제할 수 있습니다."):t("담당자 지정은 규정 관리자가 합니다.")+(edit?" "+t("회원님은 이 규정의 담당자입니다."):"")}</p>
 
   <h4 class="mg-h">개정 이력 <small>${vers.length}회</small><button class="more" data-open="${k}">규정 창구에서 보기</button></h4>
   ${vers.length?`<ul class="rv-list">${vers.map((v,vi)=>`<li><span class="rv-date">${esc(v.date)}</span><span class="ctype ${v.type==="제정"?"new":v.type==="폐지"?"del":"mod"}">${esc(v.type)}</span>${vi===0?'<span class="hv-cur">현행</span>':""}

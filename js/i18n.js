@@ -123,6 +123,14 @@ const dict=s=>{if(KO_EN[s]!==undefined)return KO_EN[s];
  {const si=stripIndex();if(si[s]!==undefined)return si[s];}
  return typeof byPattern==="function"?byPattern(s):undefined;};
 const t=s=>{if(!isEN())return s;const v=dict(s);return v!==undefined?v:s;};
+/* 편집기용: 여러 줄 원문을 줄 단위로 번역한다(장 제목 #, 표 행 |, 연계: 접두어 유지).
+ * 화면에는 번역문을 보여주고 원문은 data-src에 남겨, 고치지 않고 저장하면 원문이 그대로 유지된다. */
+const tMulti=src=>{const s0=String(src==null?"":src);if(!isEN())return s0;
+ return s0.split("\n").map(l=>{
+  const m=l.match(/^(#\s*)(.+)$/);if(m)return m[1]+t(m[2]);
+  const x=l.match(/^연계\s*:\s*(.+)$/);if(x)return t("연계")+": "+t(x[1]);
+  if(/^\s*\|.*\|\s*$/.test(l))return l.split("|").map(c=>c.trim()?c.replace(c.trim(),t(c.trim())):c).join("|");
+  return t(l);}).join("\n");};
 
 /* 숫자가 섞인 정형 문구는 규칙으로 변환한다 (조문 제목, 시행일 줄 등) */
 const PATTERNS=[

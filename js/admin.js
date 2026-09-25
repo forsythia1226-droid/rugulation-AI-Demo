@@ -47,9 +47,13 @@ function textToArts(txt,prefix,old){
  const oldArts=(old&&old.chapters||[]).flatMap(c=>c.arts);
  const chapters=[];let ch=null,art=null;
  const head=/^((?:제\d+조(?:의\d+)?)|(?:별표\d+))\s*\((.+)\)\s*$/;
+ /* 영문 표기(Article 7 (…) · Appendix 1 (…))도 한글 조문 번호로 되돌려 읽는다 */
+ const headEN=/^(?:Article\s+(\d+)(?:-(\d+))?|Appendix\s+(\d+))\s*\((.+)\)\s*$/;
  txt.split(/\r?\n/).forEach(raw=>{const l=raw.trim();if(!l)return;
   if(l.startsWith("#")){ch={t:l.replace(/^#+\s*/,""),arts:[]};chapters.push(ch);art=null;return;}
-  const m=l.match(head);
+  let m=l.match(head);
+  if(!m){const e=l.match(headEN);
+   if(e)m=[l,e[3]?`별표${e[3]}`:`제${e[1]}조${e[2]?"의"+e[2]:""}`,e[4]];}
   if(m){if(!ch){ch={t:"본문",arts:[]};chapters.push(ch);}
    const prev=oldArts.find(a=>a.n===m[1]);
    const num=m[1].startsWith("별표")?"B"+m[1].replace(/\D/g,""):m[1].replace(/^제(\d+)조(?:의(\d+))?$/,(x,a,b)=>b?a+"-"+b:a);
@@ -57,7 +61,8 @@ function textToArts(txt,prefix,old){
   if(!art)return;
   if(l.startsWith("|")){const cells=l.replace(/^\||\|$/g,"").split("|").map(c=>c.trim());
    if(!art.table){art.table={head:cells,rows:[]};art.body.push("TABLE");}else art.table.rows.push(cells);return;}
-  if(l.startsWith("연계:")){art.xref=l.slice(3).trim();return;}
+  const xr=l.match(/^(?:연계|Related)\s*:\s*(.*)$/);
+  if(xr){art.xref=xr[1].trim();return;}
   art.body.push(l);});
  return chapters;
 }
@@ -65,33 +70,35 @@ function adminEditor(p){
  const isNew=adminEdit==="",d=isNew?{no:"TES-",name:"",cat:"2",owner:"",effective:new Date().toISOString().slice(0,10).replace(/-/g,"."),blurb:"",starters:[],chapters:[]}:D[adminEdit];
  const parents=ORDER.filter(k=>!D[k].parent&&k!==adminEdit);
  p.innerHTML=`<section class="card pad">
-  <div class="bh"><span class="bi">${IC.edit}</span><h3>${isNew?"새 규정 등록":`${esc(d.no)} ${esc(d.name)} 수정`}</h3><button class="more" id="acancel">목록으로</button></div>
+  <div class="bh"><span class="bi">${IC.edit}</span><h3>${isNew?t("새 규정 등록"):`${esc(d.no)} ${esc(t(d.name))} ${t("수정")}`}</h3><button class="more" id="acancel">${t("목록으로")}</button></div>
   <div class="form">
-   <label>규정번호<input id="f-no" value="${esc(d.no)}" required></label>
-   <label class="w2">규정명<input id="f-name" value="${esc(d.name)}" placeholder="예: 인사규정_인사위원회 운영지침" required></label>
-   <label>업무분류<select id="f-cat">${Object.entries(CATS).map(([c,x])=>`<option value="${c}" ${c===d.cat?"selected":""}>${c}. ${x.n}</option>`).join("")}</select></label>
-   <label>상위 규정 (하위지침인 경우)<select id="f-parent"><option value="">없음 (본규정)</option>${parents.map(k=>`<option value="${k}" ${k===d.parent?"selected":""}>${esc(D[k].no)} ${esc(short(D[k].name))}</option>`).join("")}</select></label>
-   <label>주관부서<input id="f-owner" value="${esc(d.owner)}" placeholder="예: 인사팀"></label>
-   <label>시행일<input id="f-eff" value="${esc(d.effective)}" placeholder="2026.09.01"></label>
-   <label class="w3">한 줄 설명 (규정 창구 첫 화면)<input id="f-blurb" value="${esc(d.blurb||"")}"></label>
-   <label class="w3">예시 질문 (한 줄에 하나, 최대 3개)<textarea id="f-starters" rows="3">${esc((d.starters||[]).join("\n"))}</textarea></label>
-   <label class="w3">조문 본문
-    <small>규칙: <code># 제1장 총칙</code> 장 제목 · <code>제1조(목적)</code> 조문 제목 · 다음 줄부터 항 · <code>| 구분 | 금액 |</code> 표(첫 줄 머리글) · <code>연계: …</code> 다른 규정 안내</small>
-    <textarea id="f-body" class="admin-ta mono" rows="18">${esc(artsToText(d))}</textarea></label>
-   <label class="w2">개정 사유<input id="f-note" placeholder="예: 제14조 야근 식대 한도 조정" value=""></label>
-   <label class="chk"><input type="checkbox" id="f-notice" ${isNew?"":"checked"}> 개정 공지로 게시</label>
+   <label>${t("규정번호")}<input id="f-no" value="${esc(d.no)}" required></label>
+   <label class="w2">${t("규정명")}<input id="f-name" value="${esc(t(d.name))}" data-src="${esc(d.name)}" placeholder="${t("예: 인사규정_인사위원회 운영지침")}" required></label>
+   <label>${t("업무분류")}<select id="f-cat">${Object.entries(CATS).map(([c,x])=>`<option value="${c}" ${c===d.cat?"selected":""}>${c}. ${t(x.n)}</option>`).join("")}</select></label>
+   <label>${t("상위 규정 (하위지침인 경우)")}<select id="f-parent"><option value="">${t("없음 (본규정)")}</option>${parents.map(k=>`<option value="${k}" ${k===d.parent?"selected":""}>${esc(D[k].no)} ${esc(t(short(D[k].name)))}</option>`).join("")}</select></label>
+   <label>${t("주관부서")}<input id="f-owner" value="${esc(t(d.owner))}" data-src="${esc(d.owner)}" placeholder="${t("예: 인사팀")}"></label>
+   <label>${t("시행일")}<input id="f-eff" value="${esc(d.effective)}" placeholder="2026.09.01"></label>
+   <label class="w3">${t("한 줄 설명 (규정 창구 첫 화면)")}<input id="f-blurb" value="${esc(t(d.blurb||""))}" data-src="${esc(d.blurb||"")}"></label>
+   <label class="w3">${t("예시 질문 (한 줄에 하나, 최대 3개)")}<textarea id="f-starters" rows="3" data-src="${esc((d.starters||[]).join("\n"))}">${esc(tMulti((d.starters||[]).join("\n")))}</textarea></label>
+   <label class="w3">${t("조문 본문")}
+    <small>${t("규칙:")} <code># ${t("제1장 총칙")}</code> ${t("장 제목")} · <code>${t("제1조(목적)")}</code> ${t("조문 제목 · 다음 줄부터 항")} · <code>| ${t("구분")} | ${t("금액")} |</code> ${t("표(첫 줄 머리글)")} · <code>${t("연계")}: …</code> ${t("다른 규정 안내")}</small>
+    <textarea id="f-body" class="admin-ta mono" rows="18" data-src="${esc(artsToText(d))}">${esc(tMulti(artsToText(d)))}</textarea></label>
+   <label class="w2">${t("개정 사유")}<input id="f-note" placeholder="${t("예: 제14조 야근 식대 한도 조정")}" value=""></label>
+   <label class="chk"><input type="checkbox" id="f-notice" ${isNew?"":"checked"}> ${t("개정 공지로 게시")}</label>
   </div>
-  <div class="formbar"><button class="save" id="asave">${isNew?"등록":"저장"}</button><button class="ghost" id="aprev">미리보기</button><span class="saved hidden" id="aok"></span></div>
+  <div class="formbar"><button class="save" id="asave">${isNew?t("등록"):t("저장")}</button><button class="ghost" id="aprev">${t("미리보기")}</button><span class="saved hidden" id="aok"></span></div>
   <div id="aprevbox"></div>
  </section>`;
+ /* 영문 모드에서는 화면에만 번역문을 보여주므로, 고치지 않은 칸은 data-src의 원문으로 저장한다 */
+ const srcVal=el=>{const v=el.value,src=el.dataset.src||"";return v===tMulti(src)?src:v;};
  const read=()=>{
-  const no=$("#f-no").value.trim(),name=$("#f-name").value.trim();
+  const no=$("#f-no").value.trim(),name=srcVal($("#f-name")).trim();
   const prefix=!isNew&&arts(adminEdit)[0]?arts(adminEdit)[0].id.replace(/-[^-]+(-\d+)?$/,""):no.replace(/^TES-/,"").replace(/-/g,"");
-  const chapters=textToArts($("#f-body").value,prefix,isNew?null:d);
+  const chapters=textToArts(srcVal($("#f-body")),prefix,isNew?null:d);
   const parent=$("#f-parent").value||undefined;
   let key=isNew?no:adminEdit;if(isNew)while(D[key])key+="*";
-  const o=Object.assign({},isNew?{}:d,{key,no,name,cat:$("#f-cat").value,owner:$("#f-owner").value.trim(),effective:$("#f-eff").value.trim(),
-   blurb:$("#f-blurb").value.trim(),starters:$("#f-starters").value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,3),
+  const o=Object.assign({},isNew?{}:d,{key,no,name,cat:$("#f-cat").value,owner:srcVal($("#f-owner")).trim(),effective:$("#f-eff").value.trim(),
+   blurb:srcVal($("#f-blurb")).trim(),starters:srcVal($("#f-starters")).split("\n").map(x=>x.trim()).filter(Boolean).slice(0,3),
    chapters,loaded:chapters.some(c=>c.arts.length)});
   if(parent){o.parent=parent;o.group=(!isNew&&d.parent===parent&&d.group)?d.group:D[parent].group;}else{delete o.parent;o.group=key;}
   return o;};

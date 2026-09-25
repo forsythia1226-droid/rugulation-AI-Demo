@@ -120,3 +120,32 @@ Object.assign(DATA_EN,{
 "저장 공간이 부족해 업로드하지 못했습니다.":"Not enough storage space to upload the file."
 });
 Object.assign(DATA_EN,{"삭제할까요?":"delete this?","규정번호와 규정명은 필수입니다.":"Regulation number and name are required.","요청":"From"});
+Object.assign(DATA_EN,{
+"담당자 지정은 규정 관리자가 합니다.":"Owners are assigned by a regulation admin.",
+"회원님은 이 규정의 담당자입니다.":"You are an owner of this regulation."
+});
+
+/* 시연용 담당자 명단 (전 팀) */
+Object.assign(DATA_EN,{
+"최민호":"Choi Min-ho","윤하늘":"Yoon Ha-neul","오세린":"Oh Se-rin","임도현":"Im Do-hyun",
+"배준영":"Bae Jun-young","송재원":"Song Jae-won","남궁현":"Namgung Hyun","신아름":"Shin A-reum",
+"황보라":"Hwang Bo-ra","구하은":"Koo Ha-eun","양소희":"Yang So-hee","류시아":"Ryu Si-a",
+"차유나":"Cha Yu-na","엄지수":"Eom Ji-su",
+"책임":"Senior Researcher","선임":"Researcher"
+});
+
+/* 시스템 관리: 규정 편집기 */
+Object.assign(DATA_EN,{
+"새 규정 등록":"New regulation","수정":"— edit","목록으로":"Back to list",
+"규정번호":"Number","규정명":"Regulation name","업무분류":"Category",
+"상위 규정 (하위지침인 경우)":"Parent regulation (for a guideline)","없음 (본규정)":"None (main regulation)",
+"주관부서":"Owning team","한 줄 설명 (규정 창구 첫 화면)":"One-line description (shown at the regulation desk)",
+"예시 질문 (한 줄에 하나, 최대 3개)":"Example questions (one per line, up to 3)",
+"조문 본문":"Article text","규칙:":"Format:","장 제목":"chapter heading",
+"조문 제목 · 다음 줄부터 항":"article heading · paragraphs on the lines below",
+"표(첫 줄 머리글)":"table (first row is the header)","다른 규정 안내":"cross-reference to another regulation",
+"예: 인사규정_인사위원회 운영지침":"e.g. HR Regulation_HR Committee Guideline","예: 인사팀":"e.g. Human Resources",
+"등록":"Create","저장":"Save","미리보기":"Preview",
+"규정번호·규정명·주관부서 검색":"Search by number, name or owning team"
+});
+Object.assign(DATA_EN,{"금액":"Amount","목적":"Purpose"});
