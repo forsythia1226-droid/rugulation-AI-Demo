@@ -3,7 +3,9 @@
  * - 규정 조문·개정 이력 등 규정 데이터 본문은 사내 원본이라 번역하지 않는다(영어 모드에서 안내 표시).
  * - 질문/답변: 영어 질문을 누르면 검증된 한국어 답변과 같은 내용을 영어로 보여준다(EN_ANSWERS).
  */
-const LANGS=[["ko","🇰🇷","한국어"],["en","🇺🇸","English"]];
+const FLAG_KR=`<svg viewBox="0 0 30 20" class="flagimg" aria-hidden="true"><rect width="30" height="20" rx="2.5" fill="#fff" stroke="rgba(15,23,42,.14)" stroke-width=".8"/><path d="M15 6a4 4 0 0 1 0 8 4 4 0 0 0 0-8z" fill="#cd2e3a"/><path d="M15 6a4 4 0 0 0 0 8 4 4 0 0 1 0-8z" fill="#0047a0"/><g fill="#111" opacity=".85"><rect x="4" y="4.6" width="5" height=".9" transform="rotate(35 6.5 5)"/><rect x="4" y="6.2" width="5" height=".9" transform="rotate(35 6.5 6.6)"/><rect x="21" y="13.4" width="5" height=".9" transform="rotate(35 23.5 13.8)"/><rect x="21" y="15" width="5" height=".9" transform="rotate(35 23.5 15.4)"/></g></svg>`;
+const FLAG_US=`<svg viewBox="0 0 30 20" class="flagimg" aria-hidden="true"><rect width="30" height="20" rx="2.5" fill="#fff" stroke="rgba(15,23,42,.14)" stroke-width=".8"/><g fill="#b22234"><rect y="0" width="30" height="1.6"/><rect y="3.1" width="30" height="1.6"/><rect y="6.2" width="30" height="1.6"/><rect y="9.3" width="30" height="1.6"/><rect y="12.4" width="30" height="1.6"/><rect y="15.5" width="30" height="1.6"/><rect y="18.4" width="30" height="1.6"/></g><rect width="13" height="10.8" fill="#3c3b6e"/><g fill="#fff"><circle cx="2.6" cy="2.2" r=".7"/><circle cx="6.5" cy="2.2" r=".7"/><circle cx="10.4" cy="2.2" r=".7"/><circle cx="4.5" cy="4.6" r=".7"/><circle cx="8.4" cy="4.6" r=".7"/><circle cx="2.6" cy="7" r=".7"/><circle cx="6.5" cy="7" r=".7"/><circle cx="10.4" cy="7" r=".7"/><circle cx="4.5" cy="9.2" r=".7"/><circle cx="8.4" cy="9.2" r=".7"/></g></svg>`;
+const LANGS=[["ko",FLAG_KR,"한국어"],["en",FLAG_US,"English"]];
 const lang=()=>{try{return localStorage.getItem("rg:lang")==="en"?"en":"ko";}catch{return "ko";}};
 const setLang=v=>{try{localStorage.setItem("rg:lang",v);}catch{}};
 const isEN=()=>lang()==="en";
@@ -59,7 +61,73 @@ const KO_EN={
  /* 안내 */
  "규정 원문과 조문은 한국어 원본으로 제공됩니다.":"Regulation texts are provided in Korean, as issued."
 };
+Object.assign(KO_EN,{
+ /* 규정 목록·창구 */
+ "카테고리":"Category","규정번호":"No.","규정명":"Regulation","주관부서":"Owner team","시행일":"Effective date",
+ "조문":"Articles","미적재":"Not loaded","수정":"Edit","등록":"Register","저장":"Save","취소":"Cancel","닫기":"Close",
+ "본규정과 하위지침을 함께 검색합니다.":" Searches the regulation and its guidelines together.",
+ "이 규정은 아직 창구에 조문이 적재되지 않았습니다.":"This regulation's articles are not loaded in the desk yet.",
+ "카테고리로 돌아가기":"Back to categories",
+ /* 개정 이력 */
+ "신구대비":"Compare","개정 전":"Before","개정 후":"After","현행":"Current","조문 신설":"New article","표":"Table",
+ "이 시점 원문 보기":"View text as of this date","현행본 보기":"View current text","개정 이력으로":"Back to history",
+ "원본 파일 미등록":"No source file","효력 없음":"Not in force","등록된 개정 이력이 없습니다.":"No revision history yet.",
+ "총":"Total","회":"revisions","변경 조문":"Changed articles","등록":"By","시행":"Effective",
+ /* 위임전결기준표 */
+ "위임전결기준표":"Delegation Matrix","업무내용":"Task","결재권자":"Approver","유관조직":"Related teams",
+ "합의":"Consent","참조":"Copy","팀장":"Team leader","부문장":"Division head","대표이사":"CEO",
+ "결재라인":"Approval line","기안자":"Drafter","보고":"Report","근거":"Basis",
+ "업무 검색 (예: 출장, 접대비, 채용)":"Search tasks (e.g. travel, entertainment, hiring)",
+ "↔ 표를 좌우로 스크롤하면 합의·참조 부서까지 볼 수 있습니다 (Shift + 휠)":"↔ Scroll the table sideways to see consent and copy teams (Shift + wheel)",
+ /* 규정 문의 */
+ "질문":"Question","보내기":"Send","답변하기":"Reply","규정 원문 보기":"View regulation","보기":"View",
+ "시연":"Demo","새 메시지 입력":"Type a message",
+ /* 설정 */
+ "시연 데이터":"Demo data","초기화":"Reset","시연 데이터 초기화":"Reset demo data","저장했습니다":"Saved",
+ "프록시 주소":"Proxy URL","모델":"Model","API 키":"API key","연결 저장":"Save connection","연결 테스트":"Test connection",
+ /* 관리자 */
+ "관리자 페이지":"Owner Console","규정별 담당자를 지정하고 개정 이력과 원본 파일을 관리합니다.":"Assign owners and manage revision history and source files.",
+ "담당 규정":"My regulations","담당자":"Owners","정 담당자":"Primary owner","부 담당자":"Deputy owner","담당자 저장":"Save owners",
+ "담당자 미지정":"Unassigned","미지정":"Unassigned","내가 담당하는 규정만":"Only regulations I own",
+ "규정·담당팀 검색":"Search regulation or team","개정 이력 등록":"Add revision","첨부 파일":"Attachments",
+ "구분":"Type","개정일":"Revision date","개정 사유":"Reason","현행 조문에 반영":"Apply to current text","개정 공지로 게시":"Post as notice",
+ "+ 바뀐 조문 추가":"+ Add changed article","(새 문단 신설)":"(New paragraph)","비워 두면 이 문단 삭제":"Leave empty to delete",
+ "아직 올라온 파일이 없습니다.":"No files uploaded yet.",
+ /* 시스템 관리 */
+ "시스템 관리":"System Admin","규정 관리":"Regulations","해석 지침":"Owner guidance","확인 요청":"Escalations",
+ "질의 현황":"Query stats","변경 이력":"Change log","사용자·권한":"Users & roles","체계 점검":"System check",
+ "누적 질의":"Total queries","AI 즉시 답변":"Answered by AI","확인 요청 전환":"Escalation rate","미처리 확인 요청":"Open escalations",
+ "규정별 질의":"Queries by regulation","많이 묻는 질문":"Most asked","아직 질의가 없습니다.":"No queries yet.",
+ "+ 새 규정 등록":"+ New regulation","지침 저장":"Save guidance","답변 등록":"Submit answer","해석 지침에 추가":"Add to owner guidance",
+ /* 상태 */
+ "확인 필요":"Needs review","요청":"From","답변":"Answer",
+ "신구대비 ▾":"Compare ▾","신구대비 ▴":"Compare ▴","원본 파일 ↓":"Source file ↓",
+ "규정 창구에서 보기":"Open in regulation desk","규정 보기":"View regulation","조문 목차":"Contents",
+ "모두 확인 처리":"Mark all as read","전체":"All","검색":"Search","건":"","개":"","회":"","명":""
+});
 const t=s=>isEN()?(KO_EN[s]!==undefined?KO_EN[s]:s):s;
+
+/* ---- 화면 자동 번역: 렌더된 DOM에서 사전에 있는 문구만 정확히 일치할 때 교체 ----
+ * 규정 조문·개정 이력 본문 등 사전에 없는 문장은 그대로 둔다(원문 보존). */
+const I18N_ATTRS=["placeholder","title","aria-label","data-tip"];
+function translateTree(root){
+ if(!isEN()||!root||root.nodeType===Node.DOCUMENT_FRAGMENT_NODE&&!root.querySelectorAll)return;
+ if(root.nodeType===Node.TEXT_NODE){const k=root.nodeValue.trim();
+  if(k&&KO_EN[k]!==undefined)root.nodeValue=root.nodeValue.replace(k,KO_EN[k]);return;}
+ if(root.nodeType!==Node.ELEMENT_NODE)return;
+ const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const ns=[];
+ while(w.nextNode())ns.push(w.currentNode);
+ ns.forEach(n=>{const k=n.nodeValue.trim();if(k&&KO_EN[k]!==undefined)n.nodeValue=n.nodeValue.replace(k,KO_EN[k]);});
+ const els=[root,...root.querySelectorAll("*")];
+ els.forEach(el=>I18N_ATTRS.forEach(a=>{const v=el.getAttribute&&el.getAttribute(a);
+  if(v&&KO_EN[v.trim()]!==undefined)el.setAttribute(a,KO_EN[v.trim()]);}));
+}
+document.addEventListener("DOMContentLoaded",()=>{
+ document.documentElement.lang=lang();
+ const obs=new MutationObserver(ms=>{if(!isEN())return;ms.forEach(m=>m.addedNodes.forEach(translateTree));});
+ ["#view","#sb","#hd"].forEach(sel=>{const el=document.querySelector(sel);if(el)obs.observe(el,{childList:true,subtree:true});});
+ if(isEN())["#view","#sb","#hd"].forEach(sel=>translateTree(document.querySelector(sel)));
+});
 
 /* 영어 모드에서 보여줄 질문·답변 (한국어 검증 답변과 같은 내용) */
 const EN_Q={
