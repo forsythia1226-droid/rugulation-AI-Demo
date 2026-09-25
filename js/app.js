@@ -30,6 +30,8 @@ const IC={
  down:I('<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>'),
  print:I('<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>'),
  list:I('<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>'),
+ chev:I('<path d="m6 9 6 6 6-6"/>'),
+ check2:I('<path d="M20 6 9 17l-5-5"/>'),
  check:I('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>')
 };
 
@@ -220,13 +222,25 @@ function renderHeader(){
     const ans=mine.filter(e=>e.status==="answered").length;
     return `<button class="hbtn${settings.get().notify&&ans?" new":""}" data-go="myreq" title="${ans?`답변 도착 ${ans}건`:"내가 남긴 규정 문의"}">${IC.inbox}<span>${t("내 문의")}${mine.length?` <b>${mine.length}</b>`:""}</span></button>`;})()}
    <button class="hbtn" data-go="settings" ${state.view==="settings"?'aria-current="page"':""}>${IC.gear}<span>${t("설정")}</span></button>
-   <div class="langsw" role="group" aria-label="Language">${LANGS.map(([v,flag,label])=>`<button data-lang="${v}" aria-pressed="${lang()===v}" title="${label}"><span>${flag}</span>${v==="ko"?"KO":"EN"}</button>`).join("")}</div>
+   ${(()=>{const cur=LANGS.find(([v])=>v===lang())||LANGS[0];
+    return `<div class="langsel">
+     <button class="langbtn" id="langBtn" aria-haspopup="listbox" aria-expanded="false">
+      <span class="flag">${cur[1]}</span><span class="lname">${cur[2]}</span>${IC.chev}</button>
+     <ul class="langmenu" id="langMenu" role="listbox" hidden>${LANGS.map(([v,flag,label])=>
+      `<li><button data-lang="${v}" role="option" aria-selected="${lang()===v}"><span class="flag">${flag}</span>${label}${lang()===v?IC.check2:""}</button></li>`).join("")}</ul></div>`;})()}
   </div>`;
  bindLang();
 }
 
 function bindLang(){
- document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{if(lang()===b.dataset.lang)return;setLang(b.dataset.lang);document.documentElement.lang=b.dataset.lang;go(state.view);});
+ const btn=$("#langBtn"),menu=$("#langMenu");
+ if(!btn)return;
+ const close=()=>{menu.hidden=true;btn.setAttribute("aria-expanded","false");};
+ btn.onclick=e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;btn.setAttribute("aria-expanded",String(open));};
+ document.addEventListener("click",close,{once:true});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")close();},{once:true});
+ menu.querySelectorAll("[data-lang]").forEach(b=>b.onclick=e=>{e.stopPropagation();close();
+  if(lang()===b.dataset.lang)return;setLang(b.dataset.lang);document.documentElement.lang=b.dataset.lang;go(state.view);});
 }
 
 /* ---------- Home ---------- */

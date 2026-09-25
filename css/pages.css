@@ -744,3 +744,18 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .langsw button:hover{background:var(--card-2);color:var(--tx)}
 .langsw button[aria-pressed="true"]{background:var(--ac-50);color:var(--ac)}
 .langsw span{font-size:14px;line-height:1}
+
+/* 언어 선택 (셀렉터) */
+.langsel{position:relative;margin-left:2px}
+.langbtn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 9px 0 10px;border:1px solid var(--bd);border-radius:9px;background:var(--card);font-size:13px;font-weight:500;color:var(--tx-2)}
+.langbtn:hover{background:var(--card-2);border-color:var(--ac-200);color:var(--tx)}
+.langbtn svg{width:14px;height:14px;color:var(--mu-2)}
+.langbtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.flag{font-size:15px;line-height:1}
+.langmenu{position:absolute;top:calc(100% + 6px);right:0;min-width:150px;list-style:none;margin:0;padding:5px;background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 12px 28px rgba(15,23,42,.14);z-index:80}
+.langmenu button{display:flex;align-items:center;gap:8px;width:100%;padding:8px 9px;border-radius:7px;font-size:13px;color:var(--tx-2);text-align:left}
+.langmenu button:hover{background:var(--card-2);color:var(--tx)}
+.langmenu button[aria-selected="true"]{color:var(--ac);font-weight:600}
+.langmenu button svg{width:14px;height:14px;margin-left:auto;color:var(--ac)}
+@media (max-width:640px){.langbtn .lname{display:none}}
+.flag{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif}
