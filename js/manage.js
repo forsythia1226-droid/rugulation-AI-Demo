@@ -136,7 +136,7 @@ async function renderManageDetail(p,k,tok){
   if(!confirm(`${v.date} ${v.type} 이력을 삭제할까요? (현행 조문은 바뀌지 않습니다)`))return;
   histStore.remove(v.id);logHist(k,`개정 이력 삭제: ${v.date} ${v.type}`);renderManage();});
  const rows=$("#rvrows");
- const lineOpts=id=>{const a=artList.find(x=>x.id===id);return `<option value="__new">(새 문단 신설)</option>`+(a?a.body.filter(b=>b!=="TABLE").map((b,i)=>`<option value="${i}">${esc(b.length>60?b.slice(0,60)+"…":b)}</option>`).join(""):"");};
+ const lineOpts=id=>{const a=artList.find(x=>x.id===id);return `<option value="__new">(새 문단 신설)</option>`+(a?a.body.filter(b=>b!=="TABLE").map((b,i)=>{const v=t(b);return `<option value="${i}">${esc(v.length>60?v.slice(0,60)+"…":v)}</option>`;}).join(""):"");};
  const addRow=()=>{const r=document.createElement("div");r.className="rv-row";
   r.innerHTML=`<div class="rv-sel"><select class="rv-art">${artList.map(a=>`<option value="${a.id}">${esc(a.n)}(${esc(a.h)})</option>`).join("")}</select>
    <select class="rv-line"></select><button type="button" class="ghost sm del rv-x">삭제</button></div>

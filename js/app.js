@@ -47,7 +47,7 @@ const CAT_IC={
 
 /* 하위 화면 공통 제목 영역: 제목 + 한 줄 설명 + 오른쪽 보조 정보 (모든 화면 같은 규격) */
 /* 영어 모드에서 질문 라벨을 영어로 보여주되, 내부 처리는 한국어 원문으로 한다 */
-const qLabel=q=>isEN()&&EN_Q[q]?EN_Q[q]:q;
+const qLabel=q=>isEN()?(EN_Q[q]||t(q)):q;
 
 const pageHead=(title,desc,right="")=>`<div class="ph page-h"><div><h2>${title}</h2><p>${desc}</p></div>${right?`<span class="cnt">${right}</span>`:""}</div>`;
 
@@ -199,11 +199,11 @@ function renderSidebar(){
   <nav class="sb-nav">${NAV.map(g=>`<div class="grp">${t(g.g)}</div>`+g.items.map(([v,l,ic])=>
    `<button class="nav" data-go="${v}" data-tip="${t(l)}" ${cur===v?'aria-current="page"':""}>${ic}<span class="lbl">${t(l)}</span></button>`).join("")).join("")}</nav>
   <div class="sb-bottom">
-   ${isAdmin()?`<button class="nav" data-go="admin" data-tip="시스템 관리" ${cur==="admin"?'aria-current="page"':""}>${IC.shield}<span class="lbl">${t("시스템 관리")}</span></button>`:""}
+   ${isAdmin()?`<button class="nav" data-go="admin" data-tip="${t("시스템 관리")}" ${cur==="admin"?'aria-current="page"':""}>${IC.shield}<span class="lbl">${t("시스템 관리")}</span></button>`:""}
   </div>
-  <div class="sb-acct" data-tip="${esc(me()?.name||"")} · 로그아웃">
-   <span class="av">${esc((me()?.name||"?")[0])}</span>
-   <span class="acct-t" title="${esc(me()?.dept||"")} ${esc(me()?.name||"")}"><b>${esc(me()?.name||"")}</b>${isAdmin()?'<em>${t("관리자")}</em>':""}<small>${esc(me()?.dept||"")}</small></span>
+  <div class="sb-acct" data-tip="${esc(t(me()?.name||""))} · ${t("로그아웃")}">
+   <span class="av">${esc(t(me()?.name||"?")[0])}</span>
+   <span class="acct-t" title="${esc(t(me()?.dept||""))} ${esc(t(me()?.name||""))}"><b>${esc(t(me()?.name||""))}</b>${isAdmin()?`<em>${t("관리자")}</em>`:""}<small>${esc(t(me()?.dept||""))}</small></span>
    <button class="acct-out" id="logout" aria-label="로그아웃" title="로그아웃">${IC.logout}</button>
   </div>`;
  $("#logout").onclick=()=>{session.logout();go("home");};
@@ -213,8 +213,8 @@ function renderSidebar(){
 /* ---------- Header ---------- */
 function renderHeader(){
  const m=aiMode(),on=m!=="checking";
- const label={gemini:"● Gemini / 실시간 응답",live:"● Online / RAG Engine Active",demo:"● Demo / 시연 모드",checking:"연결 확인 중"}[m];
- const tip={gemini:"Gemini로 실시간 답변합니다. 호출에 실패하면 준비된 답변으로 전환됩니다",live:"AI 응답을 사용할 수 있습니다",demo:"사전 작성된 답변으로 AI 흐름을 시연합니다. 근거 조문 하이라이트는 실제 원문과 대조됩니다",checking:"AI 연결을 확인하고 있습니다"}[m];
+ const label=t({gemini:"● Gemini / 실시간 응답",live:"● Online / RAG Engine Active",demo:"● Demo / 시연 모드",checking:"연결 확인 중"}[m]);
+ const tip=t({gemini:"Gemini로 실시간 답변합니다. 호출에 실패하면 준비된 답변으로 전환됩니다",live:"AI 응답을 사용할 수 있습니다",demo:"사전 작성된 답변으로 AI 흐름을 시연합니다. 근거 조문 하이라이트는 실제 원문과 대조됩니다",checking:"AI 연결을 확인하고 있습니다"}[m]);
  $("#hd").innerHTML=`<h1>${t("사내규정 AI 에이전트")}</h1>
   <span class="status ${on?"on":""} ${m}" title="${tip}"><span class="dot"></span>${label}</span>
   <div class="hd-r">
@@ -267,8 +267,8 @@ function renderHome(){
    <section class="card box">
     <div class="bh"><span class="bi">${IC.bell}</span><h3>${t("최근 규정 개정 공지")}</h3><button class="more" data-go="notice">${t("더보기")}</button></div>
     <div class="nlist">${allNotices().slice(0,5).map(n=>`<button class="nrow" data-go="notice">
-     <span class="nt">${esc(n.title)}</span><span class="tnew">NEW</span>
-     <span class="nmeta">${esc(n.owner)} · ${esc(n.date)}</span></button>`).join("")}</div>
+     <span class="nt">${esc(t(n.title))}</span><span class="tnew">NEW</span>
+     <span class="nmeta">${esc(t(n.owner))} · ${esc(t(n.date))}</span></button>`).join("")}</div>
    </section>
   </div>
  </div>`;
@@ -279,11 +279,11 @@ function renderHome(){
  syncAvail();
 }
 function faqBtn(q,k,i){
- return `<button class="faq${i<3?" top":""}" data-faq="${esc(q)}" data-key="${k}"><span class="rk">${i+1}</span><span><span class="ft">${esc(qLabel(q))}</span><small>${D[k].no} ${esc(short(D[k].name))}</small></span></button>`;
+ return `<button class="faq${i<3?" top":""}" data-faq="${esc(q)}" data-key="${k}"><span class="rk">${i+1}</span><span><span class="ft">${esc(qLabel(q))}</span><small>${D[k].no} ${esc(t(short(D[k].name)))}</small></span></button>`;
 }
 function noticeCard(n,ni){
- return `<div class="ntc"><h4><span class="tnew">NEW</span>[공지] ${esc(n.title)}</h4>
-  <p class="nm">주관 ${esc(n.owner)} · 적용일자 ${esc(n.date)}</p>
+ return `<div class="ntc"><h4><span class="tnew">NEW</span>[공지] ${esc(t(n.title))}</h4>
+  <p class="nm">${t("주관")} ${esc(t(n.owner))} · ${t("적용일자")} ${esc(t(n.date))}</p>
   <ul>${n.items.map((it,ii)=>`<li><button data-ntc="${ni}-${ii}"><b>${esc(it.ref)}</b>${esc(it.text)}</button></li>`).join("")}</ul></div>`;
 }
 function bindCommon(root){
@@ -326,7 +326,7 @@ function renderCats(){
    <p class="catdesc">${esc(CATS[state.cat].d)}</p>
    <div class="doclist">${rows.map(k=>{const d=D[k];
     return `<button class="doc-row${d.parent?" child":""}${d.loaded?"":" off"}" data-open="${k}">
-     <span class="dno">${d.no}</span><span class="dname">${esc(d.name)}</span>
+     <span class="dno">${d.no}</span><span class="dname">${esc(t(d.name))}</span>
      <span class="dmeta">${d.owner}<em>시행 ${d.effective}</em></span></button>`}).join("")}</div>
   </section>
  </div>`;
@@ -411,12 +411,12 @@ function openGroup(g,q,focus){
 function renderWorkspace(){
  const g=state.group,head=groupHead(g),ds=docsOf(g).filter(k=>D[k].loaded);
  const v=$("#view");v.className="wsv";
- v.innerHTML=`<div class="crumb"><button data-go="cats">카테고리별 규정</button><span>›</span><span>${CATS[head.cat].n}</span><span>›</span><b id="crumbDoc">${esc(D[state.doc].no)} ${esc(D[state.doc].name)}</b><span class="eff" id="crumbEff">시행 ${esc(D[state.doc].effective)}</span></div>
+ v.innerHTML=`<div class="crumb"><button data-go="cats">카테고리별 규정</button><span>›</span><span>${CATS[head.cat].n}</span><span>›</span><b id="crumbDoc">${esc(D[state.doc].no)} ${esc(t(D[state.doc].name))}</b><span class="eff" id="crumbEff">시행 ${esc(D[state.doc].effective)}</span></div>
  <div class="ws">
   <section class="card pane">
-   <div class="pbar"><span class="bi">${IC.chat}</span><h3>${t("AI 규정 상담")}</h3><span class="ow">${t("주관")} ${esc(head.owner)}</span></div>
+   <div class="pbar"><span class="bi">${IC.chat}</span><h3>${t("AI 규정 상담")}</h3><span class="ow">${t("주관")} ${esc(t(head.owner))}</span></div>
    <div class="thread" id="thread"><div class="starter" id="starter">
-    <p>${esc(D[state.doc].blurb||head.blurb||"")}${ds.length>1?` 본규정과 하위지침을 함께 검색합니다.`:""}</p>
+    <p>${esc(t(D[state.doc].blurb||head.blurb||""))}${ds.length>1?" "+t("본규정과 하위지침을 함께 검색합니다."):""}</p>
     ${((D[state.doc].starters&&D[state.doc].starters.length?D[state.doc]:head).starters||[]).map(s=>`<button class="chip" data-ask="${esc(s)}">${esc(qLabel(s))}</button>`).join("")}
    </div></div>
    <div class="composer">
@@ -449,8 +449,8 @@ function renderWorkspace(){
 const docTabLabel=k=>`${esc(D[k].parent?short(D[k].name):D[k].name)}<small>${esc(D[k].no)}</small>`;
 function switchDoc(k,then){
  state.doc=k;state.docMode="text";$("#docScroll").innerHTML=docHTML(k);
- const t=$("#docTab");if(t){t.dataset.tab=k;t.innerHTML=docTabLabel(k);}
- if($("#crumbDoc")){$("#crumbDoc").textContent=`${D[k].no} ${D[k].name}`;$("#crumbEff").textContent=`시행 ${D[k].effective}`;}
+ const tab=$("#docTab");if(tab){tab.dataset.tab=k;tab.innerHTML=docTabLabel(k);}
+ if($("#crumbDoc")){$("#crumbDoc").textContent=`${D[k].no} ${t(D[k].name)}`;$("#crumbEff").textContent=`${t("시행")} ${D[k].effective}`;}
  syncDocTabs();
  if(then)then();
 }
@@ -464,11 +464,11 @@ function toggleToc(){
 function docHTML(k){
  const d=D[k];
  return `<div class="doc-sheet"><h1 class="doc-title">${esc(short(d.name))}</h1>
-  <p class="doc-sub">${d.no} · 시행 ${d.effective} · 주관 ${d.owner}</p>
+  <p class="doc-sub">${d.no} · ${t("시행")} ${d.effective} · ${t("주관")} ${t(d.owner)}</p>
   ${(d.chapters||[]).map(ch=>`<h2 class="chapter">${esc(ch.t)}</h2>`+ch.arts.map(a=>`
    <article class="art" id="art-${a.id}"><h3>${a.n}(${a.h})${k!=="__past"&&k!=="__prev"?(v=>v?`<button class="amark" data-amark="${v.id}" title="${esc(v.reason||"")}">${esc(v.eff)} ${esc(v.type)}</button>`:"")(lastChangeOf(k,a.id)):""}</h3>
    ${a.body.map(b=>b==="TABLE"?tableHTML(a.table):`<p>${esc(b)}</p>`).join("")}
-   ${a.xref?`<p class="xref"><b>연계</b> ${esc(a.xref)}</p>`:""}</article>`).join("")).join("")}</div>`;
+   ${a.xref?`<p class="xref"><b>${t("연계")}</b> ${esc(a.xref)}</p>`:""}</article>`).join("")).join("")}</div>`;
 }
 function tableHTML(t){return !t?"":`<table><thead><tr>${t.head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${t.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;}
 
@@ -509,7 +509,7 @@ function bubble(role,html){
 }
 async function ask(q){
  if(state.busy)return;
- $("#starter")?.remove();bubble("me",esc(q));
+ $("#starter")?.remove();bubble("me",esc(qLabel(q)));
  state.busy=true;$("#send").disabled=true;
  const holder=bubble("ai",`<span class="thinking dots">${t("근거 조문을 찾는 중")}</span>`),box=holder.querySelector(".bub");
  const g=state.group,head=groupHead(g);

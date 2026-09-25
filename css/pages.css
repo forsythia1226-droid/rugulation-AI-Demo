@@ -168,7 +168,7 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .cti{width:30px;height:30px;border-radius:8px;background:var(--ac-50);color:var(--ac);display:grid;place-items:center}
 .cti svg{width:16px;height:16px}
 .ctile:hover .cti{background:var(--card)}
-.ctn{font-size:13px;font-weight:600;white-space:nowrap}
+.ctn{font-size:13px;font-weight:600;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .ctc{font-size:20px;font-weight:700;line-height:1;color:var(--tx)}
 .ctc small{font-size:11.5px;font-weight:400;color:var(--mu);margin-left:2px}
 .hero{padding:22px 28px 20px}
@@ -192,7 +192,8 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .home .catcard{padding:14px 18px}
 .home .catrow{margin-top:10px;gap:8px}
 .home .ctile{flex-direction:row;align-items:center;gap:10px;padding:10px 12px}
-.home .ctn{flex:1;font-size:12.8px}
+.home .ctn{flex:1 1 auto;min-width:0;font-size:12.8px;overflow:hidden;text-overflow:ellipsis}
+.home .ctc{flex:0 0 auto;margin-left:6px}
 .home .ctc{font-size:17px}
 .home .hero{padding:14px 18px 16px}
 .home .hero .bh{margin-bottom:10px}

@@ -3,8 +3,16 @@
  * - 규정 조문·개정 이력 등 규정 데이터 본문은 사내 원본이라 번역하지 않는다(영어 모드에서 안내 표시).
  * - 질문/답변: 영어 질문을 누르면 검증된 한국어 답변과 같은 내용을 영어로 보여준다(EN_ANSWERS).
  */
-const FLAG_KR=`<svg viewBox="0 0 30 20" class="flagimg" aria-hidden="true"><rect width="30" height="20" rx="2.5" fill="#fff" stroke="rgba(15,23,42,.14)" stroke-width=".8"/><path d="M15 6a4 4 0 0 1 0 8 4 4 0 0 0 0-8z" fill="#cd2e3a"/><path d="M15 6a4 4 0 0 0 0 8 4 4 0 0 1 0-8z" fill="#0047a0"/><g fill="#111" opacity=".85"><rect x="4" y="4.6" width="5" height=".9" transform="rotate(35 6.5 5)"/><rect x="4" y="6.2" width="5" height=".9" transform="rotate(35 6.5 6.6)"/><rect x="21" y="13.4" width="5" height=".9" transform="rotate(35 23.5 13.8)"/><rect x="21" y="15" width="5" height=".9" transform="rotate(35 23.5 15.4)"/></g></svg>`;
-const FLAG_US=`<svg viewBox="0 0 30 20" class="flagimg" aria-hidden="true"><rect width="30" height="20" rx="2.5" fill="#fff" stroke="rgba(15,23,42,.14)" stroke-width=".8"/><g fill="#b22234"><rect y="0" width="30" height="1.6"/><rect y="3.1" width="30" height="1.6"/><rect y="6.2" width="30" height="1.6"/><rect y="9.3" width="30" height="1.6"/><rect y="12.4" width="30" height="1.6"/><rect y="15.5" width="30" height="1.6"/><rect y="18.4" width="30" height="1.6"/></g><rect width="13" height="10.8" fill="#3c3b6e"/><g fill="#fff"><circle cx="2.6" cy="2.2" r=".7"/><circle cx="6.5" cy="2.2" r=".7"/><circle cx="10.4" cy="2.2" r=".7"/><circle cx="4.5" cy="4.6" r=".7"/><circle cx="8.4" cy="4.6" r=".7"/><circle cx="2.6" cy="7" r=".7"/><circle cx="6.5" cy="7" r=".7"/><circle cx="10.4" cy="7" r=".7"/><circle cx="4.5" cy="9.2" r=".7"/><circle cx="8.4" cy="9.2" r=".7"/></g></svg>`;
+const FLAG_KR=`<svg viewBox="0 0 90 60" class="flagimg" aria-hidden="true"><rect width="90" height="60" rx="5" fill="#fff" stroke="rgba(15,23,42,.16)" stroke-width="1.5"/>
+<g transform="translate(45,30) rotate(-33.69)"><circle r="12" fill="#cd2e3a"/><path d="M-12 0a6 6 0 0 1 12 0 6 6 0 0 0 12 0 12 12 0 0 0-24 0z" fill="#0047a0"/></g>
+<g fill="#111" transform="translate(45,30)"><g transform="rotate(-56.31) translate(0,-21)"><rect x="-5.5" y="-3.2" width="11" height="1.9"/><rect x="-5.5" y="-.95" width="11" height="1.9"/><rect x="-5.5" y="1.3" width="11" height="1.9"/></g>
+<g transform="rotate(-123.69) translate(0,-21)"><rect x="-5.5" y="-3.2" width="4.8" height="1.9"/><rect x=".7" y="-3.2" width="4.8" height="1.9"/><rect x="-5.5" y="-.95" width="11" height="1.9"/><rect x="-5.5" y="1.3" width="4.8" height="1.9"/><rect x=".7" y="1.3" width="4.8" height="1.9"/></g>
+<g transform="rotate(56.31) translate(0,-21)"><rect x="-5.5" y="-3.2" width="4.8" height="1.9"/><rect x=".7" y="-3.2" width="4.8" height="1.9"/><rect x="-5.5" y="-.95" width="4.8" height="1.9"/><rect x=".7" y="-.95" width="4.8" height="1.9"/><rect x="-5.5" y="1.3" width="4.8" height="1.9"/><rect x=".7" y="1.3" width="4.8" height="1.9"/></g>
+<g transform="rotate(123.69) translate(0,-21)"><rect x="-5.5" y="-3.2" width="11" height="1.9"/><rect x="-5.5" y="-.95" width="4.8" height="1.9"/><rect x=".7" y="-.95" width="4.8" height="1.9"/><rect x="-5.5" y="1.3" width="11" height="1.9"/></g></g></svg>`;
+const FLAG_US=`<svg viewBox="0 0 90 60" class="flagimg" aria-hidden="true"><rect width="90" height="60" rx="5" fill="#fff" stroke="rgba(15,23,42,.16)" stroke-width="1.5"/>
+<g fill="#b22234">${[0,1,2,3,4,5,6].map(i=>`<rect y="${i*9.23+0.6}" width="90" height="4.6"/>`).join("")}</g>
+<rect x="0" y="0" width="38" height="32.3" fill="#3c3b6e"/>
+<g fill="#fff">${[0,1,2,3,4].map(r=>[0,1,2,3,4,5].map(c=>`<circle cx="${3.5+c*6.2+(r%2?3.1:0)}" cy="${3.4+r*6.3}" r="1.6"/>`).join("")).join("")}</g></svg>`;
 const LANGS=[["ko",FLAG_KR,"한국어"],["en",FLAG_US,"English"]];
 const lang=()=>{try{return localStorage.getItem("rg:lang")==="en"?"en":"ko";}catch{return "ko";}};
 const setLang=v=>{try{localStorage.setItem("rg:lang",v);}catch{}};
@@ -105,7 +113,59 @@ Object.assign(KO_EN,{
  "규정 창구에서 보기":"Open in regulation desk","규정 보기":"View regulation","조문 목차":"Contents",
  "모두 확인 처리":"Mark all as read","전체":"All","검색":"Search","건":"","개":"","회":"","명":""
 });
-const t=s=>isEN()?(KO_EN[s]!==undefined?KO_EN[s]:s):s;
+/* 규정 데이터 사전(i18n-data.js, i18n-body.js)을 함께 사용한다 */
+/* 조문 본문에서 ①②③ 항 번호를 뗀 문장(인용문)도 찾을 수 있게 색인을 만든다 */
+const MARK=/^[①-⑳]\s*/;
+let BODY_STRIP=null;
+const stripIndex=()=>{if(BODY_STRIP)return BODY_STRIP;BODY_STRIP={};
+ if(typeof BODY_EN!=="undefined")for(const k in BODY_EN){if(MARK.test(k))BODY_STRIP[k.replace(MARK,"")]=String(BODY_EN[k]).replace(MARK,"");}
+ return BODY_STRIP;};
+const dict=s=>{if(KO_EN[s]!==undefined)return KO_EN[s];
+ if(typeof DATA_EN!=="undefined"&&DATA_EN[s]!==undefined)return DATA_EN[s];
+ if(typeof BODY_EN!=="undefined"&&BODY_EN[s]!==undefined)return BODY_EN[s];
+ {const si=stripIndex();if(si[s]!==undefined)return si[s];}
+ return typeof byPattern==="function"?byPattern(s):undefined;};
+const t=s=>{if(!isEN())return s;const v=dict(s);return v!==undefined?v:s;};
+
+/* 숫자가 섞인 정형 문구는 규칙으로 변환한다 (조문 제목, 시행일 줄 등) */
+const PATTERNS=[
+ [/^제(\d+)조(?:의(\d+))?\((.+)\)$/,(m)=>`Article ${m[1]}${m[2]?"-"+m[2]:""} (${t(m[3])})`],
+ [/^별표(\d+)\((.+)\)$/,(m)=>`Appendix ${m[1]} (${t(m[2])})`],
+ [/^제(\d+)조(?:의(\d+))?$/,(m)=>`Article ${m[1]}${m[2]?"-"+m[2]:""}`],
+ [/^별표(\d+)$/,(m)=>`Appendix ${m[1]}`],
+ [/^제(\d+)장\s*(.*)$/,(m)=>`Chapter ${m[1]}${m[2]?" "+t(m[2]):""}`],
+ [/^(.+?)\s*·\s*시행\s*(\S+)\s*·\s*주관\s*(.+)$/,(m)=>`${t(m[1])} · Effective ${m[2]} · Owner ${t(m[3])}`],
+ [/^시행\s*(\S+)$/,(m)=>`Effective ${m[1]}`],
+ [/^주관\s*(.+)$/,(m)=>`Owner ${t(m[1])}`],
+ [/^적용일자\s*(\S+)\s*·\s*변경\s*(\d+)건$/,(m)=>`Effective ${m[1]} · ${m[2]} changes`],
+ [/^(.+?)\s*·\s*총\s*(\d+)회\s*·\s*현행 시행\s*(\S+)$/,(m)=>`${t(m[1])} · ${m[2]} revisions · current version effective ${m[3]}`],
+ [/^시행\s*(\S+)\s*·\s*변경 조문\s*(\d+)건(?:\s*·\s*등록\s*(.+))?$/,(m)=>`Effective ${m[1]} · ${m[2]} changed articles${m[3]?" · by "+m[3]:""}`],
+ [/^(\d+)건$/,(m)=>m[1]],
+ [/^(\d+)회$/,(m)=>`${m[1]} revisions`],
+ [/^(.+?) 제정$/,(m)=>`${t(m[1])} enacted`],
+ [/^(\d{4}\.\d{2}\.\d{2})\s*(개정|제정|신설)$/,(m)=>`${m[1]} ${({"개정":"revised","제정":"enacted","신설":"added"})[m[2]]}`],
+ [/^'(\d{2}\.\d{2}\.\d{2})\s*부$/,(m)=>`eff. '${m[1]}`],
+ [/^\[공지\]\s*(.+)$/,(m)=>`[Notice] ${t(m[1])}`],
+ [/^(TES-[0-9A-Za-z-]+)\s+(.+)$/,(m)=>{const v=t(m[2]);return v===m[2]?undefined:`${m[1]} ${v}`;}],
+ [/^(.+?)\s*\(지침\)$/,(m)=>`${t(m[1])} (Guideline)`],
+ [/^적용일자\s*'(\d{2}\.\d{2}\.\d{2})\s*부\s*·\s*변경\s*(\d+)건$/,(m)=>`Effective '${m[1]} · ${m[2]} changes`],
+ [/^제(\d+)조(?:의(\d+))?\s+(.+)$/,(m)=>{const v=t(m[3]);return v===m[3]?undefined:`Article ${m[1]}${m[2]?"-"+m[2]:""} ${v}`;}],
+ [/^(\d+)개$/,(m)=>m[1]],
+ [/^(.+?)에서 이어 확인\s*→$/,(m)=>{const v=t(m[1]);return v===m[1]?undefined:`Continue in ${v} →`;}],
+ [/^(\d+)\s*\/\s*(\d+)\s*완료$/,(m)=>`${m[1]} / ${m[2]} done`],
+ [/^(.+?)\s*근거 보기$/,(m)=>`View source · ${m[1]}`],
+ [/^([^,]+(?:,[^,]+)+)$/,(k)=>{const ps=k[1].split(",").map(x=>x.trim());
+   if(!ps.some(x=>/[가-힣]/.test(x)))return undefined;
+   const out=ps.map(x=>t(x));return out.some((v,i)=>v===ps[i]&&/[가-힣]/.test(ps[i]))?undefined:out.join(", ");}],
+ [/^(\d+)명$/,(m)=>m[1]],
+ [/^└\s*(.+)$/,(m)=>{const v=t(m[1]);return v===m[1]?undefined:`└ ${v}`;}],
+ [/^(.+?)_(.+)$/,(m)=>{const a=t(m[1]),b=t(m[2]);return a===m[1]||b===m[2]?undefined:`${a} · ${b}`;}],
+ [/^(.+?)\s+(사원|대리|과장|차장|부장|팀장|실장|부문장)$/,(m)=>{const a=t(m[1]),b=t(m[2]);return a===m[1]||b===m[2]?undefined:`${a} (${b})`;}],
+ [/^(.+·.+)$/,(k)=>{const ps=k[1].split("·").map(x=>x.trim());if(ps.length<2)return undefined;
+   if(!ps.some(x=>/[가-힣]/.test(x)))return undefined;
+   const out=ps.map(x=>t(x));return out.some((v,i)=>v===ps[i]&&/[가-힣]/.test(ps[i]))?undefined:out.join(" · ");}]
+];
+function byPattern(k){for(const[re,fn]of PATTERNS){const m=k.match(re);if(m){const v=fn(m);if(v!==undefined)return v;}}return undefined;}
 
 /* ---- 화면 자동 번역: 렌더된 DOM에서 사전에 있는 문구만 정확히 일치할 때 교체 ----
  * 규정 조문·개정 이력 본문 등 사전에 없는 문장은 그대로 둔다(원문 보존). */
@@ -113,14 +173,14 @@ const I18N_ATTRS=["placeholder","title","aria-label","data-tip"];
 function translateTree(root){
  if(!isEN()||!root||root.nodeType===Node.DOCUMENT_FRAGMENT_NODE&&!root.querySelectorAll)return;
  if(root.nodeType===Node.TEXT_NODE){const k=root.nodeValue.trim();
-  if(k&&KO_EN[k]!==undefined)root.nodeValue=root.nodeValue.replace(k,KO_EN[k]);return;}
+  const v0=dict(k);if(k&&v0!==undefined)root.nodeValue=root.nodeValue.replace(k,v0);return;}
  if(root.nodeType!==Node.ELEMENT_NODE)return;
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const ns=[];
  while(w.nextNode())ns.push(w.currentNode);
- ns.forEach(n=>{const k=n.nodeValue.trim();if(k&&KO_EN[k]!==undefined)n.nodeValue=n.nodeValue.replace(k,KO_EN[k]);});
+ ns.forEach(n=>{const k=n.nodeValue.trim();const v=dict(k);if(k&&v!==undefined)n.nodeValue=n.nodeValue.replace(k,v);});
  const els=[root,...root.querySelectorAll("*")];
  els.forEach(el=>I18N_ATTRS.forEach(a=>{const v=el.getAttribute&&el.getAttribute(a);
-  if(v&&KO_EN[v.trim()]!==undefined)el.setAttribute(a,KO_EN[v.trim()]);}));
+  const tv=v&&dict(v.trim());if(tv!==undefined&&v)el.setAttribute(a,tv);}));
 }
 document.addEventListener("DOMContentLoaded",()=>{
  document.documentElement.lang=lang();

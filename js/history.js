@@ -117,7 +117,7 @@ function showHist(k,openId){
 function showPast(k,vid){
  const v=histStore.get(vid);state.docMode="past";
  D.__past=pastDoc(k,vid);
- $("#docScroll").innerHTML=`<div class="pastbar">${IC.help}<span><b>효력 없음</b> · ${esc(v.eff)} 시행본 (${esc(v.type)})입니다. 업무에는 현행본을 적용하십시오.</span>
+ $("#docScroll").innerHTML=`<div class="pastbar">${IC.help}<span><b>${t("효력 없음")}</b> · ${t("이 문서는 ")}${esc(v.eff)}${t(" 시행본입니다")} (${esc(t(v.type))}). ${t("업무에는 현행본을 적용하십시오.")}</span>
   <button data-back="${k}">현행본 보기</button><button data-hback="${k}">개정 이력으로</button></div>`+docHTML("__past");
  delete D.__past;
  $("#docScroll").scrollTop=0;syncDocTabs();

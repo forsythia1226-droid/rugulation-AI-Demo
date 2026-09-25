@@ -102,7 +102,7 @@ function annexHTML(k){
   rows=rows.filter(x=>keep.has(x.i));}
  const mark=s=>q?esc(s).split(esc(q)).join(`<mark>${esc(q)}</mark>`):esc(s);
  return `<div class="annex">
-  <div class="ax-head"><div><h2>${esc(A.title)}</h2><p>${esc(A.sub)} · <b>●</b> 결정(전결) <b>◎</b> 보고 · 항목을 누르면 결재라인을 보여줍니다</p></div>
+  <div class="ax-head"><div><h2>${esc(t(A.title))}</h2><p>${esc(t(A.sub))} · <b>●</b> ${t("결정(전결)")} <b>◎</b> ${t("보고 · 항목을 누르면 결재라인을 보여줍니다")}</p></div>
    <div class="sbar sm ax-q">${IC.search}<input id="axq" placeholder="업무 검색 (예: 출장, 접대비, 채용)" value="${esc(annexUI.q)}"></div></div>
   <p class="ax-hint">↔ 표를 좌우로 스크롤하면 합의·참조 부서까지 볼 수 있습니다 (Shift + 휠)</p>
   <div class="ax-wrap"><table class="ax">

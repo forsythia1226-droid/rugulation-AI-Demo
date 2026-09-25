@@ -39,6 +39,11 @@ server/proxy.mjs    로컬 프록시(Node, 무의존성): API 키를 환경변�
 js/annex.js         위임전결규정 별표 제1호 「위임전결기준표」: 양식만 실제 구조, 내용은 가상. 검색·결재라인 계산·근거 조문 이동
 css/pages.css       위 화면들의 스타일
 js/demo-answers.js  시연 모드 사전 작성 답변(DEMO_QA) + 정규화 질문→응답/규정키 매핑
+js/i18n.js          다국어(한/영): 언어 선택, UI 사전(KO_EN), 정형 문구 패턴(PATTERNS), 렌더된 DOM 자동 번역(MutationObserver)
+js/i18n-data.js     규정명·분류·팀·조문 제목·요약·추천 질문·공지 영문 사전(DATA_EN)
+js/i18n-admin.js    관리자 페이지·시스템 관리·체크리스트·오류 메시지 영문 사전
+js/i18n-body*.js    조문 본문·표 셀 영문 사전(BODY_EN). body=TES-105/111, 2=201/201-1A/203, 3=201-1B/216, 4=212/212-2/208
+js/i18n-answers.js  시연 답변의 영문본(EN_A). 조문 번호·금액·일수는 한국어 답변과 동일해야 한다
 js/app.js           앱 로직: 렌더링, 검색, 하이라이트, AI 공급자(live/demo), 담당자 화면
 scripts/verify-quotes.js  인용 검증: node scripts/verify-quotes.js (답변 수정 후 반드시 실행)
 assets/             대한전선 공식 CI (라이트/다크)

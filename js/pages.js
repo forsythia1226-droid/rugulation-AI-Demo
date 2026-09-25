@@ -35,7 +35,7 @@ function renderSettings(){
   ${pageHead("설정","화면 표시와 AI 응답 방식을 설정합니다. 설정은 이 브라우저에 저장됩니다.")}
   <section class="card pad">
    <div class="bh"><span class="bi">${IC.user}</span><h3>계정</h3></div>
-   <dl class="kv"><dt>이름</dt><dd>${esc(u.name)}</dd><dt>소속</dt><dd>${esc(u.dept)}</dd><dt>권한</dt><dd>${u.role==="admin"?"규정 관리자":"일반 임직원"}</dd><dt>로그인</dt><dd>${new Date(u.at).toLocaleString("ko-KR")}</dd></dl>
+   <dl class="kv"><dt>이름</dt><dd>${esc(u.name)}</dd><dt>소속</dt><dd>${esc(u.dept)}</dd><dt>권한</dt><dd>${u.role==="admin"?"규정 관리자":"일반 임직원"}</dd><dt>로그인</dt><dd>${new Date(u.at).toLocaleString(lang()==="en"?"en-US":"ko-KR")}</dd></dl>
   </section>
   <section class="card pad">
    <div class="bh"><span class="bi">${IC.gear}</span><h3>화면</h3></div>
@@ -108,7 +108,7 @@ function renderChecklist(){
    <ul class="cklist">${items.map(c=>{const late=!done[c.id]&&c.due<today;
     return `<li class="${done[c.id]?"done":""}${late?" late":""}">
      <label><input type="checkbox" data-ck="${c.id}" ${done[c.id]?"checked":""}><span>${esc(c.t)}</span></label>
-     <span class="ckdue">${late?"기한 경과 · ":""}${c.due.toLocaleDateString("ko-KR",{month:"long",day:"numeric"})}</span>
+     <span class="ckdue">${late?"기한 경과 · ":""}${c.due.toLocaleDateString(lang()==="en"?"en-US":"ko-KR",{month:"long",day:"numeric"})}</span>
      <button class="cklink" data-ckart="${c.id}">${esc(D[c.doc]?D[c.doc].no:c.doc)} 근거 보기</button></li>`;}).join("")}</ul>
   </section>
  </div>`;
@@ -146,7 +146,7 @@ function renderMyReq(){
   <section class="card pad">
    <div class="bh"><span class="bi">${IC.inbox}</span><h3>내 문의 내역</h3><span class="cnt">${mine.length}건</span></div>
    ${mine.length?`<ul class="reqlist">${mine.map(e=>`<li>
-   <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 중"}</span><span class="pill src">${e.via==="direct"?"직접 문의":"AI 확인 요청"}</span><small>${esc(e.regName)} · ${esc(e.owner)}${e.assignee?" "+esc(nameOnly(e.assignee)):""} · ${new Date(e.at).toLocaleString("ko-KR")}</small></div>
+   <div class="reqtop"><span class="pill ${e.status}">${e.status==="answered"?"답변 완료":"확인 중"}</span><span class="pill src">${e.via==="direct"?"직접 문의":"AI 확인 요청"}</span><small>${esc(e.regName)} · ${esc(e.owner)}${e.assignee?" "+esc(nameOnly(e.assignee)):""} · ${new Date(e.at).toLocaleString(lang()==="en"?"en-US":"ko-KR")}</small></div>
    <p class="q">${esc(e.q)}</p>
    ${e.need?`<p class="need">${esc(e.need)}</p>`:""}
    ${e.answer?`<div class="ans"><b>${esc(e.answeredBy||e.owner)} 답변</b>${esc(e.answer)}</div>`:""}
@@ -192,7 +192,7 @@ function teamsToast(e){
  t.querySelector(".tt-open").onclick=()=>{clearTimeout(timer);close();teamsWindow(e);};
 }
 function teamsWindow(e){
- const who=e.assignee||e.owner,time=new Date(e.at).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+ const who=e.assignee||e.owner,time=new Date(e.at).toLocaleTimeString(lang()==="en"?"en-US":"ko-KR",{hour:"2-digit",minute:"2-digit"});
  const m=document.createElement("div");m.className="tw-back";
  m.innerHTML=`<div class="tw" role="dialog" aria-label="Teams 채팅 미리보기">
   <div class="tw-top"><span class="teams-logo">T</span><b>${esc(who)}</b><small>Microsoft Teams · 담당자 화면 (시연)</small><button class="tt-x" aria-label="닫기">✕</button></div>
@@ -225,7 +225,7 @@ table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12.5px}th,td{bo
 <h1>${esc(short(d.name))}</h1><p class="sub">${esc(d.no)} · 시행 ${esc(d.effective)} · 주관 ${esc(d.owner)}</p>
 <p class="warn">사내 한정 · 시연용 가상 조문입니다. 출력·저장본은 최신 개정이 반영되지 않을 수 있으니 시스템에서 최신본을 확인하십시오.</p>
 ${body||"<p>등록된 조문이 없습니다.</p>"}
-<p class="foot">${esc(me()?.dept||"")} ${esc(me()?.name||"")} · ${new Date().toLocaleString("ko-KR")} 출력</p></body></html>`;
+<p class="foot">${esc(me()?.dept||"")} ${esc(me()?.name||"")} · ${new Date().toLocaleString(lang()==="en"?"en-US":"ko-KR")} 출력</p></body></html>`;
 }
 function printDoc(k){
  const f=document.createElement("iframe");f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";
