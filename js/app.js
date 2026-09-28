@@ -581,6 +581,7 @@ JSON만 출력하세요:
     vd.className="verdict done";vd.innerHTML=`<div>${esc(head.owner)}에 확인 요청이 접수되었습니다. 담당자 답변은 해석 지침에 반영되어 다음부터는 이 창구에서 바로 안내됩니다.</div>`;};
    vd.appendChild(b);box.appendChild(vd);
   }
+  if(r.trace){box.insertAdjacentHTML("beforeend",traceHTML(r.trace));bindTrace(box);}
   state.turns.push({role:"user",content:q});state.turns.push({role:"assistant",content:r.answer||""});
  }catch(e){
   const msg={not_granted:"AI 사용이 허용되지 않았습니다. 오른쪽 규정 원문은 계속 열람하실 수 있습니다.",

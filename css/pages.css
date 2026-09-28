@@ -765,3 +765,16 @@ body.auth #view{display:grid;place-items:center;background:linear-gradient(160de
 .flagimg{width:23px;height:23px;display:block;border-radius:50%}
 .langbtn .flagimg,.langmenu button .flagimg{width:23px;height:23px}
 .langbtn .flag,.langmenu .flag{display:inline-flex;align-items:center}
+
+/* 처리 과정(멀티 에이전트 trace) */
+.trace{margin-top:10px;border-top:1px solid var(--bd);padding-top:8px}
+.trace-h{display:flex;align-items:center;gap:6px;width:100%;padding:2px 0;font-size:11.5px;color:var(--mu);text-align:left}
+.trace-h:hover{color:var(--tx-2)}
+.trace-t{font-weight:600}
+.trace-s{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trace-x{font-size:10px;line-height:1}
+.trace-l{list-style:none;margin:7px 0 0;padding:0;display:grid;gap:5px}
+.trace-l li{display:flex;align-items:baseline;gap:7px;font-size:11.5px;color:var(--mu);line-height:1.5}
+.trace-l b{flex:0 0 46px;font-size:10.5px;font-weight:700;letter-spacing:.02em;color:var(--ac)}
+.trace-l span{flex:1;min-width:0;color:var(--tx-2)}
+.trace-l em{flex:0 0 auto;font-style:normal;font-variant-numeric:tabular-nums;color:var(--mu-2)}
