@@ -39,6 +39,7 @@ server/proxy.mjs    로컬 프록시(Node, 무의존성): API 키를 환경변�
 js/annex.js         위임전결규정 별표 제1호 「위임전결기준표」: 양식만 실제 구조, 내용은 가상. 검색·결재라인 계산·근거 조문 이동
 css/pages.css       위 화면들의 스타일
 js/demo-answers.js  시연 모드 사전 작성 답변(DEMO_QA) + 정규화 질문→응답/규정키 매핑
+js/agents.js        멀티 에이전트 오케스트레이션: Master(라우팅) · Sub(규정군별 답변) · Verify(인용 대조) · 병합
 js/i18n.js          다국어(한/영): 언어 선택, UI 사전(KO_EN), 정형 문구 패턴(PATTERNS), 렌더된 DOM 자동 번역(MutationObserver)
 js/i18n-data.js     규정명·분류·팀·조문 제목·요약·추천 질문·공지 영문 사전(DATA_EN)
 js/i18n-admin.js    관리자 페이지·시스템 관리·체크리스트·오류 메시지 영문 사전
@@ -96,6 +97,20 @@ API 키 없이 공개 주소에서 AI 흐름을 보여주기 위해 사전 작�
   해석 지침(ownerPrompt)에 자동 추가 → 같은 질문 재질의 시 바로 답변.
 - 근거 조문 포함 복사 (Teams로 팀장에게 전달하는 실무 흐름)
 - 답변 하단 면책 문구: "규정 해석의 최종 권한은 주관부서에 있습니다"
+
+## 멀티 에이전트 구조 (js/agents.js)
+
+- `masterRoute(q,{pin,list})` — 소관 규정군 판단. `pin`은 규정 창구에서 물은 경우의 1순위 고정.
+  준비된 질문은 `DEMO_ROUTES`, 그 밖에는 `scored()` 점수. 2순위는 `minScore`와 `minRatio`를 모두 넘겨야 호출된다.
+- `subAnswer(group,q,turns)` — `provider().answer()` 위임. 규정군 하나만 담당한다.
+- `mergeResults(list)` — 1순위 본문 유지, 2순위는 `related`(이어서 확인)로만 올린다. 본문을 섞지 않는다.
+- `verifyCitations(result,groups)` — 인용 문장이 현행 조문에 그대로 있는지 문자열 대조. LLM을 쓰지 않는다.
+- `runAgents(q,{group,turns})` — 단일 진입점. 반환값은 기존 `provider.answer()`와 같고 `trace`·`agents`·`verify`가 더 붙는다.
+  `ask()`와 `routeAsk()`가 이 함수를 통해 동작하며, 마지막 trace는 `state.lastTrace`에 남는다.
+
+**바꾸지 말 것**: 병합에서 1순위 본문과 2순위 본문을 섞지 않는다. 두 규정이 다른 수치를 말할 때 근거 없는 합성이 생긴다.
+
+**실시간 전환 시**: `masterRoute` 안의 `void list` 자리에서 `provider().route(q,list)`를 부르면 된다. 그 외 구조 변경은 필요 없다.
 
 ## 개정 이력 (조문 단위 버전 관리)
 

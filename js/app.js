@@ -303,8 +303,9 @@ async function routeAsk(q){
  btn.disabled=true;note.textContent="어느 규정 소관인지 판단하는 중…";
  const list=ORDER.filter(k=>D[k].loaded&&D[k].group===k).map(k=>`${k}: ${D[k].no} ${D[k].name} — ${D[k].blurb}`).join("\n");
  try{
-  const key=await (await provider()).route(q,list);
-  if(D[key]&&D[key].loaded){openGroup(D[key].group,q,key);}
+  const route=await masterRoute(q,{list});state.lastTrace=[{agent:"master",picks:route.picks.map(p=>p.group),reason:route.reason}];
+  const key=route.picks[0]?.group;
+  if(key&&D[key]&&D[key].loaded){openGroup(D[key].group,q,key);}
   else note.textContent="판단하지 못했습니다. 카테고리에서 규정을 직접 선택해 주세요.";
  }catch(e){note.textContent=e.code==="not_granted"?"AI 사용이 허용되지 않았습니다. 규정을 직접 선택해 주세요.":"지금은 연결이 어렵습니다. 잠시 후 다시 시도해 주세요.";}
  finally{if($("#go0"))$("#go0").disabled=false;}
@@ -540,7 +541,8 @@ JSON만 출력하세요:
  const turns=[{role:"user",content:instruction}];
  state.turns.slice(-4).forEach(t=>turns.push(t));turns.push({role:"user",content:q});
  try{
-  let r=await (await provider()).answer(g,q,turns);
+  let r=await runAgents(q,{group:g,turns});
+  state.lastTrace=r.trace;
   const all=groupArts(g),multi=docsOf(g).filter(k=>D[k].loaded).length>1;
   const cits=(r.citations||[]).map(c=>{const a=all.find(x=>x.id===c.id);return a?{...c,docKey:a.docKey,label:`${a.n} ${a.h}`,docNo:D[a.docKey].no}:null;}).filter(Boolean);
   if(isEN()&&EN_A[q]&&!r.markdown)r={...r,answer:EN_A[q]};
