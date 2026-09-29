@@ -106,12 +106,10 @@ API 키 없이 공개 주소에서 AI 흐름을 보여주기 위해 사전 작�
 - `mergeResults(list)` — 1순위 본문 유지, 2순위는 `related`(이어서 확인)로만 올린다. 본문을 섞지 않는다.
 - `verifyCitations(result,groups)` — 인용 문장이 현행 조문에 그대로 있는지 문자열 대조. LLM을 쓰지 않는다.
 - `runAgents(q,{group,turns})` — 단일 진입점. 반환값은 기존 `provider.answer()`와 같고 `trace`·`agents`·`verify`가 더 붙는다.
-  `ask()`와 `routeAsk()`가 이 함수를 통해 동작하며, 마지막 trace는 `state.lastTrace`에 남는다.
+  `ask()`와 `routeAsk()`가 이 함수를 통해 동작한다.
+  `trace`는 화면에 표시하지 않고 `state.lastTrace`에만 남긴다(구조 점검·개발용).
 
 **바꾸지 말 것**: 병합에서 1순위 본문과 2순위 본문을 섞지 않는다. 두 규정이 다른 수치를 말할 때 근거 없는 합성이 생긴다.
-
-- `traceHTML(trace)` / `bindTrace(root)` — 답변 아래 접이식 '처리 과정' 표시. 기본은 접힘.
-  숫자가 섞인 문구는 `{n}`·`{k}` 자리표시자로 사전에 올려 두 언어에서 같은 코드를 쓴다.
 
 **실시간 전환 시**: `masterRoute` 안의 `void list` 자리에서 `provider().route(q,list)`를 부르면 된다. 그 외 구조 변경은 필요 없다.
 

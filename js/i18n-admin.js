@@ -150,17 +150,3 @@ Object.assign(DATA_EN,{
 });
 Object.assign(DATA_EN,{"금액":"Amount","목적":"Purpose"});
 
-/* 처리 과정(멀티 에이전트 trace) */
-Object.assign(DATA_EN,{
-"처리 과정":"How this was answered",
-"소관 규정 판단":"Routing",
-"규정 {n}곳 조회":"{n} regulation(s) queried",
-"인용 {n}건":"{n} citation(s)",
-"인용 {n}건 검증 통과":"{n} citation(s) verified",
-"인용 {n}건 중 {k}건 불일치":"{k} of {n} citations did not match",
-"인용 {n}건 대조 · 모두 일치":"{n} citation(s) checked · all matched",
-"인용 {n}건 대조 · {k}건 불일치":"{n} citation(s) checked · {k} did not match",
-"대조할 인용 없음":"No citations to check",
-"답변 없음":"no answer",
-"1순위 본문 유지":"Primary answer kept"
-});
