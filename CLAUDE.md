@@ -40,6 +40,10 @@ js/annex.js         위임전결규정 별표 제1호 「위임전결기준표�
 css/pages.css       위 화면들의 스타일
 js/demo-answers.js  시연 모드 사전 작성 답변(DEMO_QA) + 정규화 질문→응답/규정키 매핑
 js/agents.js        멀티 에이전트 오케스트레이션: Master(라우팅) · Sub(규정군별 답변) · Verify(인용 대조) · 병합
+js/search.js        임베딩 검색: 질문 벡터 조립 · 조문/규정군 유사도 (어휘 점수와 합산)
+js/embeddings.js    빌드 생성물 — 조문·어휘 벡터(int8). 직접 수정 금지
+scripts/build-embeddings.mjs  임베딩 재생성 (조문이 바뀌면 반드시 실행)
+scripts/eval-retrieval.js     검색 정확도 측정 (골든셋 43문항)
 js/i18n.js          다국어(한/영): 언어 선택, UI 사전(KO_EN), 정형 문구 패턴(PATTERNS), 렌더된 DOM 자동 번역(MutationObserver)
 js/i18n-data.js     규정명·분류·팀·조문 제목·요약·추천 질문·공지 영문 사전(DATA_EN)
 js/i18n-admin.js    관리자 페이지·시스템 관리·체크리스트·오류 메시지 영문 사전
@@ -97,6 +101,28 @@ API 키 없이 공개 주소에서 AI 흐름을 보여주기 위해 사전 작�
   해석 지침(ownerPrompt)에 자동 추가 → 같은 질문 재질의 시 바로 답변.
 - 근거 조문 포함 복사 (Teams로 팀장에게 전달하는 실무 흐름)
 - 답변 하단 면책 문구: "규정 해석의 최종 권한은 주관부서에 있습니다"
+
+## 검색 (js/search.js · js/embeddings.js)
+
+어휘 점수(`scored`)와 임베딩 유사도를 **더해서** 쓴다. 둘 중 하나만 쓰지 않는다.
+
+- 조문 벡터·어휘 벡터는 빌드 때 만들어 `js/embeddings.js`에 싣는다(약 0.8MB, int8).
+  **브라우저는 임베딩 모델을 내려받지 않는다** — 질문에 들어 있는 단어의 벡터를 평균해 질문 벡터를 만든다.
+- 모델: multilingual-e5-small(384차원). 빌드 PC에만 받는다.
+- 규정 선택(`bestGroup`)은 조문 하나가 아니라 **규정군 단위 점수**로 한다(`embGroupBonus`).
+  조문 하나의 점수로 고르면 우연히 걸린 단어에 끌려간다.
+- 가중치 `EMB_W`(조문) / `EMB_GW`(라우팅)는 골든셋으로 맞춘 값이다. 바꾸면 반드시 재측정할 것.
+
+**조문을 고치면 `node scripts/build-embeddings.mjs` 를 다시 돌려야 한다.**
+빠뜨리면 `verify-quotes.js` 가 누락 조문을 찾아 배포를 막는다.
+
+측정: `node scripts/eval-retrieval.js` (골든셋 43문항)
+
+| | 어휘만 | 어휘+임베딩 |
+| --- | --- | --- |
+| 규정 라우팅 | 84% | **88%** |
+| 인용 조문 1위 | 59% | **67%** |
+| 인용 조문 3위 내 | 76% | **80%** |
 
 ## 멀티 에이전트 구조 (js/agents.js)
 

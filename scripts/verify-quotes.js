@@ -53,5 +53,17 @@ H.H.forEach(v=>{
   else if(c.after&&!a.body.includes(c.after))errs.push(`${tag}: 개정 후 문장이 현행과 불일치 → "${c.after}"`);
   if(c.before&&c.after&&String(c.before)===String(c.after))errs.push(`${tag}: 개정 전후가 같습니다`);});
 });
+/* 임베딩(js/embeddings.js)이 현재 조문과 맞는지 — 조문을 고치고 다시 생성하지 않으면 검색이 어긋난다 */
+let embNote="";
+try{
+ const E={};vm.runInNewContext(src("js/embeddings.js")+"\n;this.ids=EMB_ARTS;this.terms=EMB_TERMS;",E);
+ const have=new Set(E.ids),cur=Object.keys(art);
+ const missing=cur.filter(id=>!have.has(id));
+ const stale=E.ids.filter(id=>!art[id]);
+ if(missing.length)errs.push(`임베딩 누락 조문 ${missing.length}건 (${missing.slice(0,5).join(", ")}) — node scripts/build-embeddings.mjs 를 다시 실행하세요`);
+ if(stale.length)errs.push(`임베딩에 남은 삭제된 조문 ${stale.length}건 (${stale.slice(0,5).join(", ")}) — node scripts/build-embeddings.mjs 를 다시 실행하세요`);
+ embNote=` · 임베딩 조문 ${E.ids.length}개/어휘 ${E.terms.length}개`;
+}catch(e){embNote=" · 임베딩 없음(어휘 검색만)";}
+
 if(errs.length){console.error(`✗ 인용 검증 실패 (${errs.length}건)\n  `+errs.join("\n  "));process.exit(1);}
-console.log(`✓ 인용 검증 통과: 답변 ${DEMO_QA.length}건 · 질문 ${Object.keys(seen).length}개 · 인용 ${n}건 · 노출 질문 ${shown.length}개 전부 대응 · 개정 이력 ${H.H.length}건(변경 ${hn}건) 현행 일치`);
+console.log(`✓ 인용 검증 통과: 답변 ${DEMO_QA.length}건 · 질문 ${Object.keys(seen).length}개 · 인용 ${n}건 · 노출 질문 ${shown.length}개 전부 대응 · 개정 이력 ${H.H.length}건(변경 ${hn}건) 현행 일치${embNote}`);

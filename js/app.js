@@ -110,6 +110,8 @@ function scored(g,q){
    if(a.tags.some(x=>x.toLowerCase().includes(t)))s+=6;
    if(a.h.toLowerCase().includes(t))s+=4;
    let i=-1,c=0;while((i=hay.indexOf(t,i+1))>-1)c++;s+=Math.min(c,4)*1.5;});
+  /* 어휘 점수에 임베딩 유사도를 더한다 (js/search.js). 임베딩이 없으면 0 이 더해진다. */
+  s+=typeof embBonus==="function"?embBonus(q,a.id):0;
   return{a,s};}).filter(x=>x.s>0).sort((x,y)=>y.s-x.s);
 }
 function retrieve(g,q,n=7){
@@ -139,8 +141,10 @@ function bestLine(a,q){
 }
 function bestGroup(q){
  const gs=[...new Set(ORDER.filter(k=>D[k].loaded).map(k=>D[k].group))];
- let best=null,top=0;
- gs.forEach(g=>{const s=scored(g,q)[0]?.s||0;if(s>top){top=s;best=g;}});
+ let best=null,top=-Infinity;
+ /* 규정 선택은 조문 하나가 아니라 규정군 전체의 임베딩 유사도를 함께 본다 */
+ gs.forEach(g=>{const s=(scored(g,q)[0]?.s||0)+(typeof embGroupBonus==="function"?embGroupBonus(q,g):0);
+  if(s>top){top=s;best=g;}});
  return best&&(D[best]?.loaded?best:docsOf(best).find(k=>D[k].loaded));
 }
 const PROVIDERS={
