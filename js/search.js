@@ -11,6 +11,7 @@
 const EMB_W = 30;        /* 조문 점수에 더할 임베딩 가중치 */
 const EMB_GW = 40;       /* 규정군 라우팅에 더할 임베딩 가중치 */
 const EMB_GTOP = 5;      /* 규정군 점수 = 소속 조문 임베딩 점수 상위 N개 평균 */
+const EMB_DW = 30;       /* 규정군 설명 벡터 가중치 (조문에 안 드러나는 규정의 성격을 보탠다) */
 const EMB_MIN_HIT = 1;   /* 질문에서 어휘 벡터를 찾은 단어가 이 개수 미만이면 임베딩을 쓰지 않는다 */
 
 let EMB = null;
@@ -112,7 +113,46 @@ function embGroupScores(q) {
   embGQ = q;
   return (embGV = out);
 }
+/* 1순위(소관 규정)는 조문 근거로만 고른다 */
 function embGroupBonus(q, g) {
   const m = embGroupScores(q);
   return m ? EMB_GW * (m.get(g) || 0) : 0;
+}
+/* 2순위(이어서 확인할 규정)는 규정의 성격까지 함께 본다.
+ * 1순위에 섞으면 조문 근거가 약해져 오히려 1순위가 틀리므로 분리해 쓴다. */
+function embDescBonus(q, g) {
+  const d = embDescScores(q);
+  return d ? EMB_DW * (d.get(g) || 0) : 0;
+}
+
+/* 규정군 설명 벡터 점수.
+ * 조문만 보면 "출장비"라는 단어 때문에 출장규정으로 끌려가지만,
+ * 위임전결규정의 설명("결재권한의 위임 범위와 금액별 전결권자를 정한다")은
+ * "어디까지 결재받아야" 같은 질문의 의도와 직접 맞는다. */
+let embDQ = null, embDV = null;
+function embDescScores(q) {
+  if (embDQ === q) return embDV;
+  const e = embReady(), v = embQueryVec(q);
+  if (!e || !v || typeof EMB_GROUP_B64 === "undefined") { embDQ = q; return (embDV = null); }
+  if (!e.grp) {
+    const bin = typeof atob === "function"
+      ? (() => { const b = atob(EMB_GROUP_B64), u = new Uint8Array(b.length);
+          for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; })()
+      : new Uint8Array(Buffer.from(EMB_GROUP_B64, "base64"));
+    e.grp = bin;
+  }
+  const out = new Map();
+  let lo = Infinity, hi = -Infinity;
+  EMB_GROUPS.forEach((g, i) => {
+    const off = i * e.dim;
+    let s = 0;
+    for (let j = 0; j < e.dim; j++) s += v[j] * ((e.grp[off + j] - 128) / 127);
+    out.set(g, s);
+    if (s < lo) lo = s;
+    if (s > hi) hi = s;
+  });
+  const span = hi - lo || 1;
+  out.forEach((s, g) => out.set(g, (s - lo) / span));
+  embDQ = q;
+  return (embDV = out);
 }

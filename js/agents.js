@@ -29,7 +29,11 @@ const agentLabel=g=>{const h=typeof groupHead==="function"?groupHead(g):null;
 async function masterRoute(q,{pin=null,limit=AGENT_CFG.fanout,list=null}={}){
  void list; /* 실시간 전환 시 provider().route(q,list) 를 부를 자리 */
  const groups=[...new Set(ORDER.filter(k=>D[k].loaded).map(k=>D[k].group))];
- const ranked=groups.map(g=>({g,score:scored(g,q)[0]?.s||0})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+ const gb=g=>typeof embGroupBonus==="function"?embGroupBonus(q,g):0;
+ const db=g=>typeof embDescBonus==="function"?embDescBonus(q,g):0;
+ /* 1순위: 조문 근거 기준 / 2순위: 규정 성격까지 더해 넓게 본다 */
+ const ranked=groups.map(g=>({g,score:(scored(g,q)[0]?.s||0)+gb(g)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+ const wide=groups.map(g=>({g,score:(scored(g,q)[0]?.s||0)+gb(g)+db(g)})).sort((a,b)=>b.score-a.score);
  const picks=[];
  const add=(g,score,via)=>{if(g&&D[g]&&!picks.some(p=>p.group===g)&&picks.length<limit)picks.push({group:g,score,via});};
 
@@ -40,6 +44,8 @@ async function masterRoute(q,{pin=null,limit=AGENT_CFG.fanout,list=null}={}){
  const headScore=picks.length?(ranked.find(r=>r.g===picks[0].group)?.score||0):0;
  const gate=picks.length?Math.max(AGENT_CFG.minScore,headScore*AGENT_CFG.minRatio):0;
  ranked.forEach(r=>{if(r.score>=gate)add(r.g,r.score,"retrieval");});
+ /* 자리가 남으면 규정 성격까지 본 순위에서 채운다 */
+ wide.forEach(r=>{if(picks.length<limit)add(r.g,r.score,"desc");});
 
  return{picks,ranked:ranked.slice(0,5),
   reason:picks.map(p=>`${agentLabel(p.group)}(${p.via})`).join(" + ")||"판단 불가"};

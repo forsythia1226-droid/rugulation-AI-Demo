@@ -10,8 +10,9 @@ import { pipeline } from "@huggingface/transformers";
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import { fileURLToPath } from "node:url";
 
-const ROOT = path.resolve(new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = f => fs.readFileSync(path.join(ROOT, f), "utf8");
 
 /* ---- 규정 데이터 로드 ---- */
@@ -64,8 +65,25 @@ async function embedAll(list, prefix, label) {
   process.stdout.write("\n");
   return out;
 }
+/* ---- 규정군 설명 텍스트 ----
+ * 규정명 + 한 줄 설명 + 추천 질문 + 주관부서 해석 지침.
+ * 조문에 안 드러나는 "이 규정은 무엇에 답하는 규정인가"를 라우팅에 알려준다. */
+const groups = [...new Set(Object.keys(D).filter(k => D[k].loaded).map(k => D[k].group))];
+const descText = g => {
+  const parts = [];
+  Object.keys(D).filter(k => D[k].group === g && D[k].loaded).forEach(k => {
+    parts.push(D[k].no + " " + D[k].name);
+    if (D[k].blurb) parts.push(D[k].blurb);
+    (D[k].starters || []).forEach(x => parts.push(x));
+    if (D[k].ownerPrompt) parts.push(String(D[k].ownerPrompt).replace(/\[[^\]]*\]/g, " ").replace(/\s+/g, " "));
+  });
+  return parts.join(" ").slice(0, 1400);
+};
+console.log("규정군", groups.length + "개");
+
 const artVec = await embedAll(arts.map(a => a.text.slice(0, 1200)), "passage: ", "조문");
 const termVec = await embedAll(terms, "query: ", "어휘");
+const grpVec = await embedAll(groups.map(descText), "passage: ", "규정군");
 
 /* ---- int8 양자화 + base64 ---- */
 const DIM = artVec[0].length;
@@ -79,13 +97,15 @@ function pack(vecs) {
 
 const js = `/* 빌드 타임 생성 파일 — 직접 수정하지 말 것 (scripts/build-embeddings.mjs 가 만든다)
  * multilingual-e5-small · ${DIM}차원 · int8 양자화
- * 조문 ${arts.length}개 벡터 + 어휘 ${terms.length}개 벡터.
+ * 조문 ${arts.length}개 · 어휘 ${terms.length}개 · 규정군 설명 ${groups.length}개 벡터.
  * 브라우저는 모델을 내려받지 않고, 어휘 벡터를 조합해 질문 벡터를 만든다. */
 const EMB_DIM=${DIM};
 const EMB_ARTS=${JSON.stringify(arts.map(a => a.id))};
 const EMB_ART_B64="${pack(artVec)}";
 const EMB_TERMS=${JSON.stringify(terms)};
 const EMB_TERM_B64="${pack(termVec)}";
+const EMB_GROUPS=${JSON.stringify(groups)};
+const EMB_GROUP_B64="${pack(grpVec)}";
 `;
 fs.writeFileSync(path.join(ROOT, "js/embeddings.js"), js, "utf8");
 console.log("js/embeddings.js  " + (js.length / 1024 / 1024).toFixed(2) + " MB");
