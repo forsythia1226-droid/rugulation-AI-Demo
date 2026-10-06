@@ -176,12 +176,31 @@ async function liveAnswer(g,q){
   citations:refused?[]:citationsFromText(g,text),related:[],needsOwner:false,ownerQuestion:""};
 }
 
-/* 준비된 답변도 LLM도 없을 때: 검색된 조문만 보여준다 */
+/* 준비된 답변도 LLM도 없을 때: 검색된 조문에서 질문과 가장 관련 있는 문장을 뽑아
+ * 답변 형태로 구성한다. 원문 문장만 옮기므로 없는 말이 생기지 않고,
+ * 인용도 그대로라 검수 에이전트의 대조를 통과한다. */
 function retrievalOnly(g,q){
- const top=scored(g,q).slice(0,3).map(x=>x.a);
- return{answer:top.length?"준비된 답변이 없어 관련 조문을 찾았습니다. 오른쪽 원문에서 확인해 주세요."
-   :"이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요.",
-  citations:top.map(a=>({id:a.id,quote:bestLine(a,q)})),related:[],needsOwner:false,ownerQuestion:""};
+ /* 2개까지만. 2번째는 1번째 점수의 절반을 넘을 때만 — 느슨하게 걸린 조문은 뺀다 */
+ const rk=scored(g,q).slice(0,3);
+ const top=rk.filter((x,i)=>i===0||x.s>=rk[0].s*0.5).slice(0,2).map(x=>x.a);
+ if(!top.length)return{answer:t("이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요."),
+  citations:[],related:[],needsOwner:false,ownerQuestion:""};
+ const ts=tokens(q),hit=l=>ts.filter(x=>l.toLowerCase().includes(x)).length;
+ const blocks=[],cits=[];
+ top.forEach((a,i)=>{
+  const ls=a.body.filter(b=>b!=="TABLE");
+  const ranked=ls.map(l=>({l,s:hit(l)})).sort((x,y)=>y.s-x.s);
+  const use=ranked.filter(x=>x.s>0).slice(0,2).map(x=>x.l);
+  const lines=use.length?use:ls.slice(0,1);
+  lines.forEach(l=>cits.push({id:a.id,quote:l.replace(/^[\u2460-\u2473]\s*/,"")}));
+  const label=`**${t(a.n)}(${t(a.h)})**`;
+  blocks.push(t(i===0?"{a}에 다음과 같이 규정되어 있습니다.":"{a}도 함께 확인하십시오.").replace("{a}",label));
+  lines.forEach(l=>blocks.push(t(l)));
+ });
+ if(top[0].xref)blocks.push(`**${t("연계")}** ${t(top[0].xref)}`);
+ blocks.push(t("질문과 가장 관련 있는 조문을 원문 그대로 옮긴 것입니다. 해석이 필요하면 주관부서에 확인하세요."));
+ return{answer:blocks.join("\n\n"),markdown:true,extract:true,
+  citations:cits.slice(0,6),related:[],needsOwner:false,ownerQuestion:""};
 }
 const llmReady=()=>typeof geminiReady==="function"&&geminiReady();
 
@@ -580,6 +599,7 @@ JSON만 출력하세요:
   if(isEN()&&EN_A[q]&&!r.markdown)r={...r,answer:EN_A[q]};
   box.innerHTML=(r.fromOwner?`<span class="ownerbadge">${esc(head.owner)} 답변 반영</span>`:"")
    +(r.live?`<span class="livebadge">${t("실시간 AI 생성 · 근거 조문을 확인하세요")}</span>`:"")
+   +(r.extract?`<span class="exbadge">${t("규정 원문에서 찾은 문장입니다")}</span>`:"")
    +(r.fallback?`<div class="fbnote">${IC.help}<span>실시간 AI 응답을 받지 못해 준비된 답변으로 안내합니다. (${esc(String(r.fallback).slice(0,60))})</span></div>`:"")
    +(r.markdown?`<div class="md">${mdToHtml(r.answer||"")}</div>`:esc(r.answer||"").replace(/제(\d+)조/g,'<strong>제$1조</strong>'));
   if(r.stale)box.insertAdjacentHTML("afterbegin",`<div class="stale">${IC.help}<span><b>근거 조문이 개정되었습니다.</b> 이 답변은 개정 전 조문 기준일 수 있습니다. 오른쪽 현행 원문과 <button data-stalehist>개정 이력</button>을 확인하고, 필요하면 주관부서에 확인하세요.</span></div>`);

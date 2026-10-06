@@ -158,3 +158,11 @@ Object.assign(DATA_EN,{
 "이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요.":"No related article was found at this desk. Please check the contents list on the right."
 });
 Object.assign(DATA_EN,{"시연 고정: 준비된 질문은 검증된 답변을 쓰고, 그 밖의 질문은 LLM이 연결돼 있으면 조문을 찾아 실시간으로 답합니다. 실시간 AI: 모든 질문을 LLM으로 답하고, 실패하면 준비된 답변으로 전환합니다.":"Demo: prepared questions use the verified answers; other questions are answered live from the retrieved articles when an LLM is connected. Live AI: every question goes to the LLM, falling back to the prepared answers on failure."});
+
+/* 조문 발췌 답변 */
+Object.assign(DATA_EN,{
+"{a}에 다음과 같이 규정되어 있습니다.":"{a} states the following.",
+"{a}도 함께 확인하십시오.":"Also see {a}.",
+"질문과 가장 관련 있는 조문을 원문 그대로 옮긴 것입니다. 해석이 필요하면 주관부서에 확인하세요.":"These are the articles most relevant to your question, quoted as they appear. For interpretation, check with the owning team.",
+"규정 원문에서 찾은 문장입니다":"Quoted from the regulation text"
+});

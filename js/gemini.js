@@ -52,6 +52,26 @@ ${corpus}`;
 }
 
 /* ---- 호출 ---- */
+/* 설정된 모델명이 더 이상 제공되지 않으면 조용히 실패한다.
+ * 그때 계정에서 쓸 수 있는 모델 목록을 받아 생성 가능한 모델로 자동 교체한다. */
+let GEMINI_RESOLVED=null;
+async function geminiPickModel(key){
+ const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`);
+ if(!r.ok)throw new Error(`모델 목록 조회 실패 ${r.status}`);
+ const j=await r.json();
+ const usable=(j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent"))
+  .map(m=>String(m.name||"").replace(/^models\//,""))
+  .filter(n=>n&&!/vision|embedding|aqa|image|tts|live/i.test(n));
+ const pick=usable.find(n=>/flash/i.test(n)&&!/thinking|lite/i.test(n))||usable.find(n=>/flash/i.test(n))||usable[0];
+ if(!pick)throw new Error("이 키로 쓸 수 있는 생성 모델이 없습니다");
+ return pick;
+}
+/* 응답 본문의 오류 메시지까지 올려 보낸다 — 원인을 화면에서 바로 알 수 있도록 */
+async function geminiErr(r){
+ let detail="";
+ try{const j=await r.json();detail=j?.error?.message||"";}catch{}
+ return new Error(`Gemini 오류 ${r.status}${detail?" · "+detail.slice(0,140):""}`);
+}
 async function geminiGenerate(system,question,history){
  const c=aiCfg();
  const contents=[...(history||[]).map(t=>({role:t.role==="assistant"?"model":"user",parts:[{text:t.content}]})),
@@ -60,17 +80,38 @@ async function geminiGenerate(system,question,history){
   generationConfig:{temperature:0.2,maxOutputTokens:1024}};
  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),20000);
  try{
-  const url=c.proxy?`${c.proxy}/api/chat`
-   :`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(c.model)}:generateContent?key=${encodeURIComponent(c.key)}`;
-  const payload=c.proxy?{model:c.model,...body}:body;
-  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),signal:ctl.signal});
-  if(!r.ok)throw new Error(`Gemini 응답 오류 ${r.status}`);
-  const j=await r.json();
-  const parts=j?.candidates?.[0]?.content?.parts||[];
-  const out=(typeof j.text==="string"&&j.text.trim())?j.text.trim():parts.map(p=>p.text||"").join("").trim();
-  if(!out)throw new Error("Gemini 응답이 비어 있습니다");
-  return out;
+  if(c.proxy){
+   const r=await fetch(`${c.proxy}/api/chat`,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:c.model,...body}),signal:ctl.signal});
+   if(!r.ok)throw await geminiErr(r);
+   return geminiText(await r.json());
+  }
+  const call=async model=>fetch(
+   `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(c.key)}`,
+   {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal:ctl.signal});
+  let model=GEMINI_RESOLVED||c.model;
+  let r=await call(model);
+  /* 모델을 못 찾으면(404/400) 쓸 수 있는 모델로 한 번 바꿔 재시도한다 */
+  if(!r.ok&&(r.status===404||r.status===400)){
+   /* 모델 탐색이 실패하면(키 오류 등) 원래 오류를 그대로 보여준다 */
+   try{
+    const alt=await geminiPickModel(c.key);
+    if(alt&&alt!==model){console.info("Gemini 모델 자동 전환:",model,"→",alt);
+     GEMINI_RESOLVED=alt;model=alt;r=await call(model);}
+   }catch(e){console.warn("모델 자동 전환 실패:",e);}
+  }
+  if(!r.ok)throw await geminiErr(r);
+  GEMINI_RESOLVED=model;
+  return geminiText(await r.json());
  }finally{clearTimeout(timer);}
+}
+function geminiText(j){
+ const cand=j?.candidates?.[0];
+ const parts=cand?.content?.parts||[];
+ const out=(typeof j.text==="string"&&j.text.trim())?j.text.trim():parts.map(p=>p.text||"").join("").trim();
+ if(out)return out;
+ const why=cand?.finishReason||j?.promptFeedback?.blockReason||"";
+ throw new Error("응답이 비어 있습니다"+(why?` (${why})`:""));
 }
 
 /* ---- 답변에서 근거 조문 찾아 인용 버튼으로 연결 ---- */

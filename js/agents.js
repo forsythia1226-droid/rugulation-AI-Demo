@@ -57,7 +57,7 @@ async function subAnswer(group,q,turns,opts){
  const r=await (await provider()).answer(group,q,turns,opts);
  return{...r,group,ms:Math.round(agentNow()-t0),
   /* 준비된 답변(또는 주관부서 답변)에 실제로 걸린 경우만 '답변함'으로 본다 */
-  answered:!!(r.key||r.fromOwner||r.markdown)};
+  answered:!!(r.key||r.fromOwner||r.live)};
 }
 
 /* ---------- 병합 ---------- */
