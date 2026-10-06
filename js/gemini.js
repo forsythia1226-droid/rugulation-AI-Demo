@@ -33,16 +33,17 @@ function geminiSystemPrompt(head,corpus,guide){
 - 사내 규정과 관련 없는 질문(일상 대화, 주식, 날씨, 타사 정보, 개인 신상 등)에는 다른 말을 덧붙이지 말고 아래 문장만 그대로 출력한다.
 ${GEMINI_REFUSAL}
 
-[출력 포맷] 아래 마크다운 형식을 그대로 지킨다. 각 항목은 한국어 존댓말로 간결하게 쓴다.
-### 📌 관련 규정
-- [${head.no} ${head.name} 제O조(조문 제목)]
+[출력 형식] 아래 규칙을 반드시 지킨다. 어기면 안 된다.
+- 머리말·소제목·번호목록·글머리표·이모지·마크다운 기호를 쓰지 않는다. 줄바꿈 없는 한 문단으로만 쓴다.
+- 3~5문장, 한국어 존댓말. 전체 400자 이내.
+- 첫 문장에 결론을 쓴다. 질문이 "얼마냐"면 금액을, "며칠이냐"면 일수를, "되느냐"면 가능 여부를 먼저 말한다.
+- 근거는 문장 안에 "제7조", "별표1"처럼 자연스럽게 섞어 쓴다. 조문 번호를 괄호로 몰아 쓰지 않는다.
+- 금액·일수·기한·비율은 데이터에 적힌 숫자를 그대로 쓴다. 반올림하거나 바꾸지 않는다.
+- 마지막 문장에는 신청 절차, 기한, 주의사항, 함께 볼 규정 중 질문에 필요한 것을 적는다.
+- 데이터로 확정할 수 없는 부분은 그 사실을 문장으로 밝히고 ${head.owner} 확인을 안내한다.
 
-### 📝 핵심 요약
-- 1~2줄로 결론부터
-
-### 💡 상세 내용 및 절차
-- 구체적인 기준·절차·기한
-- 함께 확인할 규정이 있으면 마지막 항목에 적는다
+[좋은 답변 예시] 이 문체와 길이를 따른다.
+국내출장비 380만원은 부문장 전결입니다. 제7조 표에서 국내출장비는 200만원 초과 1,000만원 이하 구간이 부문장 전결이므로 팀장을 거쳐 부문장까지 상신하면 됩니다. 한도를 피하려고 출장비를 나눠 기안하는 것은 제12조에 따라 금지되며, 같은 목적으로 3개월 안에 반복 집행하면 합계액으로 전결권자를 정합니다. 출장명령은 별도로 출장 및 여비규정 제5조 절차를 따릅니다.
 
 [규정 주관부서가 작성한 해석 지침 — 규정 원문보다 먼저 반영]
 ${guide||"(없음)"}
@@ -104,6 +105,31 @@ async function geminiGenerate(system,question,history){
   GEMINI_RESOLVED=model;
   return geminiText(await r.json());
  }finally{clearTimeout(timer);}
+}
+/* 모델이 마크다운을 섞어 보내도 준비된 답변과 같은 평문 한 문단으로 정리한다 */
+function geminiPlain(text){
+ return String(text||"")
+  .replace(/```[\s\S]*?```/g,"")                       /* 코드블록 제거 */
+  .split(/\r?\n/)
+  .filter(l=>!/^\s*#{1,6}\s/.test(l))                   /* 소제목 줄은 버린다 */
+  .map(l=>l.replace(/^\s*[-*•]\s+/,"")                  /* 글머리표 */
+           .replace(/^\s*\d+[.)]\s+/,"")               /* 번호목록 */
+           .replace(/^\s*[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]\s*/gu,"") /* 줄머리 이모지 */
+           .trim())
+  .filter(Boolean)
+  .join(" ")
+  .replace(/\*\*(.+?)\*\*/g,"$1").replace(/[*_`]/g,"") /* 강조 기호 */
+  .replace(/\s{2,}/g," ")
+  .trim();
+}
+/* 답변 본문에 이름이 나오는 다른 규정을 '이어서 확인할 규정'으로 올린다 */
+function relatedFromText(g,text){
+ const out=[];
+ ORDER.forEach(k=>{
+  if(!D[k].loaded||D[k].group===g||out.includes(D[k].group))return;
+  const n=short(D[k].name);
+  if(n&&n.length>3&&text.includes(n))out.push(D[k].group);});
+ return out.slice(0,2);
 }
 function geminiText(j){
  const cand=j?.candidates?.[0];

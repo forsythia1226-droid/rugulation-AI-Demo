@@ -170,10 +170,13 @@ async function liveAnswer(g,q){
  const head=groupHead(g);
  const corpus=retrieve(g,q).map(artText).join("\n\n---\n\n");
  const guide=docsOf(g).filter(k=>D[k].loaded).map(ownerPrompt).filter(Boolean).join("\n\n");
- const text=await geminiGenerate(geminiSystemPrompt(head,corpus,guide),q,state.turns.slice(-4));
- const refused=text.replace(/\s/g,"").includes(GEMINI_REFUSAL.replace(/\s/g,""));
- return{answer:text,markdown:true,source:"gemini",live:true,
-  citations:refused?[]:citationsFromText(g,text),related:[],needsOwner:false,ownerQuestion:""};
+ const raw=await geminiGenerate(geminiSystemPrompt(head,corpus,guide),q,state.turns.slice(-4));
+ const refused=raw.replace(/\s/g,"").includes(GEMINI_REFUSAL.replace(/\s/g,""));
+ /* 준비된 답변과 같은 평문 한 문단으로 맞춘다 — 제N조는 화면에서 굵게 표시된다 */
+ const text=refused?GEMINI_REFUSAL:geminiPlain(raw);
+ return{answer:text,source:"gemini",live:true,
+  citations:refused?[]:citationsFromText(g,text),
+  related:refused?[]:relatedFromText(g,text),needsOwner:false,ownerQuestion:""};
 }
 
 /* 준비된 답변도 LLM도 없을 때: 검색된 조문에서 질문과 가장 관련 있는 문장을 뽑아
