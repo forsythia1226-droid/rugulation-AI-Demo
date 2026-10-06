@@ -147,6 +147,44 @@ function bestGroup(q){
   if(s>top){top=s;best=g;}});
  return best&&(D[best]?.loaded?best:docsOf(best).find(k=>D[k].loaded));
 }
+/* ---------- 답변 소스 ----------
+ * 1) 준비된(검증된) 답변이 있으면 그것을 쓴다.
+ * 2) 없고 LLM이 연결돼 있으면 임베딩 검색으로 뽑은 조문만 근거로 실시간 생성한다.
+ * 3) 둘 다 없으면 관련 조문만 제시한다. */
+
+/* 검증된 답변 조회 — 없으면 null */
+function preparedAnswer(g,q){
+ const oa=ownerAnswers.get(q);
+ if(oa&&D[oa.key]&&D[oa.key].group===g)
+  return{answer:oa.answer,citations:oa.citations||[],related:[],needsOwner:false,ownerQuestion:"",fromOwner:oa.by};
+ const hit=DEMO_ANSWERS[demoNorm(q)];
+ if(hit&&D[hit.key].group===g){
+  /* 실행 시 인용 검증: 준비된 답변의 근거 문장이 현행 조문에 그대로 있는지 (개정되면 경고) */
+  const all=groupArts(g),stale=hit.citations.some(c=>{const x=all.find(y=>y.id===c.id);return !x||!x.body.some(b=>b.includes(c.quote));});
+  return stale?{...hit,stale:true}:hit;}
+ return null;
+}
+
+/* LLM 실시간 답변. 근거는 임베딩 검색(retrieve)이 뽑은 조문뿐이다. 실패하면 던진다. */
+async function liveAnswer(g,q){
+ const head=groupHead(g);
+ const corpus=retrieve(g,q).map(artText).join("\n\n---\n\n");
+ const guide=docsOf(g).filter(k=>D[k].loaded).map(ownerPrompt).filter(Boolean).join("\n\n");
+ const text=await geminiGenerate(geminiSystemPrompt(head,corpus,guide),q,state.turns.slice(-4));
+ const refused=text.replace(/\s/g,"").includes(GEMINI_REFUSAL.replace(/\s/g,""));
+ return{answer:text,markdown:true,source:"gemini",live:true,
+  citations:refused?[]:citationsFromText(g,text),related:[],needsOwner:false,ownerQuestion:""};
+}
+
+/* 준비된 답변도 LLM도 없을 때: 검색된 조문만 보여준다 */
+function retrievalOnly(g,q){
+ const top=scored(g,q).slice(0,3).map(x=>x.a);
+ return{answer:top.length?"준비된 답변이 없어 관련 조문을 찾았습니다. 오른쪽 원문에서 확인해 주세요."
+   :"이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요.",
+  citations:top.map(a=>({id:a.id,quote:bestLine(a,q)})),related:[],needsOwner:false,ownerQuestion:""};
+}
+const llmReady=()=>typeof geminiReady==="function"&&geminiReady();
+
 const PROVIDERS={
  live:{
   async route(q,list){
@@ -156,35 +194,25 @@ const PROVIDERS={
  /* Gemini 실시간 응답. 실패하면 준비된 답변(demo)으로 자동 전환한다 */
  gemini:{
   async route(q){return DEMO_ROUTES[demoNorm(q)]||bestGroup(q);},
-  async answer(g,q,turns){
-   const head=groupHead(g);
-   try{
-    const corpus=retrieve(g,q).map(artText).join("\n\n---\n\n");
-    const guide=docsOf(g).filter(k=>D[k].loaded).map(ownerPrompt).filter(Boolean).join("\n\n");
-    const text=await geminiGenerate(geminiSystemPrompt(head,corpus,guide),q,state.turns.slice(-4));
-    const refused=text.replace(/\s/g,"").includes(GEMINI_REFUSAL.replace(/\s/g,""));
-    return{answer:text,markdown:true,source:"gemini",
-     citations:refused?[]:citationsFromText(g,text),related:[],needsOwner:false,ownerQuestion:""};
-   }catch(e){
-    console.warn("Gemini 호출 실패 → 준비된 답변으로 전환:",e);
-    const fb=await PROVIDERS.demo.answer(g,q,turns);
+  async answer(g,q){
+   try{return await liveAnswer(g,q);}
+   catch(e){
+    console.warn("LLM 호출 실패 → 준비된 답변으로 전환:",e);
+    const fb=preparedAnswer(g,q)||retrievalOnly(g,q);
     return{...fb,fallback:String(e&&e.message||e)};
    }}},
  demo:{
   async route(q){await demoDelay();return DEMO_ROUTES[demoNorm(q)]||bestGroup(q);},
-  async answer(g,q){
+  async answer(g,q,turns,opts){
    await demoDelay();
-   const oa=ownerAnswers.get(q);
-   if(oa&&D[oa.key]&&D[oa.key].group===g)return{answer:oa.answer,citations:oa.citations||[],related:[],needsOwner:false,ownerQuestion:"",fromOwner:oa.by};
-   const hit=DEMO_ANSWERS[demoNorm(q)];
-   if(hit&&D[hit.key].group===g){
-    /* 실행 시 인용 검증: 준비된 답변의 근거 문장이 현행 조문에 그대로 있는지 확인 (개정되면 경고) */
-    const all=groupArts(g),stale=hit.citations.some(c=>{const x=all.find(y=>y.id===c.id);return !x||!x.body.some(b=>b.includes(c.quote));});
-    return stale?{...hit,stale:true}:hit;}
-   const top=scored(g,q).slice(0,3).map(x=>x.a);
-   return{answer:top.length?"시연 모드에서는 준비된 질문에만 AI가 답합니다. 관련 조문을 찾았습니다."
-     :"시연 모드에서는 준비된 질문에만 AI가 답합니다. 이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요.",
-    citations:top.map(a=>({id:a.id,quote:bestLine(a,q)})),related:[],needsOwner:false,ownerQuestion:""};}}
+   const prep=preparedAnswer(g,q);
+   if(prep)return prep;
+   /* 준비된 질문이 아니어도 LLM이 연결돼 있으면 임베딩 검색 결과를 근거로 답한다 */
+   if(llmReady()&&!(opts&&opts.live===false)){
+    try{return await liveAnswer(g,q);}
+    catch(e){console.warn("LLM 호출 실패 → 조문만 제시:",e);
+     return{...retrievalOnly(g,q),fallback:String(e&&e.message||e)};}}
+   return retrievalOnly(g,q);}}
 };
 async function provider(){
  if(useGemini())return PROVIDERS.gemini;
@@ -551,6 +579,7 @@ JSON만 출력하세요:
   const cits=(r.citations||[]).map(c=>{const a=all.find(x=>x.id===c.id);return a?{...c,docKey:a.docKey,label:`${a.n} ${a.h}`,docNo:D[a.docKey].no}:null;}).filter(Boolean);
   if(isEN()&&EN_A[q]&&!r.markdown)r={...r,answer:EN_A[q]};
   box.innerHTML=(r.fromOwner?`<span class="ownerbadge">${esc(head.owner)} 답변 반영</span>`:"")
+   +(r.live?`<span class="livebadge">${t("실시간 AI 생성 · 근거 조문을 확인하세요")}</span>`:"")
    +(r.fallback?`<div class="fbnote">${IC.help}<span>실시간 AI 응답을 받지 못해 준비된 답변으로 안내합니다. (${esc(String(r.fallback).slice(0,60))})</span></div>`:"")
    +(r.markdown?`<div class="md">${mdToHtml(r.answer||"")}</div>`:esc(r.answer||"").replace(/제(\d+)조/g,'<strong>제$1조</strong>'));
   if(r.stale)box.insertAdjacentHTML("afterbegin",`<div class="stale">${IC.help}<span><b>근거 조문이 개정되었습니다.</b> 이 답변은 개정 전 조문 기준일 수 있습니다. 오른쪽 현행 원문과 <button data-stalehist>개정 이력</button>을 확인하고, 필요하면 주관부서에 확인하세요.</span></div>`);
@@ -595,7 +624,9 @@ JSON만 출력하세요:
 }
 
 /* ---------- routing ---------- */
-function syncAvail(){const h=$("#hint");if(h&&aiMode()==="demo")h.textContent=t("시연 모드 · 준비된 질문에 AI가 답합니다. 근거 조문을 누르면 오른쪽 원문에서 해당 문장을 표시합니다.");}
+function syncAvail(){const h=$("#hint");if(!h||aiMode()!=="demo")return;
+ h.textContent=llmReady()?t("준비된 질문은 검증된 답변, 그 밖의 질문은 실시간 AI가 조문을 찾아 답합니다.")
+  :t("시연 모드 · 준비된 질문에 AI가 답합니다. 근거 조문을 누르면 오른쪽 원문에서 해당 문장을 표시합니다.");}
 const me=()=>session.get();
 const isAdmin=()=>me()?.role==="admin";
 function go(v){

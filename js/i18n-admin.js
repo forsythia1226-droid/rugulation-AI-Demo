@@ -150,3 +150,11 @@ Object.assign(DATA_EN,{
 });
 Object.assign(DATA_EN,{"금액":"Amount","목적":"Purpose"});
 
+/* 실시간 AI 답변 (준비된 질문이 아닐 때) */
+Object.assign(DATA_EN,{
+"실시간 AI 생성 · 근거 조문을 확인하세요":"Generated live by AI · check the cited articles",
+"준비된 질문은 검증된 답변, 그 밖의 질문은 실시간 AI가 조문을 찾아 답합니다.":"Prepared questions get verified answers; other questions are answered live by AI from the retrieved articles.",
+"준비된 답변이 없어 관련 조문을 찾았습니다. 오른쪽 원문에서 확인해 주세요.":"No prepared answer, so here are the related articles. Please check the text on the right.",
+"이 창구에서 관련 조문을 찾지 못했습니다. 오른쪽 조문 목차에서 직접 확인해 주세요.":"No related article was found at this desk. Please check the contents list on the right."
+});
+Object.assign(DATA_EN,{"시연 고정: 준비된 질문은 검증된 답변을 쓰고, 그 밖의 질문은 LLM이 연결돼 있으면 조문을 찾아 실시간으로 답합니다. 실시간 AI: 모든 질문을 LLM으로 답하고, 실패하면 준비된 답변으로 전환합니다.":"Demo: prepared questions use the verified answers; other questions are answered live from the retrieved articles when an LLM is connected. Live AI: every question goes to the LLM, falling back to the prepared answers on failure."});

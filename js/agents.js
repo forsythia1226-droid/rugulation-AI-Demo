@@ -52,9 +52,9 @@ async function masterRoute(q,{pin=null,limit=AGENT_CFG.fanout,list=null}={}){
 }
 
 /* ---------- Sub: 규정군 하나를 담당 ---------- */
-async function subAnswer(group,q,turns){
+async function subAnswer(group,q,turns,opts){
  const t0=agentNow();
- const r=await (await provider()).answer(group,q,turns);
+ const r=await (await provider()).answer(group,q,turns,opts);
  return{...r,group,ms:Math.round(agentNow()-t0),
   /* 준비된 답변(또는 주관부서 답변)에 실제로 걸린 경우만 '답변함'으로 본다 */
   answered:!!(r.key||r.fromOwner||r.markdown)};
@@ -107,7 +107,8 @@ async function runAgents(q,{group=null,turns=[]}={}){
  if(!route.picks.length)return{answer:"",citations:[],related:[],needsOwner:false,ownerQuestion:"",trace,agents:[]};
 
  /* Sub 병렬 호출 */
- const results=await Promise.all(route.picks.map(p=>subAnswer(p.group,q,turns)));
+ /* 실시간 생성은 1순위 규정에서만 한다 — 2순위까지 부르면 호출이 두 배가 된다 */
+ const results=await Promise.all(route.picks.map((p,i)=>subAnswer(p.group,q,turns,{live:i===0})));
  results.forEach(r=>trace.push({agent:"sub",group:agentLabel(r.group),answered:r.answered,
   citations:(r.citations||[]).length,ms:r.ms}));
 

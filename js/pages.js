@@ -44,7 +44,7 @@ function renderSettings(){
   </section>
   <section class="card pad">
    <div class="bh"><span class="bi">${IC.spark}</span><h3>AI 응답</h3></div>
-   <div class="setrow"><div><b>응답 방식</b><small>시연 고정: 준비된 질문에 검증된 답변만 표시합니다. 실시간 AI: Gemini로 답변하고, 호출에 실패하면 준비된 답변으로 자동 전환합니다.</small></div>${seg("aiMode",[["demo","시연 고정"],["gemini","실시간 AI(Gemini)"]],s.aiMode==="live"?"demo":s.aiMode)}</div>
+   <div class="setrow"><div><b>응답 방식</b><small>시연 고정: 준비된 질문은 검증된 답변을 쓰고, 그 밖의 질문은 LLM이 연결돼 있으면 조문을 찾아 실시간으로 답합니다. 실시간 AI: 모든 질문을 LLM으로 답하고, 실패하면 준비된 답변으로 전환합니다.</small></div>${seg("aiMode",[["demo","시연 고정"],["gemini","실시간 AI(Gemini)"]],s.aiMode==="live"?"demo":s.aiMode)}</div>
    ${s.aiMode==="gemini"?`<div class="setrow col">
     <div class="form ai-cfg">
      <label class="w2">프록시 주소 <small>권장 · 서버가 키를 보관합니다 (예: http://localhost:8787)</small><input id="ai-proxy" value="${esc(s.aiProxy)}" placeholder="비워 두면 브라우저에서 직접 호출"></label>
