@@ -47,11 +47,10 @@ function renderSettings(){
    <div class="setrow"><div><b>응답 방식</b><small>시연 고정: 준비된 질문은 검증된 답변을 쓰고, 그 밖의 질문은 LLM이 연결돼 있으면 조문을 찾아 실시간으로 답합니다. 실시간 AI: 모든 질문을 LLM으로 답하고, 실패하면 준비된 답변으로 전환합니다.</small></div>${seg("aiMode",[["demo","시연 고정"],["gemini","실시간 AI(Gemini)"]],s.aiMode==="live"?"demo":s.aiMode)}</div>
    ${s.aiMode==="gemini"?`<div class="setrow col">
     <div class="form ai-cfg">
-     <label class="w2">프록시 주소 <small>권장 · 서버가 키를 보관합니다 (예: http://localhost:8787)</small><input id="ai-proxy" value="${esc(s.aiProxy)}" placeholder="비워 두면 브라우저에서 직접 호출"></label>
      <label>모델<select id="ai-model">${["gemini-3.5-flash","gemini-3.5-flash-lite","gemini-3.8-flash","gemini-2.5-flash"].map(m=>`<option ${m===(s.aiModel||"gemini-3.5-flash")?"selected":""}>${m}</option>`).join("")}</select></label>
-     <label class="w3">API 키 <small>프록시를 쓰면 비워 둡니다. 입력하면 이 브라우저에만 저장됩니다</small><input id="ai-key" type="password" value="${esc(s.aiKey)}" placeholder="직접 호출용 (공개 시연에는 권장하지 않음)"></label>
+     <label class="w2">API 키 <small>입력한 브라우저에만 저장됩니다. 다른 PC에는 남지 않습니다</small><input id="ai-key" type="password" value="${esc(s.aiKey)}" placeholder="Gemini API 키를 붙여넣으세요"></label>
     </div>
-    <div class="formbar"><span class="rq-note">${IC.help}공개 페이지에서는 키가 노출될 수 있습니다. 실제 규정으로 시연할 때는 프록시를 사용하세요.</span>
+    <div class="formbar"><span class="rq-note">${IC.help}시연용입니다. 키는 이 브라우저에만 저장되며, 시연이 끝나면 칸을 비우고 저장하세요.</span>
      <button class="save" id="ai-save">연결 저장</button><button class="ghost" id="ai-test">연결 테스트</button><span class="saved hidden" id="ai-ok"></span></div>
     <p class="ai-state" id="ai-state"></p>
    </div>`:""}
@@ -66,10 +65,10 @@ function renderSettings(){
   </section>`:""}
  </div>`;
  $("#ai-save")&&($("#ai-save").onclick=()=>{
-  settings.set({aiProxy:$("#ai-proxy").value.trim(),aiModel:$("#ai-model").value.trim(),aiKey:$("#ai-key").value.trim()});
+  settings.set({aiProxy:"",aiModel:$("#ai-model").value.trim(),aiKey:$("#ai-key").value.trim()});
   renderHeader();const ok=$("#ai-ok");ok.textContent="저장했습니다";ok.classList.remove("hidden");setTimeout(()=>ok.classList.add("hidden"),1800);});
  $("#ai-test")&&($("#ai-test").onclick=async()=>{
-  settings.set({aiProxy:$("#ai-proxy").value.trim(),aiModel:$("#ai-model").value.trim(),aiKey:$("#ai-key").value.trim()});
+  settings.set({aiProxy:"",aiModel:$("#ai-model").value.trim(),aiKey:$("#ai-key").value.trim()});
   const st=$("#ai-state");st.className="ai-state";st.textContent="연결 확인 중…";
   try{const t=await geminiGenerate("너는 연결 테스트용 도우미다. 한국어로 '연결 정상'이라고만 답해라.","연결 테스트");
    st.classList.add("ok");st.textContent="연결 정상 · 응답: "+t.slice(0,40);}

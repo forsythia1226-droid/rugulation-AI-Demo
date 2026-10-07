@@ -84,7 +84,10 @@ Object.assign(KO_EN,{
  "시연":"Demo","새 메시지 입력":"Type a message",
  /* 설정 */
  "시연 데이터":"Demo data","초기화":"Reset","시연 데이터 초기화":"Reset demo data","저장했습니다":"Saved",
- "프록시 주소":"Proxy URL","모델":"Model","API 키":"API key","연결 저장":"Save connection","연결 테스트":"Test connection",
+ "모델":"Model","API 키":"API key",
+ "입력한 브라우저에만 저장됩니다. 다른 PC에는 남지 않습니다":"Stored only in the browser you enter it in; it is not kept on other PCs",
+ "Gemini API 키를 붙여넣으세요":"Paste your Gemini API key",
+ "시연용입니다. 키는 이 브라우저에만 저장되며, 시연이 끝나면 칸을 비우고 저장하세요.":"For demo use. The key is stored only in this browser \u2014 clear the field and save when the demo is over.","연결 저장":"Save connection","연결 테스트":"Test connection",
  /* 관리자 */
  "관리자 페이지":"Owner Console","규정별 담당자를 지정하고 개정 이력과 원본 파일을 관리합니다.":"Assign owners and manage revision history and source files.",
  "담당 규정":"My regulations","담당자":"Owners","정 담당자":"Primary owner","부 담당자":"Deputy owner","담당자 저장":"Save owners",
