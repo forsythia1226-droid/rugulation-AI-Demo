@@ -67,10 +67,21 @@ async function geminiPickModel(key){
  if(!pick)throw new Error("이 키로 쓸 수 있는 생성 모델이 없습니다");
  return pick;
 }
+/* 구글 쪽이 잠깐 막힌 상태 — 키나 요청이 잘못된 게 아니므로 기다렸다 다시 부른다.
+ * 503 과부하는 Flash 계열에서 드물지 않게 나고, 보통 1~2초 뒤 풀린다. */
+const GEMINI_BUSY = [429, 500, 502, 503, 504];
+/* 과부하 때 옮겨 탈 모델 — 가벼운 쪽이 대체로 여유가 있다 */
+const GEMINI_FALLBACKS = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"];
+const GEMINI_WAIT = [700, 1800];          /* 재시도 간격 */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 /* 응답 본문의 오류 메시지까지 올려 보낸다 — 원인을 화면에서 바로 알 수 있도록 */
 async function geminiErr(r){
  let detail="";
  try{const j=await r.json();detail=j?.error?.message||"";}catch{}
+ /* 과부하·한도는 설정이 잘못된 게 아니다. 영문 원문 대신 할 일을 알려준다. */
+ if(r.status===429)return new Error("Gemini 사용량 한도에 걸렸습니다. 잠시 후 다시 질문해 주세요.");
+ if(GEMINI_BUSY.includes(r.status))return new Error("Gemini 서버가 혼잡합니다. 잠시 후 다시 질문해 주세요.");
  return new Error(`Gemini 오류 ${r.status}${detail?" · "+detail.slice(0,140):""}`);
 }
 async function geminiGenerate(system,question,history){
@@ -79,11 +90,14 @@ async function geminiGenerate(system,question,history){
   {role:"user",parts:[{text:question}]}];
  const body={contents,systemInstruction:{parts:[{text:system}]},
   generationConfig:{temperature:0.2,maxOutputTokens:1024}};
- const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),20000);
+ const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),35000);
  try{
   if(c.proxy){
-   const r=await fetch(`${c.proxy}/api/chat`,{method:"POST",headers:{"Content-Type":"application/json"},
+   const px=async()=>fetch(`${c.proxy}/api/chat`,{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({model:c.model,...body}),signal:ctl.signal});
+   let r=await px();
+   for(let i=0;!r.ok&&GEMINI_BUSY.includes(r.status)&&i<GEMINI_WAIT.length;i++){
+    await sleep(GEMINI_WAIT[i]);r=await px();}
    if(!r.ok)throw await geminiErr(r);
    return geminiText(await r.json());
   }
@@ -100,6 +114,22 @@ async function geminiGenerate(system,question,history){
     if(alt&&alt!==model){console.info("Gemini 모델 자동 전환:",model,"→",alt);
      GEMINI_RESOLVED=alt;model=alt;r=await call(model);}
    }catch(e){console.warn("모델 자동 전환 실패:",e);}
+  }
+  /* 과부하(503 등)는 잠깐 기다렸다 같은 모델로 다시 부른다 */
+  for(let i=0;!r.ok&&GEMINI_BUSY.includes(r.status)&&i<GEMINI_WAIT.length;i++){
+   console.info(`Gemini ${r.status} — ${GEMINI_WAIT[i]}ms 뒤 재시도 (${i+1}/${GEMINI_WAIT.length})`);
+   await sleep(GEMINI_WAIT[i]);
+   r=await call(model);
+  }
+  /* 그 모델이 계속 붐비면 같은 키로 쓸 수 있는 다른 모델에 한 번 맡겨 본다 */
+  if(!r.ok&&GEMINI_BUSY.includes(r.status)){
+   for(const alt of GEMINI_FALLBACKS){
+    if(alt===model)continue;
+    console.info("Gemini 과부하 — 모델 전환 시도:",model,"→",alt);
+    const r2=await call(alt);
+    if(r2.ok){GEMINI_RESOLVED=alt;r=r2;break;}
+    if(!GEMINI_BUSY.includes(r2.status))break;   /* 과부하가 아닌 오류면 원인이 다르다 */
+   }
   }
   if(!r.ok)throw await geminiErr(r);
   GEMINI_RESOLVED=model;

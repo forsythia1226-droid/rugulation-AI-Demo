@@ -85,6 +85,8 @@ Object.assign(KO_EN,{
  /* 설정 */
  "시연 데이터":"Demo data","초기화":"Reset","시연 데이터 초기화":"Reset demo data","저장했습니다":"Saved",
  "모델":"Model","API 키":"API key",
+ "Gemini 서버가 혼잡합니다. 잠시 후 다시 질문해 주세요.":"Gemini is busy right now. Please ask again in a moment.",
+ "Gemini 사용량 한도에 걸렸습니다. 잠시 후 다시 질문해 주세요.":"The Gemini usage limit was reached. Please ask again in a moment.",
  "입력한 브라우저에만 저장됩니다. 다른 PC에는 남지 않습니다":"Stored only in the browser you enter it in; it is not kept on other PCs",
  "Gemini API 키를 붙여넣으세요":"Paste your Gemini API key",
  "시연용입니다. 키는 이 브라우저에만 저장되며, 시연이 끝나면 칸을 비우고 저장하세요.":"For demo use. The key is stored only in this browser \u2014 clear the field and save when the demo is over.","연결 저장":"Save connection","연결 테스트":"Test connection",
