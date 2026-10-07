@@ -40,6 +40,11 @@ async function masterRoute(q,{pin=null,limit=AGENT_CFG.fanout,list=null}={}){
  if(pin)add(pin,ranked.find(r=>r.g===pin)?.score||0,"desk");        /* 규정 창구에서 물은 경우 그 규정이 1순위 */
  const prepared=DEMO_ROUTES[demoNorm(q)];                            /* 준비된 질문의 지정 규정 */
  if(prepared&&D[prepared])add(D[prepared].group,Infinity,"prepared");
+ /* 표현만 바꾼 질문도 같은 규정으로 보낸다 — 검색 후보와 일치할 때만 */
+ if(typeof preparedMatch==="function"){
+  const m=preparedMatch(q,ranked.slice(0,3).map(r=>r.g));
+  if(m)add(m.group,Infinity,"match");
+ }
  /* 2순위 기준: 절대 점수와 1순위 대비 비율을 함께 본다 */
  const headScore=picks.length?(ranked.find(r=>r.g===picks[0].group)?.score||0):0;
  const gate=picks.length?Math.max(AGENT_CFG.minScore,headScore*AGENT_CFG.minRatio):0;
@@ -95,12 +100,32 @@ function verifyCitations(result,groups){
  return{checked:checks.length,passed:checks.length-failed.length,failed,ok:!failed.length};
 }
 
+/* 범위 밖 질문에 대한 응답 — 없는 근거를 만들지 않고 담당부서로 보낸다 */
+function outOfScopeAnswer(q, sc) {
+  const msg = sc.why === "inject"
+    ? t("규정 안내 외의 요청에는 답변하지 않습니다. 사내 규정에 대해 질문해 주세요.")
+    : t("이 질문과 관련된 규정을 찾지 못했습니다. 적재된 규정 범위 밖이거나 다른 표현일 수 있습니다.");
+  return {
+    answer: msg, citations: [], related: [], outOfScope: true,
+    needsOwner: sc.why !== "inject",
+    ownerQuestion: sc.why === "inject" ? "" : t("담당부서에 직접 확인이 필요한 질문입니다.")
+  };
+}
+
 /* ---------- 파이프라인 ---------- */
 /* ask()가 부르는 단일 진입점. 반환 형태는 기존 provider.answer()와 같고
  * trace(각 에이전트의 판단·소요시간)와 agents(호출한 규정군)만 더 붙는다. */
 async function runAgents(q,{group=null,turns=[]}={}){
  const trace=[],t0=agentNow();
 
+ /* 규정 범위 밖이거나 지시를 바꾸려는 입력은 조문을 들이대지 않는다 */
+ if(typeof scopeCheck==="function"){
+  const sc=scopeCheck(q);
+  if(!sc.inScope){
+   trace.push({agent:"scope",inScope:false,why:sc.why,cover:+sc.cover.toFixed(2),lex:+sc.lex.toFixed(1)});
+   return{...outOfScopeAnswer(q,sc),trace,agents:[],verify:{checked:0,passed:0,failed:[],ok:true}};
+  }
+ }
  const route=await masterRoute(q,{pin:group});
  trace.push({agent:"master",picks:route.picks.map(p=>agentLabel(p.group)),reason:route.reason,
   ms:Math.round(agentNow()-t0)});

@@ -12,7 +12,10 @@ const EMB_W = 30;        /* 조문 점수에 더할 임베딩 가중치 */
 const EMB_GW = 40;       /* 규정군 라우팅에 더할 임베딩 가중치 */
 const EMB_GTOP = 5;      /* 규정군 점수 = 소속 조문 임베딩 점수 상위 N개 평균 */
 const EMB_DW = 30;       /* 규정군 설명 벡터 가중치 (조문에 안 드러나는 규정의 성격을 보탠다) */
-const EMB_MIN_HIT = 1;   /* 질문에서 어휘 벡터를 찾은 단어가 이 개수 미만이면 임베딩을 쓰지 않는다 */
+const EMB_MIN_HIT = 1;
+const PREP_SIM = 0.93;   /* 준비 질문과 같은 뜻으로 볼 최소 유사도 — 골든셋으로 맞춘 값 */
+const SCOPE_COVER = 0.62; /* 질문의 말 중 규정에서 쓰는 말의 비중이 이보다 낮으면 범위 밖 */
+const SCOPE_LEX = 8;      /* 어휘 검색 점수가 이보다 낮으면 범위 밖 */   /* 질문에서 어휘 벡터를 찾은 단어가 이 개수 미만이면 임베딩을 쓰지 않는다 */
 
 let EMB = null;
 function embReady() {
@@ -36,18 +39,24 @@ function embReady() {
 }
 
 /* 질문 → 벡터 (어휘 벡터 평균). 찾은 단어 수가 적으면 null 을 반환해 어휘 검색만 쓰게 한다. */
+let embCover = 0;   /* 질문의 '내용어' 중 규정 코퍼스에 있는 말의 비중 (idf 가중) */
 function embQueryVec(q) {
   const e = embReady();
   if (!e) return null;
   const ts = tokens(q), v = new Float32Array(e.dim);
-  let hit = 0;
+  let hit = 0, wIn = 0, wAll = 0;
+  const idf = typeof EMB_IDF !== "undefined" ? EMB_IDF : null;
   for (const t of ts) {
     const i = e.idx.get(t);
-    if (i === undefined) continue;
+    /* 모르는 말은 질문의 핵심일 가능성이 크다 — 길수록 무겁게 센다 */
+    if (i === undefined) { wAll += Math.min(3, 1 + (t.length - 1) * 0.5); continue; }
     hit++;
+    const w = idf ? idf[i] : 1;
+    wIn += w; wAll += w;
     const off = i * e.dim;
-    for (let j = 0; j < e.dim; j++) v[j] += (e.term[off + j] - 128) / 127;
+    for (let j = 0; j < e.dim; j++) v[j] += ((e.term[off + j] - 128) / 127) * w;
   }
+  embCover = wAll ? wIn / wAll : 0;
   if (hit < EMB_MIN_HIT) return null;
   let n = 0;
   for (let j = 0; j < e.dim; j++) n += v[j] * v[j];
@@ -58,7 +67,7 @@ function embQueryVec(q) {
 
 /* 질문 하나에 대한 전체 조문의 임베딩 점수(0~1 정규화). 같은 질문은 한 번만 계산한다.
  * 규정군을 가로질러 비교해야 하므로 정규화는 전체 조문 기준으로 한다. */
-let embCacheQ = null, embCacheV = null;
+let embCacheQ = null, embCacheV = null, embRawMax = 0;
 function embScores(q) {
   if (embCacheQ === q) return embCacheV;
   const e = embReady(), v = embQueryVec(q);
@@ -75,6 +84,7 @@ function embScores(q) {
   });
   const span = hi - lo || 1;
   out.forEach((s, id) => out.set(id, (s - lo) / span));
+  embRawMax = hi;
   embCacheQ = q;
   return (embCacheV = out);
 }
@@ -155,4 +165,76 @@ function embDescScores(q) {
   out.forEach((s, g) => out.set(g, (s - lo) / span));
   embDQ = q;
   return (embDV = out);
+}
+
+/* ---------- 준비 질문 의미 매칭 ----------
+ * 글자가 달라도 뜻이 같으면 검증된 답변에 연결한다.
+ * 준비 질문 벡터는 런타임과 같은 방식(어휘 평균)으로 만들어 두었다. */
+let embPQ = null, embPV = null;
+function nearestPrepared(q) {
+  if (embPQ === q) return embPV;
+  const e = embReady(), v = embQueryVec(q);
+  if (!e || !v || typeof EMB_Q_B64 === "undefined") { embPQ = q; return (embPV = null); }
+  if (!e.q) {
+    e.q = typeof atob === "function"
+      ? (() => { const b = atob(EMB_Q_B64), u = new Uint8Array(b.length);
+          for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; })()
+      : new Uint8Array(Buffer.from(EMB_Q_B64, "base64"));
+  }
+  let best = null, second = -1;
+  for (let i = 0; i < EMB_QTEXT.length; i++) {
+    const off = i * e.dim;
+    let sim = 0;
+    for (let j = 0; j < e.dim; j++) sim += v[j] * ((e.q[off + j] - 128) / 127);
+    if (!best || sim > best.sim) { if (best) second = best.sim;
+      best = { text: EMB_QTEXT[i], src: (typeof EMB_QSRC !== "undefined" ? EMB_QSRC[i] : EMB_QTEXT[i]), key: EMB_QKEY[i], sim }; }
+    else if (sim > second) second = sim;
+  }
+  if (best) {
+    best.margin = best.sim - (second < 0 ? 0 : second);
+    /* 뜻만 비슷한 게 아니라 핵심어도 겹치는지 — 흔한 말은 idf 로 가볍게 센다 */
+    const idf = typeof EMB_IDF !== "undefined" ? EMB_IDF : null;
+    const w = t => { const i = e.idx.get(t); return i === undefined ? 1.5 : (idf ? idf[i] : 1); };
+    const qt = tokens(q), mt = new Set(tokens(best.text));
+    let shared = 0, total = 0;
+    qt.forEach(t => { const x = w(t); total += x; if (mt.has(t)) shared += x; });
+    best.share = total ? shared / total : 0;
+  }
+  embPQ = q;
+  return (embPV = best);
+}
+/* 검색이 뽑은 후보 규정군 (라우팅과 범위 판정이 같은 기준을 쓴다) */
+function candidateGroups(q, n = 3) {
+  const gs = [...new Set(ORDER.filter(k => D[k].loaded).map(k => D[k].group))];
+  return gs.map(g => ({ g, s: (scored(g, q)[0]?.s || 0) + embGroupBonus(q, g) }))
+    .sort((a, b) => b.s - a.s).slice(0, n).map(x => x.g);
+}
+
+/* 같은 뜻으로 볼 만큼 가까운 준비 질문.
+ * 뜻이 가깝다는 것만으로는 부족하다 — 그 준비 질문의 규정이 검색 후보 안에 있어야 인정한다.
+ * 이 정합성 검사가 "퇴직금 중간정산" 같은 범위 밖 질문이 엉뚱한 준비 답변에 붙는 것을 막는다. */
+function preparedMatch(q, cands) {
+  const b = nearestPrepared(q);
+  if (!b || b.sim < PREP_SIM) return null;
+  const g = D[b.key] && D[b.key].group;
+  if (!g) return null;
+  const c = cands || candidateGroups(q);
+  return c.includes(g) ? { ...b, group: g } : null;
+}
+
+/* ---------- 범위 밖 판정 ----------
+ * 규정과 무관한 질문에 엉뚱한 조문을 들이대지 않기 위한 장치다. */
+const INJECT_RE = /(이전|앞의|위의|모든)\s*(지시|명령|규칙|프롬프트)[^가-힣]{0,6}(무시|잊)|시스템\s*프롬프트|프롬프트를?\s*(출력|공개|보여|알려)|너의?\s*(지시문|규칙)을?\s*(출력|공개|알려)|ignore\s+(all\s+|the\s+)?(previous|prior|above)|system\s+prompt|reveal\s+your\s+(prompt|instructions)|jailbreak|developer\s+mode/i;
+
+/* 질문이 규정 범위 안인지 — {inScope, why, prep, art, lex} */
+function scopeCheck(q) {
+  if (INJECT_RE.test(String(q))) return { inScope: false, why: "inject", prep: 0, cover: 0, lex: 0, share: 0 };
+  const cands = candidateGroups(q);
+  const m = preparedMatch(q, cands);             /* embQueryVec 을 거치며 embCover 가 채워진다 */
+  const cover = embCover;
+  let lex = 0;
+  cands.forEach(g => { const t = scored(g, q)[0]; if (t && t.s > lex) lex = t.s; });
+  /* 준비 질문과 뜻이 같거나, 질문의 말이 규정에서 쓰는 말이고 검색도 걸릴 때만 범위 안 */
+  const inScope = !!m || (cover >= SCOPE_COVER && lex >= SCOPE_LEX);
+  return { inScope, why: inScope ? "" : "weak", prep: m ? m.sim : 0, cover, lex, match: m };
 }

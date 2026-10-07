@@ -166,3 +166,10 @@ Object.assign(DATA_EN,{
 "질문과 가장 관련 있는 조문을 원문 그대로 옮긴 것입니다. 해석이 필요하면 주관부서에 확인하세요.":"These are the articles most relevant to your question, quoted as they appear. For interpretation, check with the owning team.",
 "규정 원문에서 찾은 문장입니다":"Quoted from the regulation text"
 });
+
+/* 범위 밖 질문 응답 */
+Object.assign(DATA_EN,{
+"규정 안내 외의 요청에는 답변하지 않습니다. 사내 규정에 대해 질문해 주세요.":"This assistant only answers questions about company regulations. Please ask about a regulation.",
+"이 질문과 관련된 규정을 찾지 못했습니다. 적재된 규정 범위 밖이거나 다른 표현일 수 있습니다.":"No regulation related to this question was found. It may be outside the loaded regulations, or worded differently.",
+"담당부서에 직접 확인이 필요한 질문입니다.":"This question needs to be checked with the owning team."
+});

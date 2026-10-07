@@ -157,7 +157,13 @@ function preparedAnswer(g,q){
  const oa=ownerAnswers.get(q);
  if(oa&&D[oa.key]&&D[oa.key].group===g)
   return{answer:oa.answer,citations:oa.citations||[],related:[],needsOwner:false,ownerQuestion:"",fromOwner:oa.by};
- const hit=DEMO_ANSWERS[demoNorm(q)];
+ let hit=DEMO_ANSWERS[demoNorm(q)];
+ /* 글자가 달라도 뜻이 같으면 검증된 답변에 연결한다(의미 매칭).
+  * 그 준비 질문의 규정이 지금 창구와 같을 때만 쓴다. */
+ if(!hit&&typeof preparedMatch==="function"){
+  const m=preparedMatch(q);
+  if(m&&m.group===g){const h=DEMO_ANSWERS[demoNorm(m.src||m.text)];if(h)hit={...h,viaMatch:m.text,srcQ:m.src||m.text};}
+ }
  if(hit&&D[hit.key].group===g){
   /* 실행 시 인용 검증: 준비된 답변의 근거 문장이 현행 조문에 그대로 있는지 (개정되면 경고) */
   const all=groupArts(g),stale=hit.citations.some(c=>{const x=all.find(y=>y.id===c.id);return !x||!x.body.some(b=>b.includes(c.quote));});
@@ -599,7 +605,7 @@ JSON만 출력하세요:
   state.lastTrace=r.trace;
   const all=groupArts(g),multi=docsOf(g).filter(k=>D[k].loaded).length>1;
   const cits=(r.citations||[]).map(c=>{const a=all.find(x=>x.id===c.id);return a?{...c,docKey:a.docKey,label:`${a.n} ${a.h}`,docNo:D[a.docKey].no}:null;}).filter(Boolean);
-  if(isEN()&&EN_A[q]&&!r.markdown)r={...r,answer:EN_A[q]};
+  if(isEN()&&!r.markdown){const ea=EN_A[r.srcQ||q];if(ea)r={...r,answer:ea};}
   box.innerHTML=(r.fromOwner?`<span class="ownerbadge">${esc(head.owner)} 답변 반영</span>`:"")
    +(r.live?`<span class="livebadge">${t("실시간 AI 생성 · 근거 조문을 확인하세요")}</span>`:"")
    +(r.extract?`<span class="exbadge">${t("규정 원문에서 찾은 문장입니다")}</span>`:"")
